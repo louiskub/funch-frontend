@@ -1,7 +1,7 @@
 export type Country = { id: string; code: string; name: string; currencyCode: string };
 export type Branch = { id: string; name: string; city: string; timezone: string; countryCode: string; currencyCode: string };
 export type Offer = {
-  id: string; carTypeId: string; brand: string; model: string; seats: number; transmission: string; fuelType: string;
+  id: string; branchId: string; carTypeId: string; brand: string; model: string; seats: number; transmission: string; fuelType: string;
   features: string[]; baseHourlyRate: string; baseDailyRate: string; currencyCode: string; branchName: string;
   city: string; timezone: string; countryCode: string;
 };
@@ -22,7 +22,7 @@ function offerFrom(value: unknown): Offer {
     throw new Error("The API returned unexpected data.");
   }
   return {
-    id: string(item.id), carTypeId: string(item.carTypeId), brand: string(item.brand), model: string(item.model),
+    id: string(item.id), branchId: string(item.branchId), carTypeId: string(item.carTypeId), brand: string(item.brand), model: string(item.model),
     seats: item.seats, transmission: string(item.transmission), fuelType: string(item.fuelType), features: item.features,
     baseHourlyRate: string(item.baseHourlyRate), baseDailyRate: string(item.baseDailyRate), currencyCode: string(item.currencyCode),
     branchName: string(item.branchName), city: string(item.city), timezone: string(item.timezone), countryCode: string(item.countryCode),
@@ -63,3 +63,22 @@ export const parseOffers = (value: unknown): Offer[] => {
   return value.map(offerFrom);
 };
 export const parseOffer = (value: unknown) => offerFrom(value);
+
+export type CarOption = {
+  id: string; branchId: string; code: string; name: string; description: string;
+  category: "EQUIPMENT" | "SERVICE" | "PROTECTION";
+  pricingType: "PER_DAY" | "PER_UNIT_PER_DAY" | "FIXED";
+  price: string; quantityStock: number | null; isActive: boolean;
+};
+export const parseOptions = (value: unknown): CarOption[] => {
+  if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
+  return value.map((raw) => {
+    const item = record(raw);
+    if (item.quantityStock !== null && typeof item.quantityStock !== "number") throw new Error("The API returned unexpected data.");
+    if (!(item.category === "EQUIPMENT" || item.category === "SERVICE" || item.category === "PROTECTION") ||
+        !(item.pricingType === "PER_DAY" || item.pricingType === "PER_UNIT_PER_DAY" || item.pricingType === "FIXED") || typeof item.isActive !== "boolean") throw new Error("The API returned unexpected data.");
+    return { id: string(item.id), branchId: string(item.branchId), code: string(item.code), name: string(item.name),
+      description: string(item.description), category: item.category, pricingType: item.pricingType,
+      price: string(item.price), quantityStock: item.quantityStock, isActive: item.isActive };
+  });
+};
