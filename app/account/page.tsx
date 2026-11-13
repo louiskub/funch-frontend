@@ -54,7 +54,7 @@ export default function AccountPage() {
     {status && <p role="status" className="mt-4 rounded bg-zinc-100 p-3">{status}</p>}
     {user ? <>
       <p className="mt-3 text-sm text-zinc-700">Signed in as {user.email}</p>
-      <form onSubmit={saveProfile} className="mt-6 grid gap-4">
+      <form key="profile-form" onSubmit={saveProfile} className="mt-6 grid gap-4">
         <label className="grid gap-1">Name<input className="rounded border p-2" name="name" required maxLength={120} defaultValue={user.name} /></label>
         <label className="grid gap-1">Email<input className="rounded border p-2" name="email" type="email" required maxLength={254} defaultValue={user.email} /></label>
         <label className="grid gap-1">Phone<input className="rounded border p-2" name="phone" required minLength={3} maxLength={40} defaultValue={user.phone} /></label>
@@ -62,7 +62,7 @@ export default function AccountPage() {
       </form>
     </> : <>
       <div className="mt-6 flex gap-4 border-b"><button className={`pb-2 ${mode === "login" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("login"); setStatus(""); }}>Sign in</button><button className={`pb-2 ${mode === "register" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("register"); setStatus(""); }}>Create account</button></div>
-      <form onSubmit={signIn} className="mt-5 grid gap-4">
+      <form key={`auth-${mode}`} onSubmit={signIn} className="mt-5 grid gap-4">
         {mode === "register" && <label className="grid gap-1">Name<input className="rounded border p-2" name="name" required maxLength={120} /></label>}
         <label className="grid gap-1">Email<input className="rounded border p-2" name="email" type="email" required maxLength={254} /></label>
         <label className="grid gap-1">Password<input className="rounded border p-2" name="password" type="password" required minLength={mode === "register" ? 12 : 1} maxLength={128} /></label>
