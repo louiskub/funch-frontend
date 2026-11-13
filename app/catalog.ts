@@ -29,9 +29,17 @@ function offerFrom(value: unknown): Offer {
   };
 }
 export async function api<T>(path: string, parse: (value: unknown) => T, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`${apiBase}${path}`, { signal, cache: "no-store" });
-  if (!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
-  return parse(await response.json());
+  return parse(await apiRequest(path, { signal }));
+}
+export async function apiRequest(path: string, init: RequestInit = {}): Promise<unknown> {
+  const response = await fetch(`${apiBase}${path}`, { ...init, credentials: "include", cache: "no-store" });
+  const value: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    const body = typeof value === "object" && value !== null ? value : {};
+    const message = "message" in body && typeof body.message === "string" ? body.message : `Request failed (${response.status}).`;
+    throw new Error(message);
+  }
+  return value;
 }
 export const parseCountries = (value: unknown): Country[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
