@@ -2,7 +2,7 @@ export type Country = { id: string; code: string; name: string; currencyCode: st
 export type Branch = { id: string; name: string; city: string; timezone: string; countryCode: string; currencyCode: string };
 export type Offer = {
   id: string; branchId: string; carTypeId: string; brand: string; model: string; seats: number; transmission: string; fuelType: string;
-  features: string[]; baseHourlyRate: string; baseDailyRate: string; currencyCode: string; branchName: string;
+  features: string[]; images: { id: string; originalName: string; mimeType: string; url: string }[]; baseHourlyRate: string; baseDailyRate: string; currencyCode: string; branchName: string;
   city: string; timezone: string; countryCode: string;
 };
 
@@ -21,9 +21,14 @@ function offerFrom(value: unknown): Offer {
   if (typeof item.seats !== "number" || !Array.isArray(item.features) || !item.features.every((feature) => typeof feature === "string")) {
     throw new Error("The API returned unexpected data.");
   }
+  if (!Array.isArray(item.images)) throw new Error("The API returned unexpected data.");
+  const images = item.images.map((raw) => {
+    const image = record(raw);
+    return { id: string(image.id), originalName: string(image.originalName), mimeType: string(image.mimeType), url: string(image.url) };
+  });
   return {
     id: string(item.id), branchId: string(item.branchId), carTypeId: string(item.carTypeId), brand: string(item.brand), model: string(item.model),
-    seats: item.seats, transmission: string(item.transmission), fuelType: string(item.fuelType), features: item.features,
+    seats: item.seats, transmission: string(item.transmission), fuelType: string(item.fuelType), features: item.features, images,
     baseHourlyRate: string(item.baseHourlyRate), baseDailyRate: string(item.baseDailyRate), currencyCode: string(item.currencyCode),
     branchName: string(item.branchName), city: string(item.city), timezone: string(item.timezone), countryCode: string(item.countryCode),
   };
