@@ -241,7 +241,7 @@ export default function OptionsAdmin() {
               <input
                 required
                 maxLength={40}
-                pattern="[A-Za-z0-9_-]+"
+                pattern="(?:[A-Za-z0-9_]|-)+"
                 value={form.code}
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
                 className="rounded border p-2"
