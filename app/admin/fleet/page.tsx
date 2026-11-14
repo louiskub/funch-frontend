@@ -4,23 +4,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { currentUser } from "../../auth";
-import { apiRequest } from "../../catalog";
+import { apiRecord, apiRequest, apiString } from "../../catalog";
 
 type Branch = { id: string; code: string; name: string; city: string; currencyCode: string; isActive: boolean };
 type CarType = { id: string; brand: string; model: string; seats: number; transmission: string; fuelType: string; features: string[]; imageFileIds: string[]; isActive: boolean };
 type FileAsset = { id: string; originalName: string; mimeType: string; url: string };
 type Offer = { id: string; carTypeId: string; brand: string; model: string; branchId: string; branchName: string; baseDailyRate: string; baseHourlyRate: string; currencyCode: string; isActive: boolean };
 type Car = { id: string; carTypeBranchId: string; brand: string; model: string; branchName: string; vin: string; licensePlate: string; year: number; buyDate: string | null; status: string };
-
-function record(value: unknown): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("The API returned unexpected data.");
-  return Object.fromEntries(Object.entries(value));
-}
-
-function string(value: unknown): string {
-  if (typeof value !== "string") throw new Error("The API returned unexpected data.");
-  return value;
-}
 
 function number(value: unknown): number {
   if (typeof value !== "number") throw new Error("The API returned unexpected data.");
@@ -39,25 +29,25 @@ function textArray(value: unknown): string[] {
 
 function rows<T>(value: unknown, parse: (item: Record<string, unknown>) => T): T[] {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
-  return value.map((item: unknown) => parse(record(item)));
+  return value.map((item: unknown) => parse(apiRecord(item)));
 }
 
 function branchFrom(value: Record<string, unknown>): Branch {
-  return { id: string(value.id), code: string(value.code), name: string(value.name), city: string(value.city), currencyCode: string(value.currencyCode), isActive: boolean(value.isActive) };
+  return { id: apiString(value.id), code: apiString(value.code), name: apiString(value.name), city: apiString(value.city), currencyCode: apiString(value.currencyCode), isActive: boolean(value.isActive) };
 }
 
 function typeFrom(value: Record<string, unknown>): CarType {
-  return { id: string(value.id), brand: string(value.brand), model: string(value.model), seats: number(value.seats), transmission: string(value.transmission), fuelType: string(value.fuelType), features: textArray(value.features), imageFileIds: textArray(value.imageFileIds), isActive: boolean(value.isActive) };
+  return { id: apiString(value.id), brand: apiString(value.brand), model: apiString(value.model), seats: number(value.seats), transmission: apiString(value.transmission), fuelType: apiString(value.fuelType), features: textArray(value.features), imageFileIds: textArray(value.imageFileIds), isActive: boolean(value.isActive) };
 }
 
 function offerFrom(value: Record<string, unknown>): Offer {
-  return { id: string(value.id), carTypeId: string(value.carTypeId), brand: string(value.brand), model: string(value.model), branchId: string(value.branchId), branchName: string(value.branchName), baseDailyRate: string(value.baseDailyRate), baseHourlyRate: string(value.baseHourlyRate), currencyCode: string(value.currencyCode), isActive: boolean(value.isActive) };
+  return { id: apiString(value.id), carTypeId: apiString(value.carTypeId), brand: apiString(value.brand), model: apiString(value.model), branchId: apiString(value.branchId), branchName: apiString(value.branchName), baseDailyRate: apiString(value.baseDailyRate), baseHourlyRate: apiString(value.baseHourlyRate), currencyCode: apiString(value.currencyCode), isActive: boolean(value.isActive) };
 }
 
 function carFrom(value: Record<string, unknown>): Car {
   const buyDate = value.buyDate;
   if (buyDate !== null && typeof buyDate !== "string") throw new Error("The API returned unexpected data.");
-  return { id: string(value.id), carTypeBranchId: string(value.carTypeBranchId), brand: string(value.brand), model: string(value.model), branchName: string(value.branchName), vin: string(value.vin), licensePlate: string(value.licensePlate), year: number(value.year), buyDate, status: string(value.status) };
+  return { id: apiString(value.id), carTypeBranchId: apiString(value.carTypeBranchId), brand: apiString(value.brand), model: apiString(value.model), branchName: apiString(value.branchName), vin: apiString(value.vin), licensePlate: apiString(value.licensePlate), year: number(value.year), buyDate, status: apiString(value.status) };
 }
 
 function field(form: FormData, name: string): string {
@@ -104,7 +94,7 @@ export default function AdminFleetPage() {
     setLookupsLoaded(true);
     setGalleries(Object.fromEntries(rows(typeRows, typeFrom).map((type) => [type.id, type.imageFileIds])));
     const fileRows = await apiRequest("/admin/files");
-    setFiles(rows(fileRows, (item) => ({ id: string(item.id), originalName: string(item.originalName), mimeType: string(item.mimeType), url: string(item.url) })));
+    setFiles(rows(fileRows, (item) => ({ id: apiString(item.id), originalName: apiString(item.originalName), mimeType: apiString(item.mimeType), url: apiString(item.url) })));
   }, []);
 
   useEffect(() => {
@@ -134,13 +124,13 @@ export default function AdminFleetPage() {
     setMessage("");
     try {
       const body = new FormData(); body.set("file", file);
-      const uploaded = record(await apiRequest("/admin/files?visibility=PUBLIC", { method: "POST", body }));
-      const id = string(uploaded.id);
+      const uploaded = apiRecord(await apiRequest("/admin/files?visibility=PUBLIC", { method: "POST", body }));
+      const id = apiString(uploaded.id);
       const imageFileIds = [...(galleries[carTypeId] ?? []), id];
       await apiRequest(`/admin/fleet/car-types/${carTypeId}/images`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageFileIds }) });
       setGalleries((current) => ({ ...current, [carTypeId]: imageFileIds }));
       const fileRows = await apiRequest("/admin/files");
-      setFiles(rows(fileRows, (item) => ({ id: string(item.id), originalName: string(item.originalName), mimeType: string(item.mimeType), url: string(item.url) })));
+      setFiles(rows(fileRows, (item) => ({ id: apiString(item.id), originalName: apiString(item.originalName), mimeType: apiString(item.mimeType), url: apiString(item.url) })));
       setMessage("Image uploaded and added to gallery.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not upload image."); }
   }

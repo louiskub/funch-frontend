@@ -8,29 +8,35 @@ export type Offer = {
 
 const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
 
-function record(value: unknown): Record<string, unknown> {
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+
+export function apiRecord(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return Object.fromEntries(Object.entries(value));
 }
-function string(value: unknown): string {
+export function apiString(value: unknown): string {
   if (typeof value !== "string") throw new Error("The API returned unexpected data.");
   return value;
 }
 function offerFrom(value: unknown): Offer {
-  const item = record(value);
+  const item = apiRecord(value);
   if (typeof item.seats !== "number" || !Array.isArray(item.features) || !item.features.every((feature) => typeof feature === "string")) {
     throw new Error("The API returned unexpected data.");
   }
   if (!Array.isArray(item.images)) throw new Error("The API returned unexpected data.");
   const images = item.images.map((raw) => {
-    const image = record(raw);
-    return { id: string(image.id), originalName: string(image.originalName), mimeType: string(image.mimeType), url: string(image.url) };
+    const image = apiRecord(raw);
+    return { id: apiString(image.id), originalName: apiString(image.originalName), mimeType: apiString(image.mimeType), url: apiString(image.url) };
   });
   return {
-    id: string(item.id), branchId: string(item.branchId), carTypeId: string(item.carTypeId), brand: string(item.brand), model: string(item.model),
-    seats: item.seats, transmission: string(item.transmission), fuelType: string(item.fuelType), features: item.features, images,
-    baseHourlyRate: string(item.baseHourlyRate), baseDailyRate: string(item.baseDailyRate), currencyCode: string(item.currencyCode),
-    branchName: string(item.branchName), city: string(item.city), timezone: string(item.timezone), countryCode: string(item.countryCode),
+    id: apiString(item.id), branchId: apiString(item.branchId), carTypeId: apiString(item.carTypeId), brand: apiString(item.brand), model: apiString(item.model),
+    seats: item.seats, transmission: apiString(item.transmission), fuelType: apiString(item.fuelType), features: item.features, images,
+    baseHourlyRate: apiString(item.baseHourlyRate), baseDailyRate: apiString(item.baseDailyRate), currencyCode: apiString(item.currencyCode),
+    branchName: apiString(item.branchName), city: apiString(item.city), timezone: apiString(item.timezone), countryCode: apiString(item.countryCode),
   };
 }
 export async function api<T>(path: string, parse: (value: unknown) => T, signal?: AbortSignal): Promise<T> {
@@ -42,24 +48,24 @@ export async function apiRequest(path: string, init: RequestInit = {}): Promise<
   if (!response.ok) {
     const body = typeof value === "object" && value !== null ? value : {};
     const message = "message" in body && typeof body.message === "string" ? body.message : `Request failed (${response.status}).`;
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
   return value;
 }
 export const parseCountries = (value: unknown): Country[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return value.map((country) => {
-    const item = record(country);
-    return { id: string(item.id), code: string(item.code), name: string(item.name), currencyCode: string(item.currencyCode) };
+    const item = apiRecord(country);
+    return { id: apiString(item.id), code: apiString(item.code), name: apiString(item.name), currencyCode: apiString(item.currencyCode) };
   });
 };
 export const parseBranches = (value: unknown): Branch[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return value.map((branch) => {
-    const item = record(branch);
+    const item = apiRecord(branch);
     return {
-      id: string(item.id), name: string(item.name), city: string(item.city), timezone: string(item.timezone),
-      countryCode: string(item.countryCode), currencyCode: string(item.currencyCode),
+      id: apiString(item.id), name: apiString(item.name), city: apiString(item.city), timezone: apiString(item.timezone),
+      countryCode: apiString(item.countryCode), currencyCode: apiString(item.currencyCode),
     };
   });
 };
@@ -78,12 +84,12 @@ export type CarOption = {
 export const parseOptions = (value: unknown): CarOption[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return value.map((raw) => {
-    const item = record(raw);
+    const item = apiRecord(raw);
     if (item.quantityStock !== null && typeof item.quantityStock !== "number") throw new Error("The API returned unexpected data.");
     if (!(item.category === "EQUIPMENT" || item.category === "SERVICE" || item.category === "PROTECTION") ||
         !(item.pricingType === "PER_DAY" || item.pricingType === "PER_UNIT_PER_DAY" || item.pricingType === "FIXED") || typeof item.isActive !== "boolean") throw new Error("The API returned unexpected data.");
-    return { id: string(item.id), branchId: string(item.branchId), code: string(item.code), name: string(item.name),
-      description: string(item.description), category: item.category, pricingType: item.pricingType,
-      price: string(item.price), quantityStock: item.quantityStock, isActive: item.isActive };
+    return { id: apiString(item.id), branchId: apiString(item.branchId), code: apiString(item.code), name: apiString(item.name),
+      description: apiString(item.description), category: item.category, pricingType: item.pricingType,
+      price: apiString(item.price), quantityStock: item.quantityStock, isActive: item.isActive };
   });
 };
