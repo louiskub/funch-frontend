@@ -35,6 +35,7 @@ export default function OfferDetails({ params }: { params: Promise<{ offerId: st
     {offer && <article className="mt-8">
       <h1 className="text-3xl font-semibold">{offer.brand} {offer.model}</h1>
       <p className="mt-2">{offer.branchName} · {offer.city} · {offer.timezone}</p>
+      {offer.images.length > 0 && <section aria-label={`${offer.brand} ${offer.model} photos`} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">{offer.images.map((image, index) => <figure key={image.id} className="overflow-hidden rounded bg-zinc-100"><img src={image.url} alt={`${offer.brand} ${offer.model} photo ${index + 1}`} className="aspect-[4/3] w-full object-cover"/>{index === 0 && <figcaption className="px-2 py-1 text-sm">Cover image</figcaption>}</figure>)}</section>}
       <dl className="mt-6 grid gap-3 sm:grid-cols-2">
         <div><dt className="font-medium">Seats</dt><dd>{offer.seats}</dd></div>
         <div><dt className="font-medium">Transmission</dt><dd>{offer.transmission}</dd></div>
