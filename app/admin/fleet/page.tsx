@@ -69,8 +69,8 @@ function payload(form: FormData, names: string[], numbers: string[] = []): Recor
   return Object.fromEntries(names.map((name) => [name, numbers.includes(name) ? Number(field(form, name)) : field(form, name)]));
 }
 
-function Form({ children, onSubmit }: { children: React.ReactNode; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
-  return <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-3 rounded border border-zinc-300 p-4">{children}</form>;
+function Form({ children, onSubmit, disabled = false }: { children: React.ReactNode; onSubmit: (event: FormEvent<HTMLFormElement>) => void; disabled?: boolean }) {
+  return <form onSubmit={onSubmit}><fieldset disabled={disabled} className="flex flex-wrap items-end gap-3 rounded border border-zinc-300 p-4">{children}</fieldset></form>;
 }
 
 function Input({ label, name, defaultValue, type = "text", required = true }: { label: string; name: string; defaultValue?: string | number; type?: string; required?: boolean }) {
@@ -78,7 +78,8 @@ function Input({ label, name, defaultValue, type = "text", required = true }: { 
 }
 
 function Select({ label, name, options, value }: { label: string; name: string; options: [string, string][]; value?: string }) {
-  return <label className="grid gap-1 text-sm">{label}<select name={name} defaultValue={value ?? options[0][0]} className="rounded border border-zinc-400 px-2 py-1">{options.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>;
+  const selected = value === undefined ? options[0]?.[0] ?? "" : options.some(([key]) => key === value) ? value : "";
+  return <label className="grid gap-1 text-sm">{label}<select name={name} value={selected} required disabled={!options.length} className="rounded border border-zinc-400 px-2 py-1"><option value="">{options.length ? "Select an option" : "No options available"}</option>{options.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>;
 }
 
 export default function AdminFleetPage() {
@@ -88,6 +89,7 @@ export default function AdminFleetPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [message, setMessage] = useState("");
   const [allowed, setAllowed] = useState(false);
+  const [lookupsLoaded, setLookupsLoaded] = useState(false);
 
   const load = useCallback(async () => {
     const [branchRows, typeRows, offerRows, carRows] = await Promise.all([
@@ -96,6 +98,7 @@ export default function AdminFleetPage() {
     ]);
     setBranches(rows(branchRows, branchFrom)); setTypes(rows(typeRows, typeFrom));
     setOffers(rows(offerRows, offerFrom)); setCars(rows(carRows, carFrom));
+    setLookupsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -128,6 +131,8 @@ export default function AdminFleetPage() {
   return <main className="mx-auto w-full max-w-5xl flex-1 p-6">
     <div className="flex justify-between"><h1 className="text-2xl font-semibold">Fleet administration</h1><Link className="underline" href="/">Customer catalog</Link></div>
     <p role="status" aria-live="polite" className="mt-3 min-h-6">{message}</p>
+    <p role="status" className="text-sm">{lookupsLoaded ? "" : "Loading fleet lookups…"}</p>
+    {lookupsLoaded && (!branches.length || !types.length || !offers.length) && <p role="status" className="text-sm">{!types.length ? "Add a car type before creating offers. " : ""}{!branches.length ? "No branches are available for offers. " : ""}{!offers.length ? "Add an offer before adding cars." : ""}</p>}
 
     <section className={section}><h2 className={heading}>Car types</h2>
       <Form onSubmit={(event) => void submit(event, "/admin/fleet/car-types", "POST", ["brand", "model", "seats", "transmission", "fuelType", "features"], ["seats"], ["features"])}>
@@ -139,7 +144,7 @@ export default function AdminFleetPage() {
     </section>
 
     <section className={section}><h2 className={heading}>Branch offers and rates</h2>
-      <Form onSubmit={(event) => void submit(event, "/admin/fleet/offers", "POST", ["carTypeId", "branchId", "baseDailyRate", "baseHourlyRate", "currencyCode"])}>
+      <Form disabled={!lookupsLoaded || !types.length || !branches.length} onSubmit={(event) => void submit(event, "/admin/fleet/offers", "POST", ["carTypeId", "branchId", "baseDailyRate", "baseHourlyRate", "currencyCode"])}>
         <Select label="Car type" name="carTypeId" options={types.map((type) => [type.id, `${type.brand} ${type.model}${type.isActive ? "" : " (inactive)"}`])}/><Select label="Branch" name="branchId" options={branches.map((branch) => [branch.id, `${branch.name} · ${branch.code}${branch.isActive ? "" : " (inactive)"}`])}/><Input label="Daily rate" name="baseDailyRate"/><Input label="Hourly rate" name="baseHourlyRate"/><Input label="Currency" name="currencyCode" defaultValue={branches[0]?.currencyCode ?? "THB"}/><button className={button}>Add offer</button>
       </Form>
       <div className="space-y-3">{offers.map((offer) => <Form key={offer.id} onSubmit={(event) => void submit(event, `/admin/fleet/offers/${offer.id}`, "PATCH", ["baseDailyRate", "baseHourlyRate", "currencyCode", "isActive"])}>
@@ -148,10 +153,10 @@ export default function AdminFleetPage() {
     </section>
 
     <section className={section}><h2 className={heading}>Cars</h2>
-      <Form onSubmit={(event) => void submit(event, "/admin/fleet/cars", "POST", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
+      <Form disabled={!lookupsLoaded || !offers.length} onSubmit={(event) => void submit(event, "/admin/fleet/cars", "POST", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
         <Select label="Offer" name="carTypeBranchId" options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])}/><Input label="VIN" name="vin"/><Input label="License plate" name="licensePlate"/><Input label="Year" name="year" type="number"/><Input label="Buy date" name="buyDate" type="date" required={false}/><Select label="Status" name="status" options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]}/><button className={button}>Add car</button>
       </Form>
-      <div className="space-y-3">{cars.map((car) => <Form key={car.id} onSubmit={(event) => void submit(event, `/admin/fleet/cars/${car.id}`, "PATCH", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
+      <div className="space-y-3">{cars.map((car) => <Form key={car.id} disabled={!lookupsLoaded || !offers.some((offer) => offer.id === car.carTypeBranchId)} onSubmit={(event) => void submit(event, `/admin/fleet/cars/${car.id}`, "PATCH", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
         <p className="pb-2 text-sm font-medium">{car.brand} {car.model} · {car.branchName}</p><Select label="Offer" name="carTypeBranchId" value={car.carTypeBranchId} options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])}/><Input label="VIN" name="vin" defaultValue={car.vin}/><Input label="License plate" name="licensePlate" defaultValue={car.licensePlate}/><Input label="Year" name="year" type="number" defaultValue={car.year}/><Input label="Buy date" name="buyDate" type="date" defaultValue={car.buyDate ?? ""} required={false}/><Select label="Status" name="status" value={car.status} options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]}/><button className={button}>Save car</button>
       </Form>)}</div>
     </section>

@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-zinc-300 px-6 py-4"><nav className="mx-auto flex w-full max-w-4xl justify-between" aria-label="Main navigation"><Link href="/" className="font-semibold">FUNCH Car Rental</Link><Link href="/account" className="underline">Account</Link></nav></header>
+        <header className="border-b border-zinc-300 px-6 py-4"><nav className="mx-auto flex w-full max-w-4xl justify-between" aria-label="Main navigation"><Link href="/" className="font-semibold">FUNCH Car Rental</Link><div className="flex gap-4"><Link href="/account" className="underline">Account</Link><Link href="/admin/fleet" className="underline">Admin fleet</Link><Link href="/admin/options" className="underline">Admin options</Link></div></nav></header>
         {children}
       </body>
     </html>
