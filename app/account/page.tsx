@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { authenticate, currentUser, logout, updateProfile, User } from "../auth";
+import { ApiError } from "../catalog";
 
 type Mode = "login" | "register";
 
@@ -11,14 +12,36 @@ export default function AccountPage() {
   const [mode, setMode] = useState<Mode>("login");
   const [status, setStatus] = useState("Checking your account…");
   const [pending, setPending] = useState(false);
+  const [checkingAccount, setCheckingAccount] = useState(true);
+  const [accountCheckFailed, setAccountCheckFailed] = useState(false);
 
-  useEffect(() => {
-    currentUser().then((current) => { setUser(current); setStatus(""); }).catch(() => setStatus(""));
+  const checkAccount = useCallback(async () => {
+    setCheckingAccount(true);
+    setAccountCheckFailed(false);
+    setStatus("Checking your account…");
+    try {
+      setUser(await currentUser());
+      setStatus("");
+    } catch (error) {
+      setUser(null);
+      if (error instanceof ApiError && error.status === 401) {
+        setStatus("");
+        return;
+      }
+      setAccountCheckFailed(true);
+      setStatus(error instanceof TypeError ? "Could not reach the account service. Please retry." : error instanceof Error ? error.message : "Could not check your account. Please retry.");
+    } finally {
+      setCheckingAccount(false);
+    }
   }, []);
+
+  useEffect(() => { void Promise.resolve().then(checkAccount); }, [checkAccount]);
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (checkingAccount || pending) return;
     setPending(true); setStatus("");
+    setAccountCheckFailed(false);
     const form = new FormData(event.currentTarget);
     const data = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
     try {
@@ -51,7 +74,7 @@ export default function AccountPage() {
   return <main className="mx-auto w-full max-w-xl flex-1 px-6 py-12">
     <Link href="/" className="text-sm underline">Browse cars</Link>
     <h1 className="mt-5 text-3xl font-semibold">Your account</h1>
-    {status && <p role="status" className="mt-4 rounded bg-zinc-100 p-3">{status}</p>}
+    {status && <div role={accountCheckFailed ? "alert" : "status"} className="mt-4 rounded bg-zinc-100 p-3">{status}{accountCheckFailed && <button type="button" disabled={checkingAccount || pending} onClick={() => void checkAccount()} className="ml-3 underline">Retry</button>}</div>}
     {user ? <>
       <p className="mt-3 text-sm text-zinc-700">Signed in as {user.email}</p>
       <form key="profile-form" onSubmit={saveProfile} className="mt-6 grid gap-4">
@@ -61,13 +84,13 @@ export default function AccountPage() {
         <div className="flex gap-3"><button disabled={pending} className="rounded bg-zinc-900 px-4 py-2 text-white">Save profile</button><button type="button" disabled={pending} onClick={signOut} className="rounded border px-4 py-2">Sign out</button></div>
       </form>
     </> : <>
-      <div className="mt-6 flex gap-4 border-b"><button className={`pb-2 ${mode === "login" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("login"); setStatus(""); }}>Sign in</button><button className={`pb-2 ${mode === "register" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("register"); setStatus(""); }}>Create account</button></div>
+      <div className="mt-6 flex gap-4 border-b"><button className={`pb-2 ${mode === "login" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("login"); setStatus(""); setAccountCheckFailed(false); }}>Sign in</button><button className={`pb-2 ${mode === "register" ? "border-b-2 border-zinc-900 font-semibold" : ""}`} onClick={() => { setMode("register"); setStatus(""); setAccountCheckFailed(false); }}>Create account</button></div>
       <form key={`auth-${mode}`} onSubmit={signIn} className="mt-5 grid gap-4">
         {mode === "register" && <label className="grid gap-1">Name<input className="rounded border p-2" name="name" required maxLength={120} /></label>}
         <label className="grid gap-1">Email<input className="rounded border p-2" name="email" type="email" required maxLength={254} /></label>
         <label className="grid gap-1">Password<input className="rounded border p-2" name="password" type="password" required minLength={mode === "register" ? 12 : 1} maxLength={128} /></label>
         {mode === "register" && <label className="grid gap-1">Phone<input className="rounded border p-2" name="phone" required minLength={3} maxLength={40} /></label>}
-        <button disabled={pending} className="w-fit rounded bg-zinc-900 px-4 py-2 text-white">{mode === "login" ? "Sign in" : "Create account"}</button>
+        <button disabled={pending || checkingAccount} className="w-fit rounded bg-zinc-900 px-4 py-2 text-white">{mode === "login" ? "Sign in" : "Create account"}</button>
       </form>
     </>}
   </main>;
