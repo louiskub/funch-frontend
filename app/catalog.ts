@@ -47,10 +47,13 @@ export async function apiRequest(path: string, init: RequestInit = {}): Promise<
   const value: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const body = typeof value === "object" && value !== null ? value : {};
-    const message = "message" in body && typeof body.message === "string" ? body.message : `Request failed (${response.status}).`;
+    const status = "status" in body && typeof body.status === "object" && body.status !== null ? body.status : {};
+    const message = "messages" in status && typeof status.messages === "string"
+      ? status.messages
+      : "message" in body && typeof body.message === "string" ? body.message : `Request failed (${response.status}).`;
     throw new ApiError(message, response.status);
   }
-  return value;
+  return apiRecord(value).data;
 }
 export const parseCountries = (value: unknown): Country[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
