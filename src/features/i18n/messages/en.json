@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "findCar": "Find a car",
+    "myBookings": "My bookings",
+    "adminPortal": "Admin portal",
+    "account": "My account",
+    "signIn": "Sign in",
+    "signInOrRegister": "Sign in / Register",
+    "signOut": "Sign out",
+    "backToStore": "← Back to store",
+    "bookings": "Bookings",
+    "fleet": "Fleet",
+    "options": "Options",
+    "members": "Members",
+    "reports": "Reports"
+  },
+  "catalog": {
+    "badge": "FUNCH Car Rental",
+    "title": "Drive anywhere, anytime.",
+    "subtitle": "Choose a country and branch to see transparent daily rates, local availability, and straightforward booking terms.",
+    "country": "Country",
+    "branch": "Pickup & Return branch",
+    "pickupReturnDate": "Pickup & Return dates",
+    "findCars": "Find available cars",
+    "allCars": "All cars",
+    "loadingCars": "Loading available cars…",
+    "noCars": "No cars are currently offered at this branch.",
+    "noCountries": "No countries are available.",
+    "noBranches": "No branches are available in this country.",
+    "day": "day",
+    "hour": "hour",
+    "viewDetails": "View details & book",
+    "seats": "seats"
+  },
+  "admin": {
+    "workspace": "Workspace",
+    "branchAdmin": "Branch Admin",
+    "bookings": "Bookings",
+    "fleet": "Fleet",
+    "options": "Options",
+    "members": "Members",
+    "reports": "Reports"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "retry": "Retry",
+    "backToHome": "← Back to home"
+  }
+}
