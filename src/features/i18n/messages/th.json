@@ -4,6 +4,8 @@
     "myBookings": "การจองของฉัน",
     "adminPortal": "ระบบจัดการแอดมิน",
     "account": "บัญชีของฉัน",
+    "accountMenu": "เมนูบัญชี",
+    "navigationMenu": "เมนูนำทาง",
     "signIn": "เข้าสู่ระบบ",
     "signInOrRegister": "เข้าสู่ระบบ / สมัครสมาชิก",
     "signOut": "ออกจากระบบ",
@@ -33,6 +35,7 @@
     "seats": "ที่นั่ง"
   },
   "admin": {
+    "navigation": "เมนูผู้ดูแลระบบ",
     "workspace": "พื้นที่ทำงาน",
     "branchAdmin": "ผู้ดูแลระบบสาขา",
     "bookings": "รายการจอง",
@@ -48,5 +51,32 @@
     "submit": "ยืนยัน",
     "retry": "ลองใหม่อีกครั้ง",
     "backToHome": "← กลับหน้าหลัก"
+  },
+  "auth": {
+    "signInTitle": "เข้าสู่ระบบ FUNCH",
+    "signInSubtitle": "เข้าถึงการจองของคุณ เช่ารถต่อเนื่อง และเช็คเอาท์ได้อย่างรวดเร็ว",
+    "registerTitle": "สมัครสมาชิก FUNCH",
+    "registerSubtitle": "เริ่มต้นใช้งาน FUNCH เพื่อราคาที่โปร่งใสและการจองที่สะดวกสบาย",
+    "signInTab": "เข้าสู่ระบบ",
+    "registerTab": "สร้างบัญชีใหม่",
+    "name": "ชื่อ-นามสกุล",
+    "namePlaceholder": "สมชาย ใจดี",
+    "email": "อีเมล",
+    "emailPlaceholder": "somchai@example.com",
+    "password": "รหัสผ่าน",
+    "passwordPlaceholder": "••••••••••••",
+    "passwordHint": "ความยาวอย่างน้อย 6 ตัวอักษร",
+    "phone": "เบอร์โทรศัพท์",
+    "phonePlaceholder": "+66 81 234 5678",
+    "signInButton": "เข้าสู่ระบบ",
+    "signingInButton": "กำลังเข้าสู่ระบบ…",
+    "registerButton": "สร้างบัญชี",
+    "registeringButton": "กำลังสร้างบัญชี…",
+    "noAccount": "ยังไม่มีบัญชีใช่หรือไม่?",
+    "haveAccount": "มีบัญชีอยู่แล้วใช่หรือไม่?",
+    "createAccountLink": "สมัครสมาชิกตอนนี้",
+    "signInLink": "เข้าสู่ระบบที่นี่",
+    "close": "ปิดหน้าต่าง",
+    "or": "หรือ"
   }
 }

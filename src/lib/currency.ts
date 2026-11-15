@@ -58,6 +58,7 @@ export function formatCurrency(
 export function validateCurrencyAmount(
   amount: string,
   currencyCode?: string | null,
+  options?: { requireExactDecimals?: boolean },
 ): string | null {
   const code = (currencyCode || "THB").trim().toUpperCase();
   const trimmed = amount.trim();
@@ -69,15 +70,75 @@ export function validateCurrencyAmount(
 
   const minorUnits = getCurrencyMinorUnits(code);
   const parts = trimmed.split(".");
-  if (parts.length > 1) {
-    const fraction = parts[1];
-    if (minorUnits === 0 && fraction.length > 0) {
-      return `${code} does not support decimal fractions`;
+  const fraction = parts[1] || "";
+
+  if (minorUnits === 0) {
+    if (fraction.length > 0) {
+      return `${code} does not support decimal fractions (use whole numbers)`;
     }
+  } else {
     if (fraction.length > minorUnits) {
       return `${code} supports at most ${minorUnits} decimal place${minorUnits === 1 ? "" : "s"}`;
+    }
+    if (options?.requireExactDecimals && fraction.length !== minorUnits) {
+      return `${code} requires exactly ${minorUnits} decimal place${minorUnits === 1 ? "" : "s"} (e.g. ${parts[0] || "0"}.${"0".repeat(minorUnits)})`;
     }
   }
 
   return null;
+}
+
+/**
+ * Normalizes an amount string to the exact decimal places required by the currency.
+ * e.g. normalizeCurrencyAmount("1500", "THB") => "1500.00"
+ *      normalizeCurrencyAmount("1500.5", "THB") => "1500.50"
+ *      normalizeCurrencyAmount("1500.5", "JPY") => "1501"
+ */
+export function normalizeCurrencyAmount(
+  amount: string | number | null | undefined,
+  currencyCode?: string | null,
+): string {
+  const code = (currencyCode || "THB").trim().toUpperCase();
+  const minorUnits = getCurrencyMinorUnits(code);
+  if (amount === null || amount === undefined || amount === "") {
+    return minorUnits === 0 ? "0" : `0.${"0".repeat(minorUnits)}`;
+  }
+  const cleanStr = String(amount).replace(/,/g, "").trim();
+  const num = parseFloat(cleanStr);
+  if (isNaN(num)) {
+    return minorUnits === 0 ? "0" : `0.${"0".repeat(minorUnits)}`;
+  }
+  return num.toFixed(minorUnits);
+}
+
+/**
+ * Live input sanitizer for currency text inputs:
+ * - Restricts characters to digits and single decimal dot.
+ * - If minorUnits === 0 (e.g. JPY, KRW), disallows dot entirely.
+ * - If minorUnits > 0 (e.g. THB, USD), restricts fraction to at most minorUnits digits.
+ */
+export function filterCurrencyInput(
+  rawInput: string,
+  currencyCode?: string | null,
+): string {
+  const code = (currencyCode || "THB").trim().toUpperCase();
+  const minorUnits = getCurrencyMinorUnits(code);
+
+  if (!rawInput) return "";
+
+  // Strip anything that is not 0-9 or dot
+  let cleaned = rawInput.replace(/[^0-9.]/g, "");
+
+  if (minorUnits === 0) {
+    return cleaned.replace(/\./g, "");
+  }
+
+  const dotIdx = cleaned.indexOf(".");
+  if (dotIdx !== -1) {
+    const intPart = cleaned.slice(0, dotIdx);
+    const fracPart = cleaned.slice(dotIdx + 1).replace(/\./g, "").slice(0, minorUnits);
+    cleaned = `${intPart}.${fracPart}`;
+  }
+
+  return cleaned;
 }

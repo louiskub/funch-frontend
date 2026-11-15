@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/features/auth/hooks/use-auth";
-import { usePathname, useRouter } from "next/navigation";
+import { useAuth, useAuthModalStore } from "@/features/auth";
+import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -9,15 +9,15 @@ import { toast } from "sonner";
 
 export function CustomerGuard({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+  const { openAuthModal } = useAuthModalStore();
   const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast.info("Please sign in to view your bookings and account details");
-      router.replace(`/account?redirect=${encodeURIComponent(pathname || "/bookings")}`);
+      openAuthModal("login", { redirectUrl: pathname || "/bookings" });
     }
-  }, [isLoading, isAuthenticated, router, pathname]);
+  }, [isLoading, isAuthenticated, openAuthModal, pathname]);
 
   if (isLoading) {
     return (
@@ -35,11 +35,21 @@ export function CustomerGuard({ children }: { children: ReactNode }) {
         <p className="mt-2 text-sm text-[#57657e]">
           You need to be signed in to view this page.
         </p>
-        <div className="mt-6 flex gap-3">
-          <Button asChild>
-            <Link href="/account">Sign in or register</Link>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button
+            type="button"
+            onClick={() => openAuthModal("login", { redirectUrl: pathname || "/bookings" })}
+          >
+            Sign in
           </Button>
-          <Button asChild variant="outline">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => openAuthModal("register", { redirectUrl: pathname || "/bookings" })}
+          >
+            Create account
+          </Button>
+          <Button asChild variant="ghost">
             <Link href="/">Back to home</Link>
           </Button>
         </div>

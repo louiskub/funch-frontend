@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, Suspense } from "react";
-import {
-  CalendarIcon,
-  CarIcon,
-  UserIcon,
-  ClockIcon,
-  ShieldCheckIcon,
-} from "@/components/ui/icons";
+import { type ReactNode, Suspense } from "react";
+import { useTranslations } from "next-intl";
+import { BarChart3, Package, Users } from "lucide-react";
+import { CalendarIcon, CarIcon, UserIcon } from "@/components/ui/icons";
+import { AdminGuard } from "@/components/layout/admin-guard";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
@@ -26,61 +24,75 @@ function AdminLayoutContent({
   children,
 }: AdminLayoutProps) {
   const pathname = usePathname() || "";
+  const t = useTranslations("admin");
+  const tNav = useTranslations("nav");
+  const { user } = useAuth();
 
   const navItems = [
-    { label: "Bookings", href: "/admin/bookings", icon: CalendarIcon },
-    { label: "Fleet", href: "/admin/fleet", icon: CarIcon },
-    { label: "Options", href: "/admin/options", icon: ShieldCheckIcon },
-    { label: "Members", href: "/admin/members", icon: UserIcon },
-    { label: "Reports", href: "/admin/reports", icon: ClockIcon },
+    { label: t("bookings"), href: "/admin/bookings", icon: CalendarIcon },
+    { label: t("fleet"), href: "/admin/fleet", icon: CarIcon },
+    { label: t("options"), href: "/admin/options", icon: Package },
+    { label: t("members"), href: "/admin/members", icon: Users },
+    { label: t("reports"), href: "/admin/reports", icon: BarChart3 },
   ];
 
   return (
-    <div className="flex min-h-[calc(100vh-82px)] bg-white text-[#25314c]">
-      {/* 185px Admin Sidebar per Easy Days 1440 reference */}
-      <aside className="hidden lg:flex w-[185px] flex-col border-r border-[#e0e6f1] bg-white p-4 justify-between flex-shrink-0">
-        <div>
-          <div className="px-2 py-3 mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#57657e] block">
-              Workspace
-            </span>
-            <span className="text-base font-extrabold text-[#25314c]">
-              Branch Admin
-            </span>
-          </div>
+    <div className="flex min-h-[calc(100vh-65px)] bg-white text-[#25314c]">
+      <aside
+        aria-label={t("branchAdmin")}
+        className="sticky top-[65px] hidden h-[calc(100dvh-65px)] w-[185px] shrink-0 flex-col border-r border-[#e0e6f1] bg-white p-3 lg:flex"
+      >
+        <p className="shrink-0 px-3 pb-5 pt-4 text-sm font-semibold leading-6">
+          {t("branchAdmin")}
+        </p>
 
-          <nav className="space-y-1" aria-label="Admin navigation">
-            {navItems.map((item) => {
-              const active = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-[8px] px-3 py-2 text-xs font-semibold transition-colors",
-                    active
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary"
-                  )}
-                >
-                  <Icon size={16} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        <nav
+          className="min-h-0 flex-1 space-y-1 overflow-y-auto pb-4"
+          aria-label={t("navigation")}
+        >
+          {navItems.map((item) => {
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex min-h-11 items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none",
+                  active
+                    ? "bg-primary text-white focus-visible:outline-white"
+                    : "text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary",
+                )}
+              >
+                <Icon size={17} aria-hidden="true" className="shrink-0" />
+                <span className="min-w-0 break-words leading-5">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
 
-        {/* Staff badge */}
-        <div className="rounded-[10px] bg-[#f0f5ff] p-3 text-xs border border-[#d7e2f5]">
-          <p className="font-bold text-[#25314c] text-[11px]">Staff Profile</p>
-          <p className="text-[10px] text-[#57657e] truncate">Admin Console</p>
+        <div className="shrink-0 border-t border-[#e0e6f1] pt-3">
           <Link
-            href="/"
-            className="mt-2 block text-[10px] font-bold text-primary hover:underline"
+            href="/account"
+            aria-label={`${tNav("account")}: ${user?.name ?? t("branchAdmin")}`}
+            title={user?.email}
+            className="flex min-h-16 min-w-0 items-center gap-2.5 rounded-[10px] px-2 py-3 hover:bg-[#f0f5ff] focus-visible:outline-2 focus-visible:outline-primary"
           >
-            ← Return to storefront
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f0f5ff] text-primary">
+              <UserIcon size={16} aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-xs font-semibold">
+                {user?.name ?? t("branchAdmin")}
+              </span>
+              <span className="mt-1 block text-xs text-[#57657e]">
+                {tNav("account")}
+              </span>
+            </span>
           </Link>
         </div>
       </aside>
@@ -93,34 +105,39 @@ function AdminLayoutContent({
             <h1 className="text-xl font-bold tracking-tight text-[#25314c]">
               {title}
             </h1>
-            {subtitle && (
-              <p className="text-xs text-[#57657e]">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs text-[#57657e]">{subtitle}</p>}
           </div>
 
-          {actions && <div className="flex items-center gap-2.5">{actions}</div>}
+          {actions && (
+            <div className="flex items-center gap-2.5">{actions}</div>
+          )}
         </header>
 
         {/* Mobile secondary tabs */}
-        <div className="flex border-b border-[#e0e6f1] px-4 py-2 bg-white lg:hidden overflow-x-auto gap-2">
+        <nav
+          aria-label={t("navigation")}
+          className="flex border-b border-[#e0e6f1] px-4 py-2 bg-white lg:hidden overflow-x-auto gap-2"
+        >
           {navItems.map((item) => {
-            const active = pathname === item.href;
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "whitespace-nowrap rounded-[6px] px-3 py-1.5 text-xs font-semibold",
+                  "flex min-h-11 items-center whitespace-nowrap rounded-[6px] px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2",
                   active
                     ? "bg-primary text-white"
-                    : "text-[#57657e] hover:bg-[#f0f5ff]"
+                    : "text-[#57657e] hover:bg-[#f0f5ff]",
                 )}
               >
                 {item.label}
               </Link>
             );
           })}
-        </div>
+        </nav>
 
         {/* Content area */}
         <div className="flex-1 p-6 sm:p-8">{children}</div>
@@ -129,12 +146,14 @@ function AdminLayoutContent({
   );
 }
 
-import { AdminGuard } from "@/components/layout/admin-guard";
-
 export function AdminLayout(props: AdminLayoutProps) {
   return (
     <AdminGuard>
-      <Suspense fallback={<div className="p-8 text-sm text-[#57657e]">Loading workspace…</div>}>
+      <Suspense
+        fallback={
+          <div className="p-8 text-sm text-[#57657e]">Loading workspace…</div>
+        }
+      >
         <AdminLayoutContent {...props} />
       </Suspense>
     </AdminGuard>

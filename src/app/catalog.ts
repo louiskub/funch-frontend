@@ -4,6 +4,7 @@ export type Offer = {
   id: string; branchId: string; carTypeId: string; brand: string; model: string; seats: number; transmission: string; fuelType: string;
   features: string[]; images: { id: string; originalName: string; mimeType: string; url: string }[]; baseHourlyRate: string; baseDailyRate: string; currencyCode: string; branchName: string;
   city: string; timezone: string; countryCode: string;
+  supportedOptionIds?: string[];
 };
 
 const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api";
@@ -37,6 +38,9 @@ function offerFrom(value: unknown): Offer {
     seats: item.seats, transmission: apiString(item.transmission), fuelType: apiString(item.fuelType), features: item.features, images,
     baseHourlyRate: apiString(item.baseHourlyRate), baseDailyRate: apiString(item.baseDailyRate), currencyCode: apiString(item.currencyCode),
     branchName: apiString(item.branchName), city: apiString(item.city), timezone: apiString(item.timezone), countryCode: apiString(item.countryCode),
+    supportedOptionIds: Array.isArray(item.supportedOptionIds)
+      ? item.supportedOptionIds.filter((x): x is string => typeof x === "string")
+      : undefined,
   };
 }
 export async function api<T>(path: string, parse: (value: unknown) => T, signal?: AbortSignal): Promise<T> {

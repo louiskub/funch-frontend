@@ -1,67 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/features/auth/hooks/use-auth";
+import { FormEvent, useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAuth, useAuthModalStore } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { UserIcon, AlertCircleIcon, ChevronRightIcon } from "@/components/ui/icons";
 
-type Mode = "login" | "register";
-
 function AccountContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
 
   const {
     user,
     isLoading,
-    login,
-    isLoggingIn,
-    register,
-    isRegistering,
     updateProfile,
     isUpdatingProfile,
     logout,
     isLoggingOut,
-    refetchUser,
   } = useAuth();
 
-  const [mode, setMode] = useState<Mode>("login");
+  const { openAuthModal } = useAuthModalStore();
   const [errorMessage, setErrorMessage] = useState("");
 
-  const pending = isLoggingIn || isRegistering || isUpdatingProfile || isLoggingOut;
+  const pending = isUpdatingProfile || isLoggingOut;
 
-  async function handleAuth(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setErrorMessage("");
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") || "");
-    const password = String(form.get("password") || "");
-
-    try {
-      if (mode === "login") {
-        const loggedInUser = await login({ email, password });
-        if (redirectUrl) {
-          router.push(redirectUrl);
-        } else if (loggedInUser.role === "ADMIN") {
-          router.push("/admin/bookings");
-        }
-      } else {
-        const name = String(form.get("name") || "");
-        const phone = String(form.get("phone") || "");
-        await register({ name, email, password, phone });
-        if (redirectUrl) {
-          router.push(redirectUrl);
-        }
-      }
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Authentication failed");
+  // If user lands on account page while not logged in, prompt modal
+  useEffect(() => {
+    if (!isLoading && !user) {
+      openAuthModal("login", {
+        redirectUrl: redirectUrl || undefined,
+      });
     }
-  }
+  }, [isLoading, user, openAuthModal, redirectUrl]);
 
   async function handleSaveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -204,109 +177,27 @@ function AccountContent() {
               </form>
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Mode Switcher */}
-              <div className="flex border-b border-[#e0e6f1]">
-                <button
+            <div className="py-6 text-center space-y-4">
+              <p className="text-sm text-[#57657e]">
+                Sign in or register to manage your personal profile, vehicle bookings, and rental preferences.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Button
                   type="button"
-                  className={`pb-3 text-sm font-bold transition-all relative ${
-                    mode === "login"
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-[#57657e] hover:text-[#25314c]"
-                  }`}
-                  onClick={() => {
-                    setMode("login");
-                    setErrorMessage("");
-                  }}
+                  onClick={() => openAuthModal("login", { redirectUrl: redirectUrl || undefined })}
+                  className="h-11 w-full sm:w-auto px-6 font-bold"
                 >
-                  Sign in
-                </button>
-                <button
+                  Sign in to account
+                </Button>
+                <Button
                   type="button"
-                  className={`ml-8 pb-3 text-sm font-bold transition-all relative ${
-                    mode === "register"
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-[#57657e] hover:text-[#25314c]"
-                  }`}
-                  onClick={() => {
-                    setMode("register");
-                    setErrorMessage("");
-                  }}
+                  variant="outline"
+                  onClick={() => openAuthModal("register", { redirectUrl: redirectUrl || undefined })}
+                  className="h-11 w-full sm:w-auto px-6 font-semibold"
                 >
                   Create new account
-                </button>
-              </div>
-
-              <form onSubmit={handleAuth} className="space-y-4">
-                {mode === "register" && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#25314c]">Full name</label>
-                    <Input
-                      name="name"
-                      required
-                      maxLength={120}
-                      placeholder="Jane Doe"
-                      className="h-11 text-sm"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#25314c]">Email address</label>
-                  <Input
-                    name="email"
-                    type="email"
-                    required
-                    maxLength={254}
-                    placeholder="jane@example.com"
-                    className="h-11 text-sm"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#25314c]">Password</label>
-                  <Input
-                    name="password"
-                    type="password"
-                    required
-                    minLength={mode === "register" ? 6 : 1}
-                    maxLength={128}
-                    placeholder="••••••••••••"
-                    className="h-11 text-sm"
-                  />
-                  {mode === "register" && (
-                    <span className="text-[11px] text-[#57657e] block">
-                      Must be at least 6 characters.
-                    </span>
-                  )}
-                </div>
-
-                {mode === "register" && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-[#25314c]">Phone number</label>
-                    <Input
-                      name="phone"
-                      required
-                      minLength={3}
-                      maxLength={40}
-                      placeholder="+66 81 234 5678"
-                      className="h-11 text-sm"
-                    />
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={pending}
-                  className="h-12 w-full text-sm font-bold mt-2"
-                >
-                  {pending
-                    ? "Authenticating…"
-                    : mode === "login"
-                      ? "Sign in to account"
-                      : "Create account"}
                 </Button>
-              </form>
+              </div>
             </div>
           )}
         </CardContent>

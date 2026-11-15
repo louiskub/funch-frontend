@@ -51,21 +51,20 @@ function CatalogBrowserContent() {
   const [branchId, setBranchId] = useState(urlBranch);
   const [offerState, setOfferState] = useState("");
 
-  const [pickupDate, setPickupDate] = useState(urlPickup);
-  const [returnDate, setReturnDate] = useState(urlReturn);
-
-  useEffect(() => {
-    if (!pickupDate || !returnDate) {
-      const d = new Date();
-      d.setDate(d.getDate() + 1);
-      d.setHours(10, 0, 0, 0);
-      const defaultPickup = d.toISOString().slice(0, 16);
-      d.setDate(d.getDate() + 3);
-      const defaultReturn = d.toISOString().slice(0, 16);
-      if (!pickupDate) setPickupDate(defaultPickup);
-      if (!returnDate) setReturnDate(defaultReturn);
-    }
-  }, [pickupDate, returnDate]);
+  const [pickupDate, setPickupDate] = useState(() => {
+    if (urlPickup) return urlPickup;
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    d.setHours(10, 0, 0, 0);
+    return d.toISOString().slice(0, 16);
+  });
+  const [returnDate, setReturnDate] = useState(() => {
+    if (urlReturn) return urlReturn;
+    const d = new Date();
+    d.setDate(d.getDate() + 4);
+    d.setHours(10, 0, 0, 0);
+    return d.toISOString().slice(0, 16);
+  });
 
   const [selectedCategory, setSelectedCategory] = useState<string>(urlCategory);
   const [sortBy, setSortBy] = useState<string>("price-asc");

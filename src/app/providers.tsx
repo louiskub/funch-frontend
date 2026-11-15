@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Toaster } from "sonner";
 import { getQueryClient } from "@/lib/query-client";
 import { messages, useLocaleStore } from "@/features/i18n";
+import { AuthModal } from "@/features/auth";
 import { type ReactNode, useState } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -19,6 +20,7 @@ export function Providers({ children }: { children: ReactNode }) {
         timeZone="Asia/Bangkok"
       >
         {children}
+        <AuthModal />
         <Toaster position="top-right" richColors closeButton />
       </NextIntlClientProvider>
     </QueryClientProvider>

@@ -130,7 +130,16 @@ export default function OfferDetails({
       parseOptions,
       controller.signal,
     )
-      .then(setOptions)
+      .then((allOptions) => {
+        const supported =
+          Array.isArray(offer.supportedOptionIds) &&
+          offer.supportedOptionIds.length > 0
+            ? allOptions.filter((opt) =>
+                offer.supportedOptionIds!.includes(opt.id),
+              )
+            : allOptions;
+        setOptions(supported);
+      })
       .catch((error: unknown) => {
         if (!controller.signal.aborted)
           setMessage(

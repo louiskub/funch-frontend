@@ -4,6 +4,8 @@
     "myBookings": "My bookings",
     "adminPortal": "Admin portal",
     "account": "My account",
+    "accountMenu": "Account menu",
+    "navigationMenu": "Navigation menu",
     "signIn": "Sign in",
     "signInOrRegister": "Sign in / Register",
     "signOut": "Sign out",
@@ -33,6 +35,7 @@
     "seats": "seats"
   },
   "admin": {
+    "navigation": "Admin navigation",
     "workspace": "Workspace",
     "branchAdmin": "Branch Admin",
     "bookings": "Bookings",
@@ -48,5 +51,32 @@
     "submit": "Submit",
     "retry": "Retry",
     "backToHome": "← Back to home"
+  },
+  "auth": {
+    "signInTitle": "Sign in to FUNCH",
+    "signInSubtitle": "Access your bookings, saved rentals, and fast checkout.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Get started with FUNCH for transparent rates and quick booking.",
+    "signInTab": "Sign in",
+    "registerTab": "Create account",
+    "name": "Full name",
+    "namePlaceholder": "Jane Doe",
+    "email": "Email address",
+    "emailPlaceholder": "jane@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••••••",
+    "passwordHint": "Must be at least 6 characters.",
+    "phone": "Phone number",
+    "phonePlaceholder": "+66 81 234 5678",
+    "signInButton": "Sign in to account",
+    "signingInButton": "Signing in…",
+    "registerButton": "Create account",
+    "registeringButton": "Creating account…",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createAccountLink": "Create one now",
+    "signInLink": "Sign in here",
+    "close": "Close modal",
+    "or": "or"
   }
 }
