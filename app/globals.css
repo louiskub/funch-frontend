@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'FunchManrope';
+  src: url('/design-v2/manrope.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #25314c;
+  --card: #ffffff;
+  --card-foreground: #25314c;
+  --popover: #ffffff;
+  --popover-foreground: #25314c;
+  --primary: #2747b7;
+  --primary-foreground: #ffffff;
+  --primary-hover: #1c358d;
+  --secondary: #f0f5ff;
+  --secondary-foreground: #2747b7;
+  --muted: #f0f5ff;
+  --muted-foreground: #57657e;
+  --accent: #dfe9fc;
+  --accent-foreground: #25314c;
+  --destructive: #a22f2f;
+  --destructive-foreground: #ffffff;
+  --border: #e0e6f1;
+  --input: #e0e6f1;
+  --ring: #2747b7;
+  --radius: 0.625rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: 'FunchManrope', sans-serif;
 }
 
+/* Easy Days: white canvas preserved across system color-scheme preferences per DESIGN.md */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #25314c;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'FunchManrope', sans-serif;
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { apiRecord, apiRequest } from "../../catalog";
+import { apiRecord, apiRequest, apiString } from "../../catalog";
 import { currentUser } from "../../auth";
 
 type Item = {
@@ -11,7 +11,9 @@ type Item = {
   status: string;
   pickupAt: string;
   returnAt: string;
+  actualReturnAt: string | null;
   totalAmount: string;
+  finalAmount: string;
   currencyCode: string;
   customerName: string;
   customerEmail: string;
@@ -30,7 +32,9 @@ function parseRows(value: unknown): Item[] {
       status: String(x.status),
       pickupAt: String(x.pickupAt),
       returnAt: String(x.returnAt),
+      actualReturnAt: x.actualReturnAt === null ? null : apiString(x.actualReturnAt),
       totalAmount: String(x.totalAmount),
+      finalAmount: apiString(x.finalAmount),
       currencyCode: String(x.currencyCode),
       customerName: String(x.customerName),
       customerEmail: String(x.customerEmail),
@@ -66,6 +70,12 @@ export default function AdminBookings() {
     amount: "",
   });
   const [chargeTarget, setChargeTarget] = useState("");
+  const [previews, setPreviews] = useState<Record<string, {
+    actualReturnAt: string;
+    bookingAmount: string;
+    projectedFinalAmount: string;
+    lines: { kind: string; amount: string }[];
+  }>>({});
   const refresh = useCallback(async () => {
     try {
       setItems(parseRows(await apiRequest("/admin/bookings")));
@@ -100,6 +110,11 @@ export default function AdminBookings() {
         }),
       );
       await refresh();
+      setPreviews((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
       const conflicts = Array.isArray(result.capacityConflictBookingIds)
         ? result.capacityConflictBookingIds.length
         : 0;
@@ -107,7 +122,8 @@ export default function AdminBookings() {
       const lineSummary = lines
         .map((raw) => {
           const line = apiRecord(raw);
-          return `${String(line.type ?? line.kind)} ${String(line.amount)}`;
+          const amount = typeof line.amount === "string" ? line.amount : apiString(apiRecord(line.amount).amount);
+          return `${String(line.type ?? line.kind)} ${amount}`;
         })
         .join(", ");
       setMessage(
@@ -153,6 +169,31 @@ export default function AdminBookings() {
       }));
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not load cars.");
+    }
+  }
+  async function previewReturn(id: string) {
+    setBusy(id);
+    setMessage("");
+    try {
+      const result = apiRecord(await apiRequest(`/admin/bookings/${id}/return-preview`));
+      const rawLines: unknown = result.lines;
+      if (!Array.isArray(rawLines)) throw new Error("Unexpected return preview.");
+      setPreviews((current) => ({
+        ...current,
+        [id]: {
+          actualReturnAt: apiString(result.actualReturnAt),
+          bookingAmount: apiString(result.bookingAmount),
+          projectedFinalAmount: apiString(result.projectedFinalAmount),
+          lines: rawLines.map((raw: unknown) => {
+            const line = apiRecord(raw);
+            return { kind: apiString(line.kind), amount: apiString(apiRecord(line.amount).amount) };
+          }),
+        },
+      }));
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not preview return.");
+    } finally {
+      setBusy("");
     }
   }
   if (!allowed)
@@ -203,6 +244,11 @@ export default function AdminBookings() {
               {new Date(b.returnAt).toLocaleString()} · {b.currencyCode}{" "}
               {b.totalAmount}
             </p>
+            {b.actualReturnAt && (
+              <p className="mt-2 text-sm">
+                Returned {new Date(b.actualReturnAt).toLocaleString()} · Booking {b.totalAmount} {b.currencyCode} · Confirmed total {b.finalAmount} {b.currencyCode}
+              </p>
+            )}
             {b.charges.length > 0 && (
               <ul className="mt-2 space-y-1 text-sm">
                 {b.charges.map((charge) => (
@@ -318,6 +364,21 @@ export default function AdminBookings() {
               )}
               {b.status === "IN_USE" && (
                 <>
+                  {!b.actualReturnAt && (
+                    <button disabled={!!busy} className="underline" onClick={() => void previewReturn(b.id)}>
+                      Preview return charges
+                    </button>
+                  )}
+                  {!b.actualReturnAt && previews[b.id] && (
+                    <div className="w-full rounded border p-3 text-sm">
+                      <p>Estimated return at {new Date(previews[b.id].actualReturnAt).toLocaleString()}</p>
+                      <p>Original booking: {previews[b.id].bookingAmount} {b.currencyCode}</p>
+                      {previews[b.id].lines.length ? (
+                        <ul>{previews[b.id].lines.map((line, index) => <li key={index}>{line.kind}: {line.amount} {b.currencyCode}</li>)}</ul>
+                      ) : <p>No extra rental charges.</p>}
+                      <p>Projected total: {previews[b.id].projectedFinalAmount} {b.currencyCode}</p>
+                    </div>
+                  )}
                   <button
                     className="underline"
                     onClick={() =>
@@ -386,7 +447,7 @@ export default function AdminBookings() {
                     </div>
                   )}
                   <button
-                    disabled={!!busy}
+                    disabled={!!busy || !previews[b.id] || !!b.actualReturnAt}
                     className="underline"
                     onClick={() =>
                       void action(b.id, `/admin/bookings/${b.id}/return`, {
@@ -397,7 +458,7 @@ export default function AdminBookings() {
                     Record return
                   </button>
                   <button
-                    disabled={!!busy}
+                    disabled={!!busy || !b.actualReturnAt || b.charges.some((charge) => charge.status === "PENDING")}
                     className="underline"
                     onClick={() =>
                       void action(
