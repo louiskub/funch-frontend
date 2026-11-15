@@ -8,6 +8,7 @@ import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency, validateCurrencyAmount } from "@/lib/currency";
 
 type Branch = { id: string; code: string; name: string; city: string; currencyCode: string; isActive: boolean };
 type CarType = { id: string; brand: string; model: string; seats: number; transmission: string; fuelType: string; features: string[]; imageFileIds: string[]; isActive: boolean };
@@ -121,6 +122,23 @@ export default function AdminFleetPage() {
       const formElement = event.currentTarget;
       const form = new FormData(formElement);
       const data = payload(form, names, numbers);
+      if (names.includes("baseDailyRate") || names.includes("baseHourlyRate")) {
+        const currency = String(data.currencyCode || "THB");
+        if (data.baseDailyRate !== undefined) {
+          const err = validateCurrencyAmount(String(data.baseDailyRate), currency);
+          if (err) {
+            setMessage(`Daily rate: ${err}`);
+            return;
+          }
+        }
+        if (data.baseHourlyRate !== undefined) {
+          const err = validateCurrencyAmount(String(data.baseHourlyRate), currency);
+          if (err) {
+            setMessage(`Hourly rate: ${err}`);
+            return;
+          }
+        }
+      }
       for (const name of arrays) data[name] = field(form, name).split(",").map((part) => part.trim()).filter(Boolean);
       await apiRequest(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       setMessage("Saved successfully.");
@@ -289,6 +307,9 @@ export default function AdminFleetPage() {
                   <div>
                     <h3 className="text-sm font-bold text-[#25314c]">{offer.brand} {offer.model}</h3>
                     <p className="text-[11px] text-[#57657e]">{offer.branchName}</p>
+                    <p className="text-xs font-semibold text-primary mt-1">
+                      {formatCurrency(offer.baseDailyRate, offer.currencyCode)} / day · {formatCurrency(offer.baseHourlyRate, offer.currencyCode)} / hr
+                    </p>
                   </div>
                   <Badge variant={offer.isActive ? "approved" : "rejected"} className="text-[10px]">
                     {offer.isActive ? "Active" : "Inactive"}

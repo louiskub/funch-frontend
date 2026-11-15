@@ -250,7 +250,7 @@ function BookingsContent() {
                   <div className="border-t border-[#d7e2f5] pt-2 flex justify-between font-bold text-[#25314c]">
                     <span>Total Rate</span>
                     <span className="text-primary">
-                      {formatCurrency(selected.totalAmount, selected.currencyCode)}
+                      {formatCurrency(String(selected.totalAmount), String(selected.currencyCode))}
                     </span>
                   </div>
                 </div>

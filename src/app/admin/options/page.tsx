@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatCurrency, getCurrencyMinorUnits, validateCurrencyAmount } from "@/lib/currency";
 
-type Branch = { id: string; name: string; city: string; countryCode: string };
+type Branch = { id: string; name: string; city: string; countryCode: string; currencyCode?: string };
 type FormState = {
   code: string;
   name: string;
@@ -51,6 +52,7 @@ function branchesFrom(value: unknown): Branch[] {
       name: raw.name,
       city: raw.city,
       countryCode: raw.countryCode,
+      currencyCode: "currencyCode" in raw && typeof raw.currencyCode === "string" ? raw.currencyCode : "THB",
     };
   });
 }
@@ -90,6 +92,9 @@ export default function OptionsAdmin() {
   const [editing, setEditing] = useState<CarOption | null>(null);
   const [status, setStatus] = useState("Checking administrator access…");
   const [saving, setSaving] = useState(false);
+
+  const currentBranch = branches.find((b) => b.id === branchId);
+  const branchCurrency = currentBranch?.currencyCode ?? "THB";
 
   useEffect(() => {
     let alive = true;
@@ -141,6 +146,11 @@ export default function OptionsAdmin() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const err = validateCurrencyAmount(form.price, branchCurrency);
+    if (err) {
+      setStatus(`Price: ${err}`);
+      return;
+    }
     setSaving(true);
     setStatus("");
     const body = {
@@ -299,7 +309,7 @@ export default function OptionsAdmin() {
                         {option.pricingType.toLowerCase().replaceAll("_", " ")}
                       </TableCell>
                       <TableCell className="font-bold text-[#25314c]">
-                        {option.price}
+                        {formatCurrency(option.price, branchCurrency)}
                       </TableCell>
                       <TableCell className="text-xs text-[#57657e]">
                         {option.quantityStock === null ? "Unlimited" : `${option.quantityStock} units`}
@@ -420,11 +430,11 @@ export default function OptionsAdmin() {
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#25314c]">Price Rate</label>
+                    <label className="text-xs font-bold text-[#25314c]">Price Rate ({branchCurrency})</label>
                     <Input
                       required
                       inputMode="decimal"
-                      pattern="(?:0|[1-9][0-9]{0,9})(?:\.[0-9]{1,4})?"
+                      step={getCurrencyMinorUnits(branchCurrency) === 0 ? "1" : "0.01"}
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: e.target.value })}
                       className="h-9 text-xs font-mono font-semibold"

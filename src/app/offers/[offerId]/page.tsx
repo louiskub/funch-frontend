@@ -503,7 +503,7 @@ export default function OfferDetails({
                         Estimated Quote
                       </span>
                       <span className="text-base font-extrabold text-[#25314c]">
-                        {formatCurrency(quote.totalAmount, quote.currencyCode)}
+                        {formatCurrency(String(quote.totalAmount), String(quote.currencyCode))}
                       </span>
                     </div>
 
@@ -511,13 +511,13 @@ export default function OfferDetails({
                       <div className="flex justify-between">
                         <span>Vehicle rental</span>
                         <span className="font-semibold text-[#25314c]">
-                          {formatCurrency(quote.rentalSubtotal, quote.currencyCode)}
+                          {formatCurrency(String(quote.rentalSubtotal), String(quote.currencyCode))}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Selected options</span>
                         <span className="font-semibold text-[#25314c]">
-                          {formatCurrency(quote.optionsSubtotal, quote.currencyCode)}
+                          {formatCurrency(String(quote.optionsSubtotal), String(quote.currencyCode))}
                         </span>
                       </div>
                     </div>

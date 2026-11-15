@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocaleStore, LOCALES } from "@/features/i18n";
+import { useLocaleStore } from "@/features/i18n";
 import { cn } from "@/lib/utils";
 
 interface LanguageSwitcherProps {
@@ -13,32 +13,39 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full border border-[#e0e6f1] bg-[#f0f5ff]/60 p-0.5 text-xs font-semibold text-[#57657e]",
+        "inline-flex h-[34px] items-center rounded-full border border-[#d7e2f5] bg-[#f0f5ff] p-[3px] select-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]",
         className
       )}
       role="group"
       aria-label="Language selection"
     >
-      {LOCALES.map((item) => {
-        const isActive = locale === item.code;
-        return (
-          <button
-            key={item.code}
-            type="button"
-            onClick={() => setLocale(item.code)}
-            aria-pressed={isActive}
-            className={cn(
-              "flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] transition-all",
-              isActive
-                ? "bg-white font-bold text-primary shadow-sm"
-                : "hover:text-[#25314c]"
-            )}
-          >
-            <span>{item.flag}</span>
-            <span>{item.code.toUpperCase()}</span>
-          </button>
-        );
-      })}
+      <button
+        type="button"
+        onClick={() => setLocale("en")}
+        aria-pressed={locale === "en"}
+        className={cn(
+          "relative flex h-full items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-all duration-200 ease-out active:scale-95",
+          locale === "en"
+            ? "bg-white text-primary shadow-[0_2px_4px_rgba(39,71,183,0.1),0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-[#e0e6f1]/70"
+            : "text-[#57657e] hover:text-[#25314c]"
+        )}
+      >
+        En
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setLocale("th")}
+        aria-pressed={locale === "th"}
+        className={cn(
+          "relative flex h-full items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-all duration-200 ease-out active:scale-95",
+          locale === "th"
+            ? "bg-white text-primary shadow-[0_2px_4px_rgba(39,71,183,0.1),0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-[#e0e6f1]/70"
+            : "text-[#57657e] hover:text-[#25314c]"
+        )}
+      >
+        Th
+      </button>
     </div>
   );
 }

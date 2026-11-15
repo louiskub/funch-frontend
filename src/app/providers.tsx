@@ -13,7 +13,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider locale={locale} messages={messages[locale]}>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={messages[locale]}
+        timeZone="Asia/Bangkok"
+      >
         {children}
         <Toaster position="top-right" richColors closeButton />
       </NextIntlClientProvider>

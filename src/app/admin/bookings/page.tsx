@@ -760,7 +760,7 @@ export default function AdminBookings() {
                             <Input
                               type="number"
                               min="0"
-                              step="0.0001"
+                              step={getCurrencyMinorUnits(selectedBooking.currencyCode) === 0 ? "1" : "0.01"}
                               value={charge.amount}
                               onChange={(e) =>
                                 setCharge({ ...charge, amount: e.target.value })
@@ -790,13 +790,18 @@ export default function AdminBookings() {
                             !!busy || !charge.description.trim() || !charge.amount
                           }
                           size="sm"
-                          onClick={() =>
+                          onClick={() => {
+                            const err = validateCurrencyAmount(charge.amount, selectedBooking.currencyCode);
+                            if (err) {
+                              setMessage(`Charge amount: ${err}`);
+                              return;
+                            }
                             void action(
                               selectedBooking.id,
                               `/admin/bookings/${selectedBooking.id}/charges`,
                               charge,
-                            )
-                          }
+                            );
+                          }}
                           className="w-full h-8 text-xs font-bold"
                         >
                           Save pending charge
