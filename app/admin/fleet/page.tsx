@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest, apiString } from "../../catalog";
+import { AdminLayout } from "../admin-layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type Branch = { id: string; code: string; name: string; city: string; currencyCode: string; isActive: boolean };
 type CarType = { id: string; brand: string; model: string; seats: number; transmission: string; fuelType: string; features: string[]; imageFileIds: string[]; isActive: boolean };
@@ -61,16 +64,16 @@ function payload(form: FormData, names: string[], numbers: string[] = []): Recor
 }
 
 function Form({ children, onSubmit, disabled = false }: { children: React.ReactNode; onSubmit: (event: FormEvent<HTMLFormElement>) => void; disabled?: boolean }) {
-  return <form onSubmit={onSubmit}><fieldset disabled={disabled} className="flex flex-wrap items-end gap-3 rounded border border-zinc-300 p-4">{children}</fieldset></form>;
+  return <form onSubmit={onSubmit}><fieldset disabled={disabled} className="flex flex-wrap items-end gap-3 rounded-[12px] border border-[#e0e6f1] bg-white p-4 shadow-sm">{children}</fieldset></form>;
 }
 
-function Input({ label, name, defaultValue, type = "text", required = true }: { label: string; name: string; defaultValue?: string | number; type?: string; required?: boolean }) {
-  return <label className="grid gap-1 text-sm">{label}<input name={name} type={type} defaultValue={defaultValue} required={required} className="rounded border border-zinc-400 px-2 py-1" /></label>;
+function FormInput({ label, name, defaultValue, type = "text", required = true }: { label: string; name: string; defaultValue?: string | number; type?: string; required?: boolean }) {
+  return <label className="grid gap-1 text-xs font-semibold text-[#25314c]">{label}<input name={name} type={type} defaultValue={defaultValue} required={required} className="h-9 rounded-[8px] border border-[#e0e6f1] bg-white px-3 py-1 text-xs font-normal text-[#25314c] outline-none focus:border-primary focus:ring-1 focus:ring-primary" /></label>;
 }
 
-function Select({ label, name, options, value }: { label: string; name: string; options: [string, string][]; value?: string }) {
+function FormSelect({ label, name, options, value }: { label: string; name: string; options: [string, string][]; value?: string }) {
   const selected = value === undefined ? options[0]?.[0] ?? "" : options.some(([key]) => key === value) ? value : "";
-  return <label className="grid gap-1 text-sm">{label}<select name={name} value={selected} required disabled={!options.length} className="rounded border border-zinc-400 px-2 py-1"><option value="">{options.length ? "Select an option" : "No options available"}</option>{options.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>;
+  return <label className="grid gap-1 text-xs font-semibold text-[#25314c]">{label}<select name={name} value={selected} required disabled={!options.length} className="h-9 rounded-[8px] border border-[#e0e6f1] bg-white px-2 py-1 text-xs font-normal text-[#25314c] outline-none focus:border-primary focus:ring-1 focus:ring-primary"><option value="">{options.length ? "Select an option" : "No options available"}</option>{options.map(([key, title]) => <option key={key} value={key}>{title}</option>)}</select></label>;
 }
 
 export default function AdminFleetPage() {
@@ -86,11 +89,15 @@ export default function AdminFleetPage() {
 
   const load = useCallback(async () => {
     const [branchRows, typeRows, offerRows, carRows] = await Promise.all([
-      apiRequest("/admin/fleet/branches"), apiRequest("/admin/fleet/car-types"),
-      apiRequest("/admin/fleet/offers"), apiRequest("/admin/fleet/cars"),
+      apiRequest("/admin/fleet/branches"),
+      apiRequest("/admin/fleet/car-types"),
+      apiRequest("/admin/fleet/offers"),
+      apiRequest("/admin/fleet/cars"),
     ]);
-    setBranches(rows(branchRows, branchFrom)); setTypes(rows(typeRows, typeFrom));
-    setOffers(rows(offerRows, offerFrom)); setCars(rows(carRows, carFrom));
+    setBranches(rows(branchRows, branchFrom));
+    setTypes(rows(typeRows, typeFrom));
+    setOffers(rows(offerRows, offerFrom));
+    setCars(rows(carRows, carFrom));
     setLookupsLoaded(true);
     setGalleries(Object.fromEntries(rows(typeRows, typeFrom).map((type) => [type.id, type.imageFileIds])));
     const fileRows = await apiRequest("/admin/files");
@@ -98,32 +105,38 @@ export default function AdminFleetPage() {
   }, []);
 
   useEffect(() => {
-    currentUser().then((user) => {
-      if (user.role !== "ADMIN") throw new Error("Admin access is required.");
-      setAllowed(true);
-      return load();
-    }).catch((error: unknown) => setMessage(error instanceof Error ? error.message : "Could not load fleet."));
+    currentUser()
+      .then((user) => {
+        if (user.role !== "ADMIN") throw new Error("Admin access is required.");
+        setAllowed(true);
+        return load();
+      })
+      .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "Could not load fleet."));
   }, [load]);
 
   async function submit(event: FormEvent<HTMLFormElement>, path: string, method: "POST" | "PATCH", names: string[], numbers: string[] = [], arrays: string[] = []) {
-    event.preventDefault(); setMessage("");
+    event.preventDefault();
+    setMessage("");
     try {
       const formElement = event.currentTarget;
       const form = new FormData(formElement);
       const data = payload(form, names, numbers);
       for (const name of arrays) data[name] = field(form, name).split(",").map((part) => part.trim()).filter(Boolean);
       await apiRequest(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      setMessage("Saved.");
+      setMessage("Saved successfully.");
       if (method === "POST") formElement.reset();
       await load();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save changes."); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not save changes.");
+    }
   }
 
   async function uploadImage(carTypeId: string, file: File | undefined) {
     if (!file) return;
     setMessage("");
     try {
-      const body = new FormData(); body.set("file", file);
+      const body = new FormData();
+      body.set("file", file);
       const uploaded = apiRecord(await apiRequest("/admin/files?visibility=PUBLIC", { method: "POST", body }));
       const id = apiString(uploaded.id);
       const imageFileIds = [...(galleries[carTypeId] ?? []), id];
@@ -131,64 +144,217 @@ export default function AdminFleetPage() {
       setGalleries((current) => ({ ...current, [carTypeId]: imageFileIds }));
       const fileRows = await apiRequest("/admin/files");
       setFiles(rows(fileRows, (item) => ({ id: apiString(item.id), originalName: apiString(item.originalName), mimeType: apiString(item.mimeType), url: apiString(item.url) })));
-      setMessage("Image uploaded and added to gallery.");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not upload image."); }
+      setMessage("Image uploaded and added to vehicle gallery.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not upload image.");
+    }
   }
 
   async function saveGallery(carTypeId: string) {
     try {
       await apiRequest(`/admin/fleet/car-types/${carTypeId}/images`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageFileIds: galleries[carTypeId] ?? [] }) });
       setMessage("Gallery order saved.");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not save gallery."); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not save gallery.");
+    }
   }
 
-  if (!allowed) return <main className="mx-auto w-full max-w-5xl flex-1 p-6"><h1 className="text-2xl font-semibold">Fleet administration</h1><p role="status" className="mt-4">{message || "Checking admin access…"}</p><Link className="mt-4 inline-block underline" href="/">Back to catalog</Link></main>;
+  if (!allowed) {
+    return (
+      <main className="mx-auto w-full max-w-5xl flex-1 p-8">
+        <h1 className="text-2xl font-bold text-[#25314c]">Fleet administration</h1>
+        <p role="status" className="mt-4 text-sm text-[#57657e]">
+          {message || "Checking admin access…"}
+        </p>
+      </main>
+    );
+  }
 
-  const button = "rounded bg-zinc-900 px-3 py-2 text-sm text-white";
-  const section = "mt-8 space-y-4";
-  const heading = "text-xl font-semibold";
-  return <main className="mx-auto w-full max-w-5xl flex-1 p-6">
-    <div className="flex justify-between"><h1 className="text-2xl font-semibold">Fleet administration</h1><Link className="underline" href="/">Customer catalog</Link></div>
-    <p role="status" aria-live="polite" className="mt-3 min-h-6">{message}</p>
-    <p role="status" className="text-sm">{lookupsLoaded ? "" : "Loading fleet lookups…"}</p>
-    {lookupsLoaded && (!branches.length || !types.length || !offers.length) && <p role="status" className="text-sm">{!types.length ? "Add a car type before creating offers. " : ""}{!branches.length ? "No branches are available for offers. " : ""}{!offers.length ? "Add an offer before adding cars." : ""}</p>}
-
-    <section className={section}><h2 className={heading}>Car types</h2>
-      <Form onSubmit={(event) => void submit(event, "/admin/fleet/car-types", "POST", ["brand", "model", "seats", "transmission", "fuelType", "features"], ["seats"], ["features"])}>
-        <Input label="Brand" name="brand"/><Input label="Model" name="model"/><Input label="Seats" name="seats" type="number"/><Select label="Transmission" name="transmission" options={[["AUTO", "Automatic"], ["MANUAL", "Manual"]]}/><Select label="Fuel" name="fuelType" options={[["GASOLINE", "Gasoline"], ["DIESEL", "Diesel"], ["ELECTRIC", "Electric"], ["HYBRID", "Hybrid"]]}/><Input label="Features (comma separated)" name="features" required={false}/><button className={button}>Add car type</button>
-      </Form>
-      <div className="space-y-3">{types.map((type) => <div key={type.id} className="space-y-3">
-        <Form onSubmit={(event) => void submit(event, `/admin/fleet/car-types/${type.id}`, "PATCH", ["brand", "model", "seats", "transmission", "fuelType", "features", "isActive"], ["seats"], ["features"])}>
-          <Input label="Brand" name="brand" defaultValue={type.brand}/><Input label="Model" name="model" defaultValue={type.model}/><Input label="Seats" name="seats" type="number" defaultValue={type.seats}/><Select label="Transmission" name="transmission" value={type.transmission} options={[["AUTO", "Automatic"], ["MANUAL", "Manual"]]}/><Select label="Fuel" name="fuelType" value={type.fuelType} options={[["GASOLINE", "Gasoline"], ["DIESEL", "Diesel"], ["ELECTRIC", "Electric"], ["HYBRID", "Hybrid"]]}/><Input label="Features" name="features" defaultValue={type.features.join(", ")} required={false}/><Select label="Status" name="isActive" value={String(type.isActive)} options={[["true", "Active"], ["false", "Inactive"]]}/><button className={button}>Save {type.brand} {type.model}</button>
-        </Form>
-        <div className="rounded border border-zinc-300 p-4"><h3 className="font-medium">Images · first image is the cover</h3>
-          <label className="mt-3 inline-grid gap-1 text-sm">Upload public image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { void uploadImage(type.id, event.currentTarget.files?.[0]); event.currentTarget.value = ""; }} /></label>
-          <ol className="mt-3 space-y-2">{(galleries[type.id] ?? []).map((id, index, ordered) => {
-            const file = files.find((item) => item.id === id);
-            return <li key={id} className="flex items-center gap-3"><span className="w-8 text-sm">{index + 1}</span>{file && <img src={file.url} alt="" className="h-12 w-16 rounded object-cover"/>}<span className="min-w-0 flex-1 truncate">{file?.originalName ?? id}</span><button type="button" disabled={index === 0} onClick={() => setGalleries((current) => { const ids = [...(current[type.id] ?? [])]; [ids[index - 1], ids[index]] = [ids[index]!, ids[index - 1]!]; return { ...current, [type.id]: ids }; })} className="rounded border px-2 py-1" aria-label={`Move ${file?.originalName ?? "image"} up`}>Up</button><button type="button" disabled={index === ordered.length - 1} onClick={() => setGalleries((current) => { const ids = [...(current[type.id] ?? [])]; [ids[index + 1], ids[index]] = [ids[index]!, ids[index + 1]!]; return { ...current, [type.id]: ids }; })} className="rounded border px-2 py-1" aria-label={`Move ${file?.originalName ?? "image"} down`}>Down</button><button type="button" onClick={() => setGalleries((current) => ({ ...current, [type.id]: (current[type.id] ?? []).filter((fileId) => fileId !== id) }))} className="rounded border px-2 py-1">Remove</button></li>;
-          })}</ol>
-          <label className="mt-3 grid max-w-sm gap-1 text-sm">Add existing public image<select value="" onChange={(event) => { const id = event.target.value; if (id) setGalleries((current) => ({ ...current, [type.id]: [...(current[type.id] ?? []), id] })); }} className="rounded border border-zinc-400 px-2 py-1"><option value="">Choose image</option>{files.filter((file) => !(galleries[type.id] ?? []).includes(file.id)).map((file) => <option key={file.id} value={file.id}>{file.originalName}</option>)}</select></label>
-          <button type="button" onClick={() => void saveGallery(type.id)} className={`${button} mt-3`}>Save image order</button>
+  return (
+    <AdminLayout
+      title="Fleet Administration"
+      subtitle="Configure vehicle models, branch rental offers, pricing rates, and license plates."
+      actions={
+        <Button variant="outline" size="sm" onClick={() => void load()} className="text-xs h-9">
+          Refresh data
+        </Button>
+      }
+    >
+      {message && (
+        <div role="status" className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]">
+          {message}
         </div>
-      </div>)}</div>
-    </section>
+      )}
 
-    <section className={section}><h2 className={heading}>Branch offers and rates</h2>
-      <Form disabled={!lookupsLoaded || !types.length || !branches.length} onSubmit={(event) => void submit(event, "/admin/fleet/offers", "POST", ["carTypeId", "branchId", "baseDailyRate", "baseHourlyRate", "currencyCode"])}>
-        <Select label="Car type" name="carTypeId" options={types.map((type) => [type.id, `${type.brand} ${type.model}${type.isActive ? "" : " (inactive)"}`])}/><Select label="Branch" name="branchId" options={branches.map((branch) => [branch.id, `${branch.name} · ${branch.code}${branch.isActive ? "" : " (inactive)"}`])}/><Input label="Daily rate" name="baseDailyRate"/><Input label="Hourly rate" name="baseHourlyRate"/><Input label="Currency" name="currencyCode" defaultValue={branches[0]?.currencyCode ?? "THB"}/><button className={button}>Add offer</button>
-      </Form>
-      <div className="space-y-3">{offers.map((offer) => <Form key={offer.id} onSubmit={(event) => void submit(event, `/admin/fleet/offers/${offer.id}`, "PATCH", ["baseDailyRate", "baseHourlyRate", "currencyCode", "isActive"])}>
-        <p className="pb-2 text-sm font-medium">{offer.brand} {offer.model} · {offer.branchName}</p><Input label="Daily rate" name="baseDailyRate" defaultValue={offer.baseDailyRate}/><Input label="Hourly rate" name="baseHourlyRate" defaultValue={offer.baseHourlyRate}/><Input label="Currency" name="currencyCode" defaultValue={offer.currencyCode}/><Select label="Status" name="isActive" value={String(offer.isActive)} options={[["true", "Active"], ["false", "Inactive"]]}/><button className={button}>Save rates</button>
-      </Form>)}</div>
-    </section>
+      <div className="space-y-10">
+        {/* Section 1: Car Types */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#25314c]">1. Vehicle Types & Models</h2>
+              <p className="text-xs text-[#57657e]">Create the catalog specification of each car model.</p>
+            </div>
+            <Badge variant="secondary" className="font-semibold">{types.length} Types</Badge>
+          </div>
 
-    <section className={section}><h2 className={heading}>Cars</h2>
-      <Form disabled={!lookupsLoaded || !offers.length} onSubmit={(event) => void submit(event, "/admin/fleet/cars", "POST", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
-        <Select label="Offer" name="carTypeBranchId" options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])}/><Input label="VIN" name="vin"/><Input label="License plate" name="licensePlate"/><Input label="Year" name="year" type="number"/><Input label="Buy date" name="buyDate" type="date" required={false}/><Select label="Status" name="status" options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]}/><button className={button}>Add car</button>
-      </Form>
-      <div className="space-y-3">{cars.map((car) => <Form key={car.id} disabled={!lookupsLoaded || !offers.some((offer) => offer.id === car.carTypeBranchId)} onSubmit={(event) => void submit(event, `/admin/fleet/cars/${car.id}`, "PATCH", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
-        <p className="pb-2 text-sm font-medium">{car.brand} {car.model} · {car.branchName}</p><Select label="Offer" name="carTypeBranchId" value={car.carTypeBranchId} options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])}/><Input label="VIN" name="vin" defaultValue={car.vin}/><Input label="License plate" name="licensePlate" defaultValue={car.licensePlate}/><Input label="Year" name="year" type="number" defaultValue={car.year}/><Input label="Buy date" name="buyDate" type="date" defaultValue={car.buyDate ?? ""} required={false}/><Select label="Status" name="status" value={car.status} options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]}/><button className={button}>Save car</button>
-      </Form>)}</div>
-    </section>
-  </main>;
+          <Form onSubmit={(event) => void submit(event, "/admin/fleet/car-types", "POST", ["brand", "model", "seats", "transmission", "fuelType", "features"], ["seats"], ["features"])}>
+            <FormInput label="Brand" name="brand" />
+            <FormInput label="Model" name="model" />
+            <FormInput label="Seats" name="seats" type="number" />
+            <FormSelect label="Transmission" name="transmission" options={[["AUTO", "Automatic"], ["MANUAL", "Manual"]]} />
+            <FormSelect label="Fuel" name="fuelType" options={[["GASOLINE", "Gasoline"], ["DIESEL", "Diesel"], ["ELECTRIC", "Electric"], ["HYBRID", "Hybrid"]]} />
+            <FormInput label="Features (comma separated)" name="features" required={false} />
+            <Button type="submit" size="sm" className="h-9 text-xs font-bold">+ Add car type</Button>
+          </Form>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {types.map((type) => (
+              <Card key={type.id} className="rounded-[14px] border-[#e0e6f1] bg-white shadow-sm overflow-hidden">
+                <CardHeader className="bg-[#f0f5ff]/40 p-4 border-b border-[#e0e6f1]">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-base">{type.brand} {type.model}</CardTitle>
+                    <Badge variant={type.isActive ? "approved" : "rejected"} className="text-[10px]">
+                      {type.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                  <Form onSubmit={(event) => void submit(event, `/admin/fleet/car-types/${type.id}`, "PATCH", ["brand", "model", "seats", "transmission", "fuelType", "features", "isActive"], ["seats"], ["features"])}>
+                    <FormInput label="Brand" name="brand" defaultValue={type.brand} />
+                    <FormInput label="Model" name="model" defaultValue={type.model} />
+                    <FormInput label="Seats" name="seats" type="number" defaultValue={type.seats} />
+                    <FormSelect label="Transmission" name="transmission" value={type.transmission} options={[["AUTO", "Automatic"], ["MANUAL", "Manual"]]} />
+                    <FormSelect label="Fuel" name="fuelType" value={type.fuelType} options={[["GASOLINE", "Gasoline"], ["DIESEL", "Diesel"], ["ELECTRIC", "Electric"], ["HYBRID", "Hybrid"]]} />
+                    <FormInput label="Features" name="features" defaultValue={type.features.join(", ")} required={false} />
+                    <FormSelect label="Status" name="isActive" value={String(type.isActive)} options={[["true", "Active"], ["false", "Inactive"]]} />
+                    <Button type="submit" variant="outline" size="sm" className="h-8 text-xs font-semibold">Save specs</Button>
+                  </Form>
+
+                  {/* Image Gallery */}
+                  <div className="rounded-[10px] bg-[#f0f5ff]/50 p-3.5 border border-[#e0e6f1] space-y-2.5">
+                    <span className="text-[11px] font-bold text-[#25314c] block">Photo Gallery</span>
+                    <label className="inline-flex items-center gap-2 text-xs font-semibold text-primary cursor-pointer">
+                      <span>+ Upload new public image</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={(event) => { void uploadImage(type.id, event.currentTarget.files?.[0]); event.currentTarget.value = ""; }} />
+                    </label>
+
+                    {(galleries[type.id] ?? []).length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        {(galleries[type.id] ?? []).map((id, index, ordered) => {
+                          const file = files.find((item) => item.id === id);
+                          return (
+                            <div key={id} className="flex items-center gap-2 rounded-[6px] bg-white p-2 text-xs border border-[#e0e6f1]">
+                              <span className="text-[10px] font-bold text-[#57657e] w-4">{index + 1}</span>
+                              {file && <img src={file.url} alt="" className="h-8 w-12 rounded object-cover" />}
+                              <span className="truncate flex-1 text-[11px] font-medium text-[#25314c]">{file?.originalName ?? id}</span>
+                              <Button type="button" variant="ghost" size="sm" disabled={index === 0} onClick={() => setGalleries((current) => { const ids = [...(current[type.id] ?? [])]; [ids[index - 1], ids[index]] = [ids[index]!, ids[index - 1]!]; return { ...current, [type.id]: ids }; })} className="h-6 px-1.5 text-[10px]">Up</Button>
+                              <Button type="button" variant="ghost" size="sm" disabled={index === ordered.length - 1} onClick={() => setGalleries((current) => { const ids = [...(current[type.id] ?? [])]; [ids[index + 1], ids[index]] = [ids[index]!, ids[index + 1]!]; return { ...current, [type.id]: ids }; })} className="h-6 px-1.5 text-[10px]">Down</Button>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setGalleries((current) => ({ ...current, [type.id]: (current[type.id] ?? []).filter((fileId) => fileId !== id) }))} className="h-6 px-1.5 text-[10px] text-[#a22f2f]">Remove</Button>
+                            </div>
+                          );
+                        })}
+                        <Button type="button" size="sm" variant="secondary" onClick={() => void saveGallery(type.id)} className="h-7 text-[11px] font-bold w-full mt-2">Save order</Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Section 2: Branch Offers */}
+        <section className="space-y-4 pt-4 border-t border-[#e0e6f1]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#25314c]">2. Branch Rental Offers & Daily Rates</h2>
+              <p className="text-xs text-[#57657e]">Pair a car model with a branch and define rental prices.</p>
+            </div>
+            <Badge variant="secondary" className="font-semibold">{offers.length} Offers</Badge>
+          </div>
+
+          <Form disabled={!lookupsLoaded || !types.length || !branches.length} onSubmit={(event) => void submit(event, "/admin/fleet/offers", "POST", ["carTypeId", "branchId", "baseDailyRate", "baseHourlyRate", "currencyCode"])}>
+            <FormSelect label="Car type" name="carTypeId" options={types.map((type) => [type.id, `${type.brand} ${type.model}${type.isActive ? "" : " (inactive)"}`])} />
+            <FormSelect label="Branch" name="branchId" options={branches.map((branch) => [branch.id, `${branch.name} · ${branch.code}${branch.isActive ? "" : " (inactive)"}`])} />
+            <FormInput label="Daily rate" name="baseDailyRate" />
+            <FormInput label="Hourly rate" name="baseHourlyRate" />
+            <FormInput label="Currency" name="currencyCode" defaultValue={branches[0]?.currencyCode ?? "THB"} />
+            <Button type="submit" size="sm" className="h-9 text-xs font-bold">+ Create offer</Button>
+          </Form>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {offers.map((offer) => (
+              <div key={offer.id} className="rounded-[12px] border border-[#e0e6f1] bg-white p-4 space-y-3 shadow-sm">
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#25314c]">{offer.brand} {offer.model}</h3>
+                    <p className="text-[11px] text-[#57657e]">{offer.branchName}</p>
+                  </div>
+                  <Badge variant={offer.isActive ? "approved" : "rejected"} className="text-[10px]">
+                    {offer.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+
+                <Form onSubmit={(event) => void submit(event, `/admin/fleet/offers/${offer.id}`, "PATCH", ["baseDailyRate", "baseHourlyRate", "currencyCode", "isActive"])}>
+                  <FormInput label="Daily" name="baseDailyRate" defaultValue={offer.baseDailyRate} />
+                  <FormInput label="Hourly" name="baseHourlyRate" defaultValue={offer.baseHourlyRate} />
+                  <FormInput label="Currency" name="currencyCode" defaultValue={offer.currencyCode} />
+                  <FormSelect label="Status" name="isActive" value={String(offer.isActive)} options={[["true", "Active"], ["false", "Inactive"]]} />
+                  <Button type="submit" variant="outline" size="sm" className="h-8 text-xs font-semibold">Save rates</Button>
+                </Form>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Section 3: Physical Cars */}
+        <section className="space-y-4 pt-4 border-t border-[#e0e6f1]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[#25314c]">3. Physical Vehicles & License Plates</h2>
+              <p className="text-xs text-[#57657e]">Track individual physical vehicles by VIN, plate number, and status.</p>
+            </div>
+            <Badge variant="secondary" className="font-semibold">{cars.length} Cars</Badge>
+          </div>
+
+          <Form disabled={!lookupsLoaded || !offers.length} onSubmit={(event) => void submit(event, "/admin/fleet/cars", "POST", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
+            <FormSelect label="Offer & branch" name="carTypeBranchId" options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])} />
+            <FormInput label="VIN" name="vin" />
+            <FormInput label="License plate" name="licensePlate" />
+            <FormInput label="Year" name="year" type="number" />
+            <FormInput label="Buy date" name="buyDate" type="date" required={false} />
+            <FormSelect label="Status" name="status" options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]} />
+            <Button type="submit" size="sm" className="h-9 text-xs font-bold">+ Register vehicle</Button>
+          </Form>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {cars.map((car) => (
+              <div key={car.id} className="rounded-[12px] border border-[#e0e6f1] bg-white p-4 space-y-3 shadow-sm">
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <span className="font-mono text-xs font-extrabold text-primary block">{car.licensePlate}</span>
+                    <h3 className="text-sm font-bold text-[#25314c]">{car.brand} {car.model}</h3>
+                    <p className="text-[11px] text-[#57657e]">{car.branchName}</p>
+                  </div>
+                  <Badge variant={car.status === "ACTIVE" ? "approved" : car.status === "MAINTENANCE" ? "pending" : "rejected"} className="text-[10px]">
+                    {car.status}
+                  </Badge>
+                </div>
+
+                <Form disabled={!lookupsLoaded || !offers.some((offer) => offer.id === car.carTypeBranchId)} onSubmit={(event) => void submit(event, `/admin/fleet/cars/${car.id}`, "PATCH", ["carTypeBranchId", "vin", "licensePlate", "year", "buyDate", "status"], ["year"])}>
+                  <FormSelect label="Branch offer" name="carTypeBranchId" value={car.carTypeBranchId} options={offers.map((offer) => [offer.id, `${offer.brand} ${offer.model} · ${offer.branchName}${offer.isActive ? "" : " (inactive)"}`])} />
+                  <FormInput label="VIN" name="vin" defaultValue={car.vin} />
+                  <FormInput label="Plate" name="licensePlate" defaultValue={car.licensePlate} />
+                  <FormInput label="Year" name="year" type="number" defaultValue={car.year} />
+                  <FormInput label="Buy date" name="buyDate" type="date" defaultValue={car.buyDate ?? ""} required={false} />
+                  <FormSelect label="Status" name="status" value={car.status} options={[["ACTIVE", "Active"], ["MAINTENANCE", "Maintenance"], ["DECOMMISSIONED", "Decommissioned"]]} />
+                  <Button type="submit" variant="outline" size="sm" className="h-8 text-xs font-semibold">Save vehicle</Button>
+                </Form>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </AdminLayout>
+  );
 }

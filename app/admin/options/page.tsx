@@ -3,6 +3,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { currentUser } from "../../auth";
 import { apiRequest, CarOption, parseOptions } from "../../catalog";
+import { AdminLayout } from "../admin-layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Branch = { id: string; name: string; city: string; countryCode: string };
 type FormState = {
@@ -25,8 +31,7 @@ const emptyForm: FormState = {
 };
 
 function branchesFrom(value: unknown): Branch[] {
-  if (!Array.isArray(value))
-    throw new Error("The API returned unexpected data.");
+  if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return value.map((raw) => {
     if (
       typeof raw !== "object" ||
@@ -165,6 +170,7 @@ export default function OptionsAdmin() {
           `/admin/options/branches/${encodeURIComponent(branchId)}`,
         ).then(parseOptions),
       );
+      setStatus("Option saved successfully.");
     } catch (error) {
       setStatus(
         error instanceof Error ? error.message : "Could not save this option.",
@@ -187,6 +193,7 @@ export default function OptionsAdmin() {
           `/admin/options/branches/${encodeURIComponent(branchId)}`,
         ).then(parseOptions),
       );
+      setStatus(`Option "${option.name}" updated.`);
     } catch (error) {
       setStatus(
         error instanceof Error
@@ -197,225 +204,290 @@ export default function OptionsAdmin() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
-      <h1 className="text-3xl font-semibold">Branch options and stock</h1>
-      <p className="mt-2 text-zinc-700">
-        Manage equipment and services offered at each branch.
-      </p>
+    <AdminLayout
+      title="Branch Rental Options"
+      subtitle="Manage add-on equipment, coverage packages, and services offered at each branch."
+      actions={
+        branches.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#57657e]">Branch</span>
+            <select
+              className="h-9 rounded-[8px] border border-[#e0e6f1] bg-white px-3 py-1 text-xs font-bold text-[#25314c] outline-none"
+              value={branchId}
+              onChange={(e) => {
+                setBranchId(e.target.value);
+                setEditing(null);
+                setForm(emptyForm);
+              }}
+            >
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name} ({branch.city})
+                </option>
+              ))}
+            </select>
+          </div>
+        )
+      }
+    >
       {status && (
-        <p role="status" className="mt-4">
+        <div className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]">
           {status}
-        </p>
+        </div>
       )}
-      {branches.length > 0 && (
-        <label className="mt-6 grid max-w-xl gap-2 font-medium">
-          Branch
-          <select
-            className="rounded border border-zinc-400 bg-white p-2"
-            value={branchId}
-            onChange={(event) => {
-              setBranchId(event.target.value);
-              setEditing(null);
-              setForm(emptyForm);
-            }}
-          >
-            {branches.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name} — {branch.city} ({branch.countryCode})
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-      {branchId && (
-        <>
-          <form
-            onSubmit={submit}
-            className="mt-8 grid gap-4 rounded border border-zinc-300 p-5 sm:grid-cols-2"
-          >
-            <h2 className="text-xl font-semibold sm:col-span-2">
-              {editing ? `Edit ${editing.name}` : "Add an option"}
-            </h2>
-            <label className="grid gap-1">
-              Code
-              <input
-                required
-                maxLength={40}
-                pattern="(?:[A-Za-z0-9_]|-)+"
-                value={form.code}
-                onChange={(e) => setForm({ ...form, code: e.target.value })}
-                className="rounded border p-2"
-              />
-            </label>
-            <label className="grid gap-1">
-              Name
-              <input
-                required
-                maxLength={120}
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="rounded border p-2"
-              />
-            </label>
-            <label className="grid gap-1">
-              Category
-              <select
-                value={form.category}
-                onChange={(e) => {
-                  const category = categoryValue(e.target.value);
-                  if (category) setForm({ ...form, category });
-                }}
-                className="rounded border bg-white p-2"
-              >
-                <option value="EQUIPMENT">Equipment</option>
-                <option value="SERVICE">Service</option>
-                <option value="PROTECTION">Protection</option>
-              </select>
-            </label>
-            <label className="grid gap-1">
-              Pricing type
-              {editing ? (
-                <input
-                  readOnly
-                  value={editing.pricingType}
-                  className="rounded border bg-zinc-100 p-2"
-                />
-              ) : (
-                <select
-                  value={form.pricingType}
-                  onChange={(e) => {
-                    const pricingType = pricingTypeValue(e.target.value);
-                    if (pricingType) setForm({ ...form, pricingType });
-                  }}
-                  className="rounded border bg-white p-2"
-                >
-                  <option value="PER_DAY">Per day</option>
-                  <option value="PER_UNIT_PER_DAY">Per unit per day</option>
-                  <option value="FIXED">Fixed</option>
-                </select>
-              )}
-            </label>
-            <label className="grid gap-1">
-              Price
-              <input
-                required
-                inputMode="decimal"
-                pattern="(?:0|[1-9][0-9]{0,9})(?:\.[0-9]{1,4})?"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="rounded border p-2"
-              />
-            </label>
-            <label className="grid gap-1">
-              Quantity stock (blank means unlimited)
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={form.quantityStock}
-                onChange={(e) =>
-                  setForm({ ...form, quantityStock: e.target.value })
-                }
-                className="rounded border p-2"
-              />
-            </label>
-            <label className="grid gap-1 sm:col-span-2">
-              Description
-              <textarea
-                maxLength={1000}
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                className="rounded border p-2"
-              />
-            </label>
-            <div className="flex gap-3 sm:col-span-2">
-              <button
-                disabled={saving}
-                className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-              >
-                {saving
-                  ? "Saving…"
-                  : editing
-                    ? "Save changes"
-                    : "Create option"}
-              </button>
-              {editing && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(null);
-                    setForm(emptyForm);
-                  }}
-                  className="rounded border px-4 py-2"
-                >
-                  Cancel
-                </button>
-              )}
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+        {/* Left: Options Table */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-[#25314c]">
+                Configured Add-ons
+              </h2>
+              <p className="text-xs text-[#57657e]">
+                {options.length} options active for this branch location.
+              </p>
             </div>
-          </form>
-          <section className="mt-8" aria-labelledby="options-list">
-            <h2 id="options-list" className="text-xl font-semibold">
-              Options at this branch
-            </h2>
-            {options.length === 0 ? (
-              <p className="mt-3">No options configured for this branch.</p>
-            ) : (
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="p-2">Name</th>
-                      <th className="p-2">Category / price</th>
-                      <th className="p-2">Stock</th>
-                      <th className="p-2">Status</th>
-                      <th className="p-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {options.map((option) => (
-                      <tr key={option.id} className="border-b">
-                        <td className="p-2">
-                          <strong>{option.name}</strong>
-                          <div className="text-sm">{option.code}</div>
-                        </td>
-                        <td className="p-2">
-                          {option.category} · {option.pricingType} ·{" "}
-                          {option.price}
-                        </td>
-                        <td className="p-2">
-                          {option.quantityStock ?? "Unlimited"}
-                        </td>
-                        <td className="p-2">
-                          {option.isActive ? "Active" : "Inactive"}
-                        </td>
-                        <td className="p-2">
-                          <button
-                            onClick={() => {
-                              setEditing(option);
-                              setForm(formFor(option));
-                            }}
-                            className="mr-3 underline"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => void toggleActive(option)}
-                            className="underline"
-                          >
-                            {option.isActive ? "Deactivate" : "Reactivate"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {editing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditing(null);
+                  setForm(emptyForm);
+                }}
+                className="h-8 text-xs"
+              >
+                + Create new option
+              </Button>
             )}
-          </section>
-        </>
-      )}
-    </main>
+          </div>
+
+          <div className="rounded-[14px] border border-[#e0e6f1] bg-white overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Option</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Pricing Model</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {options.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-[#57657e]">
+                      No options configured for this branch yet.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  options.map((option) => (
+                    <TableRow key={option.id} className={editing?.id === option.id ? "bg-[#f0f5ff]" : ""}>
+                      <TableCell>
+                        <p className="font-bold text-[#25314c]">{option.name}</p>
+                        <p className="text-[11px] font-mono text-[#57657e]">{option.code}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {option.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-[#57657e]">
+                        {option.pricingType.toLowerCase().replaceAll("_", " ")}
+                      </TableCell>
+                      <TableCell className="font-bold text-[#25314c]">
+                        {option.price}
+                      </TableCell>
+                      <TableCell className="text-xs text-[#57657e]">
+                        {option.quantityStock === null ? "Unlimited" : `${option.quantityStock} units`}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={option.isActive ? "approved" : "rejected"} className="text-[10px]">
+                          {option.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right space-x-1 whitespace-nowrap">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(option);
+                            setForm(formFor(option));
+                          }}
+                          className="h-7 text-xs text-primary font-semibold"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void toggleActive(option)}
+                          className={`h-7 text-xs font-semibold ${option.isActive ? "text-[#a22f2f]" : "text-[#17604a]"}`}
+                        >
+                          {option.isActive ? "Deactivate" : "Activate"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Right: Add / Edit Option Form */}
+        <div>
+          <Card className="rounded-[18px] border-[#e0e6f1] bg-white shadow-sm sticky top-28">
+            <CardHeader className="bg-[#f0f5ff]/40 p-5 border-b border-[#e0e6f1]">
+              <CardTitle className="text-base">
+                {editing ? `Edit ${editing.name}` : "Create New Option"}
+              </CardTitle>
+              <CardDescription>
+                {editing ? "Modify pricing, description or stock limits." : "Add equipment or protection packages."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5">
+              <form onSubmit={submit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#25314c]">Option Code</label>
+                  <Input
+                    required
+                    maxLength={40}
+                    pattern="(?:[A-Za-z0-9_]|-)+"
+                    placeholder="e.g. GPS_UNIT"
+                    value={form.code}
+                    onChange={(e) => setForm({ ...form, code: e.target.value })}
+                    className="h-9 text-xs uppercase"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#25314c]">Option Name</label>
+                  <Input
+                    required
+                    maxLength={120}
+                    placeholder="e.g. GPS Navigation"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#25314c]">Category</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => {
+                        const category = categoryValue(e.target.value);
+                        if (category) setForm({ ...form, category });
+                      }}
+                      className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none"
+                    >
+                      <option value="EQUIPMENT">Equipment</option>
+                      <option value="SERVICE">Service</option>
+                      <option value="PROTECTION">Protection</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#25314c]">Pricing Model</label>
+                    {editing ? (
+                      <Input
+                        readOnly
+                        value={editing.pricingType}
+                        className="h-9 text-xs bg-[#f0f5ff]/60"
+                      />
+                    ) : (
+                      <select
+                        value={form.pricingType}
+                        onChange={(e) => {
+                          const pricingType = pricingTypeValue(e.target.value);
+                          if (pricingType) setForm({ ...form, pricingType });
+                        }}
+                        className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none"
+                      >
+                        <option value="PER_DAY">Per day</option>
+                        <option value="PER_UNIT_PER_DAY">Per unit per day</option>
+                        <option value="FIXED">Fixed fee</option>
+                      </select>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#25314c]">Price Rate</label>
+                    <Input
+                      required
+                      inputMode="decimal"
+                      pattern="(?:0|[1-9][0-9]{0,9})(?:\.[0-9]{1,4})?"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
+                      className="h-9 text-xs font-mono font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#25314c]">Stock Quantity</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="Unlimited"
+                      value={form.quantityStock}
+                      onChange={(e) =>
+                        setForm({ ...form, quantityStock: e.target.value })
+                      }
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#25314c]">Description</label>
+                  <textarea
+                    maxLength={1000}
+                    rows={3}
+                    placeholder="Brief description for customer visibility…"
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    className="w-full rounded-[8px] border border-[#e0e6f1] p-2.5 text-xs text-[#25314c] outline-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-2">
+                  <Button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 h-10 text-xs font-bold"
+                  >
+                    {saving ? "Saving…" : editing ? "Save changes" : "Create option"}
+                  </Button>
+                  {editing && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setEditing(null);
+                        setForm(emptyForm);
+                      }}
+                      className="h-10 text-xs font-semibold"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </AdminLayout>
   );
 }

@@ -1,21 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "./navbar";
 import Link from "next/link";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "FUNCH Car Rental",
-  description: "Browse rental cars by country and branch.",
+  title: "FUNCH Car Rental — Easy Days",
+  description: "Browse and rent quality vehicles with transparent pricing.",
 };
 
 export default function RootLayout({
@@ -24,45 +14,39 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-zinc-300 px-6 py-4">
-          <nav
-            className="mx-auto flex w-full max-w-5xl flex-wrap justify-between gap-3"
-            aria-label="Main navigation"
-          >
-            <Link href="/" className="font-semibold">
-              FUNCH Car Rental
-            </Link>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/account" className="underline">
-                Account
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-white text-[#25314c] selection:bg-[#dfe9fc] selection:text-[#25314c]">
+        <Navbar />
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-[#e0e6f1] bg-white py-12 text-[#57657e]">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <span className="text-[26px] font-extrabold tracking-[-0.04em] text-[#57657e]">
+                funch.
+              </span>
+              <span className="text-xs text-[#57657e]/70">
+                · Car rental, made simple
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-6 text-xs text-[#57657e]">
+              <Link href="/" className="hover:text-primary transition-colors">
+                Find a car
               </Link>
-              <Link href="/bookings" className="underline">
+              <Link href="/bookings" className="hover:text-primary transition-colors">
                 My bookings
               </Link>
-              <Link href="/admin/bookings" className="underline">
-                Bookings admin
+              <Link href="/account" className="hover:text-primary transition-colors">
+                Account
               </Link>
-              <Link href="/admin/members" className="underline">
-                Members
-              </Link>
-              <Link href="/admin/reports" className="underline">
-                Reports
-              </Link>
-              <Link href="/admin/fleet" className="underline">
-                Admin fleet
-              </Link>
-              <Link href="/admin/options" className="underline">
-                Admin options
+              <Link href="/admin/bookings" className="hover:text-primary transition-colors">
+                Admin
               </Link>
             </div>
-          </nav>
-        </header>
-        {children}
+            <p className="text-xs text-[#57657e]/60">
+              © 2026 FUNCH Car Rental. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );

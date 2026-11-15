@@ -1,8 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { api, Branch, Country, Offer, parseBranches, parseCountries, parseOffers } from "./catalog";
+import { useEffect, useState, useMemo } from "react";
+import {
+  api,
+  Branch,
+  Country,
+  Offer,
+  parseBranches,
+  parseCountries,
+  parseOffers,
+} from "./catalog";
+import { Button } from "@/components/ui/button";
+import {
+  MapPinIcon,
+  CalendarIcon,
+  SearchIcon,
+  CarIcon,
+  ChevronRightIcon,
+  ClockIcon,
+} from "@/components/ui/icons";
 
 export default function CatalogBrowser() {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -10,74 +27,431 @@ export default function CatalogBrowser() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [countryCode, setCountryCode] = useState("");
   const [branchId, setBranchId] = useState("");
-  const [countryState, setCountryState] = useState("Loading countries…");
-  const [branchState, setBranchState] = useState("");
   const [offerState, setOfferState] = useState("");
+
+  const [pickupDate, setPickupDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(10, 0, 0, 0);
+      setPickupDate(d.toISOString().slice(0, 16));
+      d.setDate(d.getDate() + 3);
+      setReturnDate(d.toISOString().slice(0, 16));
+    });
+  }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const [sortBy, setSortBy] = useState<string>("price-asc");
 
   useEffect(() => {
     const controller = new AbortController();
-    api("/countries", parseCountries, controller.signal).then((items) => {
-      setCountries(items); setCountryCode(items[0]?.code ?? ""); setCountryState(items.length ? "" : "No countries are available.");
-      setBranchState(items.length ? "Loading branches…" : "");
-    }).catch((error: unknown) => {
-      if (!controller.signal.aborted) setCountryState(error instanceof Error ? error.message : "Could not load countries.");
-    });
+    api("/countries", parseCountries, controller.signal)
+      .then((items) => {
+        setCountries(items);
+        setCountryCode(items[0]?.code ?? "");
+        if (!items.length) {
+          setOfferState("No countries are available.");
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted)
+          setOfferState(
+            error instanceof Error ? error.message : "Could not load countries."
+          );
+      });
     return () => controller.abort();
   }, []);
 
   useEffect(() => {
     if (!countryCode) return;
     const controller = new AbortController();
-    api(`/countries/${encodeURIComponent(countryCode)}/branches`, parseBranches, controller.signal).then((items) => {
-      setBranches(items); setBranchId(items[0]?.id ?? ""); setOffers([]);
-      setOfferState(items.length ? "Loading cars…" : "");
-      setBranchState(items.length ? "" : "No branches are available in this country.");
-    }).catch((error: unknown) => {
-      if (!controller.signal.aborted) setBranchState(error instanceof Error ? error.message : "Could not load branches.");
-    });
+    api(
+      `/countries/${encodeURIComponent(countryCode)}/branches`,
+      parseBranches,
+      controller.signal
+    )
+      .then((items) => {
+        setBranches(items);
+        setBranchId(items[0]?.id ?? "");
+        setOffers([]);
+        setOfferState(
+          items.length ? "Loading available cars…" : "No branches are available in this country."
+        );
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted)
+          setOfferState(
+            error instanceof Error ? error.message : "Could not load branches."
+          );
+      });
     return () => controller.abort();
   }, [countryCode]);
 
   useEffect(() => {
     if (!branchId) return;
     const controller = new AbortController();
-    api(`/branches/${encodeURIComponent(branchId)}/offers`, parseOffers, controller.signal).then((items) => {
-      setOffers(items); setOfferState(items.length ? "" : "No cars are currently offered at this branch.");
-    }).catch((error: unknown) => {
-      if (!controller.signal.aborted) setOfferState(error instanceof Error ? error.message : "Could not load cars.");
-    });
+    api(
+      `/branches/${encodeURIComponent(branchId)}/offers`,
+      parseOffers,
+      controller.signal
+    )
+      .then((items) => {
+        setOffers(items);
+        setOfferState(
+          items.length ? "" : "No cars are currently offered at this branch."
+        );
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted)
+          setOfferState(
+            error instanceof Error ? error.message : "Could not load cars."
+          );
+      });
     return () => controller.abort();
   }, [branchId]);
 
-  return <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
-    <h1 className="text-3xl font-semibold">Browse rental cars</h1>
-    <p className="mt-2 text-zinc-700">Choose a country and branch to see current car types and rates.</p>
-    <div className="mt-8 grid gap-5 sm:grid-cols-2">
-      <label className="grid gap-2 font-medium" htmlFor="country">Country
-        <select id="country" className="rounded border border-zinc-400 bg-white p-2" value={countryCode} onChange={(event) => {
-          setCountryCode(event.target.value); setBranches([]); setBranchId(""); setOffers([]);
-          setBranchState("Loading branches…"); setOfferState("");
-        }} disabled={!countries.length}>
-          {countries.map((country) => <option key={country.id} value={country.code}>{country.name}</option>)}
-        </select><span role="status" className="text-sm font-normal text-zinc-700">{countryState}</span>
-      </label>
-      <label className="grid gap-2 font-medium" htmlFor="branch">Branch
-        <select id="branch" className="rounded border border-zinc-400 bg-white p-2" value={branchId} onChange={(event) => {
-          setBranchId(event.target.value); setOffers([]); setOfferState("Loading cars…");
-        }} disabled={!branches.length}>
-          {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name} — {branch.city}</option>)}
-        </select><span role="status" className="text-sm font-normal text-zinc-700">{branchState}</span>
-      </label>
-    </div>
-    <section aria-labelledby="cars-heading" className="mt-10">
-      <h2 id="cars-heading" className="text-xl font-semibold">Cars at this branch</h2>
-      {offerState && <p role="status" className="mt-4">{offerState}</p>}
-      <ul className="mt-4 divide-y divide-zinc-300">{offers.map((offer) => <li key={offer.id} className="py-5">
-        <h3 className="text-lg font-medium"><Link className="underline" href={`/offers/${offer.id}`}>{offer.brand} {offer.model}</Link></h3>
-        <p className="mt-1 text-sm">{offer.seats} seats · {offer.transmission.toLowerCase()} · {offer.fuelType.toLowerCase()}</p>
-        <p className="mt-2">{offer.currencyCode} {offer.baseHourlyRate} / hour · {offer.currencyCode} {offer.baseDailyRate} / day</p>
-        <p className="text-sm text-zinc-700">Times shown in {offer.timezone}.</p>
-      </li>)}</ul>
-    </section>
-  </main>;
+  const activeBranch = useMemo(
+    () => branches.find((b) => b.id === branchId),
+    [branches, branchId]
+  );
+
+  // Available categories inferred from car models / features
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    offers.forEach((o) => {
+      const brandModel = `${o.brand} ${o.model}`.toLowerCase();
+      if (brandModel.includes("suv") || o.features.some((f) => f.toLowerCase().includes("suv"))) {
+        set.add("SUV");
+      } else if (brandModel.includes("van") || brandModel.includes("commuter") || o.seats > 5) {
+        set.add("Van");
+      } else {
+        set.add("Sedan");
+      }
+    });
+    return ["ALL", ...Array.from(set)];
+  }, [offers]);
+
+  const filteredOffers = useMemo(() => {
+    let list = [...offers];
+    if (selectedCategory !== "ALL") {
+      list = list.filter((o) => {
+        const brandModel = `${o.brand} ${o.model}`.toLowerCase();
+        if (selectedCategory === "SUV") {
+          return brandModel.includes("suv") || o.features.some((f) => f.toLowerCase().includes("suv"));
+        }
+        if (selectedCategory === "Van") {
+          return brandModel.includes("van") || o.seats > 5;
+        }
+        return !brandModel.includes("suv") && o.seats <= 5;
+      });
+    }
+    if (sortBy === "price-asc") {
+      list.sort((a, b) => Number(a.baseDailyRate) - Number(b.baseDailyRate));
+    } else if (sortBy === "price-desc") {
+      list.sort((a, b) => Number(b.baseDailyRate) - Number(a.baseDailyRate));
+    } else if (sortBy === "name") {
+      list.sort((a, b) => `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`));
+    }
+    return list;
+  }, [offers, selectedCategory, sortBy]);
+
+  return (
+    <main className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      {/* Hero section: 2 columns on desktop per Easy Days 1440 reference */}
+      <section className="grid items-center gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12">
+        <div className="flex flex-col">
+          <p className="text-[12px] font-bold tracking-[0.14em] text-primary uppercase">
+            Car rental, made clear
+          </p>
+          <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.035em] text-[#25314c] sm:text-4xl lg:text-[43px] lg:leading-[1.15]">
+            Find the right car for where you’re going.
+          </h1>
+          <p className="mt-3 text-sm text-[#57657e] leading-relaxed">
+            Choose a country and branch to see transparent daily rates, local availability, and straightforward booking terms.
+          </p>
+
+          {/* Search Form: 2x2 grid + full-width CTA */}
+          <div className="mt-7 grid gap-3.5 sm:grid-cols-2">
+            {/* Country field */}
+            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                <MapPinIcon size={14} className="text-primary" />
+                Country
+              </span>
+              <select
+                id="country"
+                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50"
+                value={countryCode}
+                onChange={(e) => {
+                  setCountryCode(e.target.value);
+                  setBranches([]);
+                  setBranchId("");
+                  setOffers([]);
+                  setOfferState("Loading branches…");
+                }}
+                disabled={!countries.length}
+              >
+                {countries.map((c) => (
+                  <option key={c.id} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Branch field */}
+            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                <MapPinIcon size={14} className="text-primary" />
+                Pickup & Return branch
+              </span>
+              <select
+                id="branch"
+                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50"
+                value={branchId}
+                onChange={(e) => {
+                  setBranchId(e.target.value);
+                  setOffers([]);
+                  setOfferState("Loading available cars…");
+                }}
+                disabled={!branches.length}
+              >
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} ({b.city})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Pickup date */}
+            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                <CalendarIcon size={14} className="text-primary" />
+                Pickup date & time
+              </span>
+              <input
+                type="datetime-local"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none"
+              />
+            </div>
+
+            {/* Return date */}
+            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                <CalendarIcon size={14} className="text-primary" />
+                Return date & time
+              </span>
+              <input
+                type="datetime-local"
+                value={returnDate}
+                onChange={(e) => setReturnDate(e.target.value)}
+                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none"
+              />
+            </div>
+
+            {/* Full-width Search CTA */}
+            <div className="sm:col-span-2">
+              <Button
+                type="button"
+                className="h-12 w-full text-base font-medium shadow-none hover:bg-[#1c358d]"
+                onClick={() => {
+                  const fleetElement = document.getElementById("fleet-section");
+                  if (fleetElement) {
+                    fleetElement.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                <SearchIcon size={18} />
+                <span>Find available cars</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 text-xs text-[#57657e]">
+            <ClockIcon size={14} className="text-primary" />
+            <span>
+              Same branch pickup and return · Times shown in {activeBranch?.timezone || "branch local time"}
+            </span>
+          </div>
+        </div>
+
+        {/* Hero Visual on the right */}
+        <div className="relative overflow-hidden rounded-[20px] bg-[#f0f5ff] min-h-[300px] sm:min-h-[380px] lg:min-h-[420px] flex items-end p-6 border border-[#e0e6f1]">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b2d42]/70 via-[#1b2d42]/20 to-transparent z-10" />
+          <div className="absolute inset-0 bg-[#2747b7]/10 flex items-center justify-center">
+            <CarIcon size={120} className="text-primary/20" />
+          </div>
+          
+          {/* Subtle caption */}
+          <div className="relative z-20 rounded-[8px] bg-white/95 px-3.5 py-2 shadow-sm backdrop-blur-sm">
+            <p className="text-xs font-bold text-[#25314c]">
+              {activeBranch?.name || "Suvarnabhumi Airport (BKK)"}
+            </p>
+            <p className="text-[11px] text-[#57657e]">
+              Convenient pickup · Transparent daily quotes
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Fleet Section */}
+      <section id="fleet-section" className="mt-16 pt-8 border-t border-[#e0e6f1]">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-[#25314c] sm:text-[27px]">
+              Find your kind of car.
+            </h2>
+            <p className="mt-1 text-sm text-[#57657e]">
+              {activeBranch ? (
+                <>
+                  Fleet available at <strong className="font-semibold text-[#25314c]">{activeBranch.name}</strong> ({filteredOffers.length} vehicle types ready to book)
+                </>
+              ) : (
+                "Choose a branch to see vehicles"
+              )}
+            </p>
+          </div>
+
+          {/* Sort selection */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-[#57657e]">Sort by</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="rounded-[8px] border border-[#e0e6f1] bg-white px-3 py-1.5 text-xs font-semibold text-[#25314c] outline-none"
+            >
+              <option value="price-asc">Rate: Low to High</option>
+              <option value="price-desc">Rate: High to Low</option>
+              <option value="name">Vehicle Model</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Category Filters */}
+        {categories.length > 1 && (
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            {categories.map((cat) => {
+              const active = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
+                    active
+                      ? "bg-primary text-white shadow-sm"
+                      : "border border-[#e0e6f1] bg-white text-[#57657e] hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  <CarIcon size={14} />
+                  <span>{cat === "ALL" ? "All vehicles" : cat}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Loading / Empty States */}
+        {offerState && (
+          <div className="mt-8 rounded-[14px] bg-[#f0f5ff] p-8 text-center text-sm font-medium text-[#57657e]">
+            {offerState}
+          </div>
+        )}
+
+        {/* Car Grid: 3-column open cards per Easy Days reference */}
+        <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredOffers.map((offer) => {
+            const hasCustomImage = offer.images && offer.images.length > 0;
+            const imageUrl = hasCustomImage ? offer.images[0].url : null;
+
+            return (
+              <div
+                key={offer.id}
+                className="group flex flex-col transition-transform duration-200"
+              >
+                {/* Vehicle image container with category pill */}
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-[#f0f5ff] border border-[#e0e6f1]/60 flex items-center justify-center">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={`${offer.brand} ${offer.model}`}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-primary/40">
+                      <CarIcon size={64} />
+                      <span className="mt-1 text-[11px] font-semibold text-[#57657e]">
+                        {offer.brand}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Category badge pinned to top-left */}
+                  <span className="absolute top-3.5 left-3.5 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-[#25314c] shadow-sm backdrop-blur-sm">
+                    {offer.seats > 5 ? "VAN" : offer.seats >= 5 ? "SEDAN" : "COMPACT"}
+                  </span>
+                </div>
+
+                {/* Car info: open layout, no enclosing box */}
+                <div className="mt-4 flex flex-1 flex-col">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="text-lg font-bold text-[#25314c] group-hover:text-primary transition-colors">
+                      {offer.brand} {offer.model}
+                    </h3>
+                  </div>
+
+                  <p className="mt-1 text-xs text-[#57657e]">
+                    Ideal for city drives and highway travel · {offer.branchName}
+                  </p>
+
+                  {/* Specs list */}
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#57657e]">
+                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-primary">
+                      {offer.seats} Seats
+                    </span>
+                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                      {offer.transmission}
+                    </span>
+                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                      {offer.fuelType}
+                    </span>
+                  </div>
+
+                  <div className="my-4 border-t border-[#e0e6f1]" />
+
+                  {/* Bottom rate and CTA */}
+                  <div className="mt-auto flex items-end justify-between gap-3">
+                    <div>
+                      <span className="text-[11px] text-[#57657e] block">Daily rate</span>
+                      <p className="text-lg font-bold tracking-tight text-[#25314c]">
+                        {offer.currencyCode} {offer.baseDailyRate}
+                        <span className="text-xs font-normal text-[#57657e]"> / day</span>
+                      </p>
+                    </div>
+
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="rounded-[8px] font-semibold text-xs h-10 px-4 hover:bg-primary hover:text-white transition-all shadow-none"
+                    >
+                      <Link href={`/offers/${offer.id}`}>
+                        <span>View car</span>
+                        <ChevronRightIcon size={14} />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </main>
+  );
 }
