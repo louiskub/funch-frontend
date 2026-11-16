@@ -1410,7 +1410,7 @@ export default function AdminFleetPage() {
       </div>
 
       {activeTab === "timeline" && (
-        <section id="fleet-timeline-panel" role="tabpanel" aria-labelledby="fleet-timeline-tab" className="rounded-[16px] border border-border bg-white p-5 shadow-xs">
+        <section id="fleet-timeline-panel" role="tabpanel" aria-labelledby="fleet-timeline-tab" className="rounded-[16px] border border-border bg-background p-5 shadow-xs">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-foreground">{tTimeline("title")}</h2>
@@ -1489,7 +1489,7 @@ export default function AdminFleetPage() {
                 <tbody>
                   {fleetTimeline.matrix.map((model) => (
                     <tr key={model.carTypeBranchId} className="border-b border-border last:border-b-0">
-                      <th scope="row" className="sticky left-0 z-10 border-r border-border bg-white px-3 py-2 text-left">
+                      <th scope="row" className="sticky left-0 z-10 border-r border-border bg-background px-3 py-2 text-left">
                         <span className="block font-bold text-foreground">{model.brand} {model.model}</span>
                         <span className="mt-0.5 block font-normal text-muted-foreground">
                           {tTimeline("capacity", { count: model.totalCapacity })}
