@@ -24,6 +24,10 @@ colors:
   rejected-surface: "#fce8e8"
   danger-hover: "#842323"
   form-error: "#a32d25"
+  success: "#16a34a"
+  success-hover: "#15803d"
+  warning: "#f59e0b"
+  warning-hover: "#d97706"
 typography:
   display:
     fontFamily: "FunchManrope, sans-serif"
@@ -187,16 +191,18 @@ components:
 
 ใช้ token ตามหน้าที่ ตัวอักษรเนื้อหาใช้ `text` หรือ `text-muted` ส่วน primary ใช้กับการกระทำ สิ่งที่เลือก และทางนำสายตา ภาพรถเป็นแหล่งสีเพิ่มเติมตามธรรมชาติของภาพ ไม่ต้องย้อมภาพด้วยสีแบรนด์
 
-### สีสถานะ
+### สีสถานะและ Semantic Action Buttons
 
-| สถานะ | ตัวอักษร | พื้น | ความหมายและข้อความตัวอย่าง |
+| สถานะ / Action | ตัวอักษร | พื้น | ความหมายและข้อความตัวอย่าง |
 | --- | --- | --- | --- |
-| `PENDING` | `#815110` | `#FFF0CE` | Awaiting review / Pending approval |
-| `APPROVED` | `#17604A` | `#E3F3EB` | Awaiting pickup; อนุมัติแล้ว ยังไม่ assign รถ |
-| `IN_USE` | `#28569C` | `#E9F0FC` | On the road |
-| `COMPLETED` | `#56615E` | `#EDF0EF` | Completed |
-| `REJECTED` | `#A22F2F` | `#FCE8E8` | Rejected พร้อมเหตุผล |
-| Destructive action | ขาว | `#A22F2F` | ปฏิเสธ/การกระทำที่มีผลตาม requirement; hover `#842323` |
+| `PENDING` (Badge) | `#815110` | `#FFF0CE` | Awaiting review / Pending approval |
+| `APPROVED` (Badge) | `#17604A` | `#E3F3EB` | Awaiting pickup; อนุมัติแล้ว ยังไม่ assign รถ |
+| `IN_USE` (Badge) | `#28569C` | `#E9F0FC` | On the road |
+| `COMPLETED` (Badge) | `#56615E` | `#EDF0EF` | Completed |
+| `REJECTED` (Badge) | `#A22F2F` | `#FCE8E8` | Rejected พร้อมเหตุผล |
+| Success Action Button (`variant="success"`) | ขาว | `#16A34A` | อนุมัติ ส่งมอบรถ (Assign & Pickup, Approve); hover `#15803D` |
+| Warning Action Button (`variant="warning"`) | `#25314C` | `#F59E0B` | บันทึกรับรถคืน จัดการค่าปรับ (Process Return, Settle); hover `#D97706` |
+| Destructive Action Button (`variant="destructive"`) | ขาว | `#A22F2F` | ปฏิเสธ/การกระทำที่มีผลลบ (Reject, Cancel); hover `#842323` |
 | Field error | `#A32D25` | พื้นขาวของฟอร์ม | ปัญหาของ field และวิธีแก้ |
 
 ทุกสถานะมีข้อความกำกับ สีสถานะแยกจากสีแบรนด์ การอนุมัติไม่ใช้ข้อความที่รับรองว่ารถจริงพร้อมส่งมอบแล้ว

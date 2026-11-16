@@ -247,7 +247,15 @@ export default function OfferDetails({
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <main className="relative min-h-screen">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute left-1/2 -top-[120px] -translate-x-1/2 w-[1000px] h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(223,233,252,0.45)_0%,rgba(240,245,255,0.2)_45%,rgba(255,255,255,0)_75%)]" />
+      </div>
+
+      <div className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       {/* Back link */}
       <div className="mb-6">
         <Link
@@ -327,7 +335,7 @@ export default function OfferDetails({
                 Vehicle Specifications
               </h2>
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Seats
                   </span>
@@ -335,7 +343,7 @@ export default function OfferDetails({
                     {offer.seats} Passengers
                   </span>
                 </div>
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Transmission
                   </span>
@@ -343,7 +351,7 @@ export default function OfferDetails({
                     {offer.transmission}
                   </span>
                 </div>
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Fuel Type
                   </span>
@@ -351,7 +359,7 @@ export default function OfferDetails({
                     {offer.fuelType}
                   </span>
                 </div>
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Base Daily Rate
                   </span>
@@ -359,7 +367,7 @@ export default function OfferDetails({
                     {formatCurrency(offer.baseDailyRate, offer.currencyCode)}
                   </span>
                 </div>
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Base Hourly Rate
                   </span>
@@ -367,7 +375,7 @@ export default function OfferDetails({
                     {formatCurrency(offer.baseHourlyRate, offer.currencyCode)}
                   </span>
                 </div>
-                <div className="rounded-[12px] border border-[#e0e6f1] bg-white p-3.5">
+                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
                   <span className="text-[11px] font-semibold text-[#57657e] block">
                     Branch Location
                   </span>
@@ -399,7 +407,7 @@ export default function OfferDetails({
 
           {/* Right Column: Reservation & Quote Card */}
           <div>
-            <Card className="sticky top-28 rounded-[18px] border-[#e0e6f1] bg-white shadow-sm">
+            <Card className="sticky top-28 rounded-[22px] border-[#e0e6f1] bg-white shadow-[0_12px_36px_-6px_rgba(37,49,76,0.07),0_2px_8px_rgba(37,49,76,0.02)]">
               <CardHeader className="border-b border-[#e0e6f1] p-6 pb-5">
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs font-semibold text-[#57657e] uppercase tracking-wider">
@@ -416,7 +424,7 @@ export default function OfferDetails({
                 <form onSubmit={(e) => void getQuote(e)} className="space-y-5">
                   {/* Dates */}
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3 py-2">
+                    <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
                       <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
                         <CalendarIcon size={13} className="text-primary" />
                         Pickup date
@@ -433,7 +441,7 @@ export default function OfferDetails({
                       />
                     </div>
 
-                    <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3 py-2">
+                    <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
                       <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
                         <CalendarIcon size={13} className="text-primary" />
                         Return date
@@ -651,6 +659,7 @@ export default function OfferDetails({
           </div>
         </article>
       )}
+      </div>
     </main>
   );
 }

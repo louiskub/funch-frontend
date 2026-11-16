@@ -26,6 +26,7 @@ type Booking = {
   brand: string;
   model: string;
   branchName: string;
+  licensePlate?: string | null;
 };
 
 function rows(value: unknown): Booking[] {
@@ -43,6 +44,7 @@ function rows(value: unknown): Booking[] {
       brand: String(x.brand),
       model: String(x.model),
       branchName: String(x.branchName),
+      licensePlate: "licensePlate" in x && typeof x.licensePlate === "string" ? x.licensePlate : null,
     };
   });
 }
@@ -140,24 +142,31 @@ function BookingsContent() {
           {items.map((b) => (
             <div
               key={b.id}
-              className={`rounded-[14px] border p-5 transition-all ${
+              className={`rounded-[16px] border p-5 transition-all shadow-xs ${
                 selected?.id === b.id
                   ? "border-primary bg-[#f0f5ff]/40 shadow-sm"
-                  : "border-[#e0e6f1] bg-white hover:border-primary/50"
+                  : "border-[#e0e6f1] bg-white hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
               }`}
             >
               <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <span className="text-xs font-mono font-bold tracking-wider text-primary">
+                <span className="text-xs font-mono font-bold tracking-wider text-primary tabular-nums">
                   #{b.bookingNumber}
                 </span>
                 <StatusBadge status={b.status} />
               </div>
 
               <div className="mt-3 flex items-baseline justify-between gap-2">
-                <h3 className="text-lg font-bold text-[#25314c]">
-                  {b.brand} {b.model}
-                </h3>
-                <span className="text-base font-extrabold text-[#25314c]">
+                <div>
+                  <h3 className="text-lg font-bold text-[#25314c]">
+                    {b.brand} {b.model}
+                  </h3>
+                  {b.licensePlate && (
+                    <span className="inline-flex items-center gap-1 rounded bg-[#e8f0fe] px-2 py-0.5 font-mono text-[10px] font-bold text-primary border border-primary/20 mt-1 tabular-nums">
+                      <CarIcon size={11} /> {b.licensePlate}
+                    </span>
+                  )}
+                </div>
+                <span className="text-base font-extrabold text-[#25314c] tabular-nums">
                   {formatCurrency(b.totalAmount, b.currencyCode)}
                 </span>
               </div>
@@ -167,7 +176,7 @@ function BookingsContent() {
                   <MapPinIcon size={14} className="text-primary flex-shrink-0" />
                   <span>{b.branchName}</span>
                 </p>
-                <p className="flex items-center gap-1.5">
+                <p className="flex items-center gap-1.5 tabular-nums">
                   <CalendarIcon size={14} className="text-primary flex-shrink-0" />
                   <span>
                     {new Date(b.pickupAt).toLocaleString()} → {new Date(b.returnAt).toLocaleString()}
@@ -185,7 +194,7 @@ function BookingsContent() {
                   variant="secondary"
                   size="sm"
                   onClick={() => void detail(b.id)}
-                  className="h-8 rounded-[6px] text-xs font-semibold"
+                  className="h-8 rounded-[6px] text-xs font-semibold transition-all active:scale-[0.98]"
                 >
                   <span>{selected?.id === b.id ? "Viewing" : "View details"}</span>
                   <ChevronRightIcon size={13} />
@@ -198,10 +207,10 @@ function BookingsContent() {
         {/* Detail Panel */}
         <div>
           {selected ? (
-            <Card className="sticky top-28 rounded-[18px] border-[#e0e6f1] bg-white shadow-sm">
+            <Card className="sticky top-28 rounded-[20px] border-[#e0e6f1] bg-white shadow-[0_12px_36px_-6px_rgba(37,49,76,0.07),0_2px_8px_rgba(37,49,76,0.02)]">
               <CardHeader className="flex flex-row items-center justify-between border-b border-[#e0e6f1] p-5">
                 <div>
-                  <span className="text-[11px] font-mono font-bold text-primary block">
+                  <span className="text-[11px] font-mono font-bold text-primary block tabular-nums">
                     #{String(selected.bookingNumber)}
                   </span>
                   <CardTitle className="text-lg">Reservation details</CardTitle>
@@ -209,7 +218,7 @@ function BookingsContent() {
                 <button
                   type="button"
                   onClick={() => setSelected(null)}
-                  className="rounded-[6px] p-1 text-[#57657e] hover:bg-[#f0f5ff] hover:text-[#25314c]"
+                  className="rounded-[6px] p-1 text-[#57657e] hover:bg-[#f0f5ff] hover:text-[#25314c] transition-colors"
                   aria-label="Close details"
                 >
                   <XIcon size={18} />
@@ -229,6 +238,14 @@ function BookingsContent() {
                       {String(selected.brand)} {String(selected.model)}
                     </strong>
                   </div>
+                  {Boolean(selected.licensePlate) && (
+                    <div className="flex justify-between">
+                      <span className="text-[#57657e]">Assigned Car Plate</span>
+                      <strong className="text-primary font-mono bg-white px-2 py-0.5 rounded border border-[#e0e6f1] tabular-nums">
+                        {String(selected.licensePlate)}
+                      </strong>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-[#57657e]">Branch</span>
                     <strong className="text-[#25314c]">
@@ -237,19 +254,19 @@ function BookingsContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#57657e]">Pickup</span>
-                    <span className="text-[#25314c]">
+                    <span className="text-[#25314c] tabular-nums">
                       {new Date(String(selected.pickupAt)).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#57657e]">Return</span>
-                    <span className="text-[#25314c]">
+                    <span className="text-[#25314c] tabular-nums">
                       {new Date(String(selected.returnAt)).toLocaleString()}
                     </span>
                   </div>
                   <div className="border-t border-[#d7e2f5] pt-2 flex justify-between font-bold text-[#25314c]">
                     <span>Total Rate</span>
-                    <span className="text-primary">
+                    <span className="text-primary tabular-nums">
                       {formatCurrency(String(selected.totalAmount), String(selected.currencyCode))}
                     </span>
                   </div>

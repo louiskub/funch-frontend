@@ -825,9 +825,10 @@ export default function MembersPage() {
                   </h3>
                   <Link
                     href="/admin/bookings"
-                    className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline whitespace-nowrap"
                   >
-                    All Bookings Queue <ExternalLinkIcon size={13} />
+                    <span>All Bookings Queue</span>
+                    <ExternalLinkIcon size={13} />
                   </Link>
                 </div>
 

@@ -509,7 +509,7 @@ export default function OptionsAdmin() {
                   <button
                     type="button"
                     onClick={() => openModal(option)}
-                    className="inline-flex items-center gap-1 rounded-[6px] border border-[#e0e6f1] bg-white px-2 py-1 text-xs font-semibold text-[#25314c] hover:border-primary hover:text-primary hover:bg-[#f0f5ff] transition-colors"
+                    className="inline-flex items-center gap-1 rounded-[6px] border border-[#e0e6f1] bg-white px-2 py-1 text-xs font-semibold text-[#25314c] hover:border-primary hover:text-primary hover:bg-[#f0f5ff] transition-colors whitespace-nowrap cursor-pointer"
                     title="Edit option"
                   >
                     <EditIcon size={12} />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -16,6 +16,7 @@ import { useAuth, useAuthModalStore } from "@/features/auth";
 import { LanguageSwitcher } from "./language-switcher";
 
 function NavbarContent() {
+  const router = useRouter();
   const pathname = usePathname() || "";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuToggle = useRef<HTMLButtonElement>(null);
@@ -48,14 +49,21 @@ function NavbarContent() {
   const links = isCurrentAdminPath
     ? [{ label: t("backToStore"), href: "/" }]
     : customerNavLinks;
-  const signOut = () => {
+  const signOut = async () => {
     setMobileMenuOpen(false);
-    void logout().catch(() => undefined);
+    try {
+      await logout();
+    } catch {
+      // ignore
+    }
+    if (isCurrentAdminPath) {
+      router.replace("/");
+    }
   };
 
   return (
     <header
-      className="sticky top-0 z-40 w-full border-b border-[#e0e6f1] bg-white"
+      className="sticky top-0 z-40 w-full border-b border-[#e0e6f1]/80 bg-white/85 backdrop-blur-md shadow-[0_1px_3px_0_rgba(37,49,76,0.02),0_4px_16px_-2px_rgba(37,49,76,0.04)] transition-all"
       onKeyDown={(event) => {
         if (event.key === "Escape" && mobileMenuOpen) {
           setMobileMenuOpen(false);
@@ -118,7 +126,7 @@ function NavbarContent() {
             </nav>
           ) : (
             <nav
-              className="hidden items-center gap-7 md:flex"
+              className="hidden items-center gap-2 md:flex"
               aria-label="Main navigation"
             >
               {links.map((link) => {
@@ -132,10 +140,10 @@ function NavbarContent() {
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "text-[14px] font-medium transition-colors hover:text-primary",
+                      "rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-all duration-150",
                       isActive
-                        ? "text-primary font-semibold"
-                        : "text-[#57657e]",
+                        ? "bg-[#f0f5ff] text-primary font-semibold shadow-xs"
+                        : "text-[#57657e] hover:bg-[#f0f5ff]/70 hover:text-primary",
                     )}
                   >
                     {link.label}
@@ -163,7 +171,7 @@ function NavbarContent() {
             <div className="hidden sm:flex items-center gap-3">
               <Link
                 href="/account"
-                className="inline-flex min-h-11 items-center gap-2 rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#25314c] transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="inline-flex min-h-10 items-center gap-2 rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#25314c] shadow-xs transition-all hover:border-primary/50 hover:bg-[#f8faff] hover:text-primary hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {isAdmin ? (
                   <ShieldCheckIcon size={15} className="text-primary" />
@@ -182,7 +190,7 @@ function NavbarContent() {
                 onClick={signOut}
                 disabled={isLoggingOut}
                 aria-label={t("signOut")}
-                className="inline-flex size-11 items-center justify-center rounded-[10px] text-[#57657e] transition-colors hover:bg-[#f0f5ff] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+                className="inline-flex size-10 items-center justify-center rounded-[10px] text-[#57657e] transition-colors hover:bg-[#f0f5ff] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
                 title={t("signOut")}
               >
                 <LogOutIcon size={16} />
@@ -192,7 +200,7 @@ function NavbarContent() {
             <button
               type="button"
               onClick={() => openAuthModal("login")}
-              className="hidden sm:inline-flex items-center gap-2 rounded-[30px] border border-primary bg-primary px-4 py-2 text-[13px] font-medium text-white shadow-sm transition-colors hover:bg-[#1c358d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 rounded-[30px] border border-primary bg-primary px-4.5 py-2 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-[#1c358d] hover:shadow-sm hover:shadow-primary/25 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
             >
               <UserIcon size={15} />
               <span>{t("signIn")}</span>

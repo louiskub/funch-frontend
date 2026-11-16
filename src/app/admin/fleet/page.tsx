@@ -1364,7 +1364,7 @@ export default function AdminFleetPage() {
                             <button
                               type="button"
                               onClick={() => setEditingSpecs(carType)}
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline"
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline whitespace-nowrap cursor-pointer"
                             >
                               <EditIcon size={11} /> Edit Model Specs
                             </button>
@@ -1601,7 +1601,7 @@ export default function AdminFleetPage() {
                         <button
                           type="button"
                           onClick={() => openManageOptions(offer)}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline"
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline whitespace-nowrap cursor-pointer"
                         >
                           <EditIcon size={11} /> Manage Options
                         </button>

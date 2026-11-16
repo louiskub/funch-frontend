@@ -41,6 +41,8 @@ export const bookingQueueSchema = z.array(
     pickupAt: instant,
     returnAt: instant,
     actualReturnAt: instant.nullable(),
+    readyAt: instant.nullable().optional(),
+    readyBy: z.string().nullable().optional(),
     totalAmount: z.string(),
     finalAmount: z.string(),
     currencyCode: z.string(),
@@ -52,6 +54,7 @@ export const bookingQueueSchema = z.array(
     branchName: z.string(),
     branchId: z.string(),
     timezone,
+    licensePlate: z.string().nullable().optional(),
     charges: z.array(chargeSchema),
   }),
 );
@@ -60,12 +63,17 @@ export type BookingRow = z.infer<typeof bookingQueueSchema>[number];
 export const bookingDetailSchema = z.object({
   id: z.string(),
   carId: z.string().nullable(),
+  licensePlate: z.string().nullable().optional(),
+  carVin: z.string().nullable().optional(),
+  carYear: z.number().nullable().optional(),
   rentalSubtotal: z.string(),
   optionsSubtotal: z.string(),
   totalAmount: z.string(),
   finalAmount: z.string(),
   rejectionReason: z.string().nullable(),
   cancellationReason: z.string().nullable(),
+  readyAt: instant.nullable().optional(),
+  readyBy: z.string().nullable().optional(),
   options: z.array(
     z.object({
       id: z.string(),

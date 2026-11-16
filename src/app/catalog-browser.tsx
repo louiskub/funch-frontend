@@ -215,136 +215,147 @@ function CatalogBrowserContent() {
   }, [offers, selectedCategory, sortBy]);
 
   return (
-    <main className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-      {/* Hero section: 2 columns on desktop per Easy Days 1440 reference */}
-      <section className="grid items-center gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12">
-        <div className="flex flex-col">
-          <p className="text-[12px] font-bold tracking-[0.14em] text-primary uppercase">
-            {t("badge")}
-          </p>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.035em] text-[#25314c] sm:text-4xl lg:text-[43px] lg:leading-[1.15]">
-            {t("title")}
-          </h1>
-          <p className="mt-3 text-sm text-[#57657e] leading-relaxed">
-            {t("subtitle")}
-          </p>
+    <main className="relative min-h-screen">
+      {/* Ambient soft glow on hero backdrop */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px] overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute left-1/2 -top-[140px] -translate-x-1/2 w-[1100px] h-[520px] bg-[radial-gradient(ellipse_at_center,rgba(223,233,252,0.5)_0%,rgba(240,245,255,0.3)_45%,rgba(255,255,255,0)_75%)]" />
+      </div>
 
-          {/* Search Form: 2x2 grid + full-width CTA */}
-          <div className="mt-7 grid gap-3.5 sm:grid-cols-2">
-            {/* Country field */}
-            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                <MapPinIcon size={14} className="text-primary" />
-                {t("country")}
-              </span>
-              <select
-                id="country"
-                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50"
-                value={countryCode}
-                onChange={(e) => {
-                  const newCode = e.target.value;
-                  setCountryCode(newCode);
-                  setBranches([]);
-                  setBranchId("");
-                  setOffers([]);
-                  setOfferState("Loading branches…");
-                  syncUrlParams({ country: newCode, branch: "" });
-                }}
-                disabled={!countries.length}
-              >
-                {countries.map((c) => (
-                  <option key={c.id} value={c.code}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Branch field */}
-            <div className="flex flex-col justify-center rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-2.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                <MapPinIcon size={14} className="text-primary" />
-                {t("branch")}
-              </span>
-              <select
-                id="branch"
-                className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50"
-                value={branchId}
-                onChange={(e) => {
-                  const newBranch = e.target.value;
-                  setBranchId(newBranch);
-                  setOffers([]);
-                  setOfferState("Loading available cars…");
-                  syncUrlParams({ branch: newBranch });
-                }}
-                disabled={!branches.length}
-              >
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name} ({b.city})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Pickup & Return date range picker with popover */}
-            <DateTimeRangePicker
-              pickupDateTime={pickupDate}
-              returnDateTime={returnDate}
-              onPickupChange={(val) => {
-                setPickupDate(val);
-                syncUrlParams({ pickup: val });
-              }}
-              onReturnChange={(val) => {
-                setReturnDate(val);
-                syncUrlParams({ return: val });
-              }}
-            />
-
-            {/* Full-width Search CTA */}
-            <div className="sm:col-span-2">
-              <Button
-                type="button"
-                className="h-12 w-full text-base font-medium shadow-none hover:bg-[#1c358d]"
-                onClick={() => {
-                  const fleetElement = document.getElementById("fleet-section");
-                  if (fleetElement) {
-                    fleetElement.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                <SearchIcon size={18} />
-                <span>{t("findCars")}</span>
-              </Button>
-            </div>
-          </div>
-
-          <div className="mt-3 flex items-center gap-2 text-xs text-[#57657e]">
-            <ClockIcon size={14} className="text-primary" />
-            <span>
-              Same branch pickup and return · Times shown in {activeBranch?.timezone || "branch local time"}
-            </span>
-          </div>
-        </div>
-
-        {/* Hero Visual on the right */}
-        <div className="relative overflow-hidden rounded-[20px] bg-[#f0f5ff] min-h-[300px] sm:min-h-[380px] lg:min-h-[420px] flex items-end p-6 border border-[#e0e6f1]">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1b2d42]/70 via-[#1b2d42]/20 to-transparent z-10" />
-          <div className="absolute inset-0 bg-[#2747b7]/10 flex items-center justify-center">
-            <CarIcon size={120} className="text-primary/20" />
-          </div>
-          
-          {/* Subtle caption */}
-          <div className="relative z-20 rounded-[8px] bg-white/95 px-3.5 py-2 shadow-sm backdrop-blur-sm">
-            <p className="text-xs font-bold text-[#25314c]">
-              {activeBranch?.name || "Suvarnabhumi Airport (BKK)"}
+      <div className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        {/* Hero section: 2 columns on desktop per Easy Days 1440 reference */}
+        <section className="grid items-center gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:gap-12">
+          <div className="flex flex-col">
+            <p className="text-[12px] font-bold tracking-[0.14em] text-primary uppercase">
+              {t("badge")}
             </p>
-            <p className="text-[11px] text-[#57657e]">
-              Convenient pickup · Transparent daily quotes
+            <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.035em] text-[#25314c] sm:text-4xl lg:text-[43px] lg:leading-[1.15]">
+              {t("title")}
+            </h1>
+            <p className="mt-3 text-sm text-[#57657e] leading-relaxed">
+              {t("subtitle")}
             </p>
+
+            {/* Floating Command Card */}
+            <div className="mt-8 rounded-[24px] border border-[#e0e6f1] bg-white p-5 sm:p-7 shadow-[0_12px_36px_-6px_rgba(37,49,76,0.06),0_2px_8px_rgba(37,49,76,0.02)]">
+              <div className="grid gap-3.5 sm:grid-cols-2">
+                {/* Country field */}
+                <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
+                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                    <MapPinIcon size={14} className="text-primary" />
+                    {t("country")}
+                  </span>
+                  <select
+                    id="country"
+                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50 cursor-pointer"
+                    value={countryCode}
+                    onChange={(e) => {
+                      const newCode = e.target.value;
+                      setCountryCode(newCode);
+                      setBranches([]);
+                      setBranchId("");
+                      setOffers([]);
+                      setOfferState("Loading branches…");
+                      syncUrlParams({ country: newCode, branch: "" });
+                    }}
+                    disabled={!countries.length}
+                  >
+                    {countries.map((c) => (
+                      <option key={c.id} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Branch field */}
+                <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
+                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+                    <MapPinIcon size={14} className="text-primary" />
+                    {t("branch")}
+                  </span>
+                  <select
+                    id="branch"
+                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50 cursor-pointer"
+                    value={branchId}
+                    onChange={(e) => {
+                      const newBranch = e.target.value;
+                      setBranchId(newBranch);
+                      setOffers([]);
+                      setOfferState("Loading available cars…");
+                      syncUrlParams({ branch: newBranch });
+                    }}
+                    disabled={!branches.length}
+                  >
+                    {branches.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} ({b.city})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Pickup & Return date range picker with popover */}
+                <DateTimeRangePicker
+                  pickupDateTime={pickupDate}
+                  returnDateTime={returnDate}
+                  onPickupChange={(val) => {
+                    setPickupDate(val);
+                    syncUrlParams({ pickup: val });
+                  }}
+                  onReturnChange={(val) => {
+                    setReturnDate(val);
+                    syncUrlParams({ return: val });
+                  }}
+                />
+
+                {/* Full-width Search CTA */}
+                <div className="sm:col-span-2">
+                  <Button
+                    type="button"
+                    className="h-12 w-full text-base font-semibold shadow-xs hover:shadow-md hover:shadow-primary/25 active:scale-[0.99] transition-all cursor-pointer"
+                    onClick={() => {
+                      const fleetElement = document.getElementById("fleet-section");
+                      if (fleetElement) {
+                        fleetElement.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
+                    <SearchIcon size={18} />
+                    <span>{t("findCars")}</span>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-3.5 flex items-center gap-2 pt-3 border-t border-[#e0e6f1]/80 text-xs text-[#57657e]">
+                <ClockIcon size={14} className="text-primary" />
+                <span>
+                  Same branch pickup and return · Times shown in {activeBranch?.timezone || "branch local time"}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+
+          {/* Hero Visual on the right */}
+          <div className="relative overflow-hidden rounded-[24px] bg-[#f0f5ff] min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] flex items-end p-6 border border-[#e0e6f1] shadow-[0_12px_36px_-6px_rgba(37,49,76,0.06),0_2px_8px_rgba(37,49,76,0.02)]">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/75 via-[#0f172a]/20 to-transparent z-10" />
+            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+              <CarIcon size={120} className="text-primary/25" />
+            </div>
+            
+            {/* Subtle caption */}
+            <div className="relative z-20 rounded-[12px] bg-white/95 px-4 py-2.5 shadow-md shadow-[#25314c]/5 backdrop-blur-md border border-[#e0e6f1]">
+              <p className="text-xs font-bold text-[#25314c]">
+                {activeBranch?.name || "Suvarnabhumi Airport (BKK)"}
+              </p>
+              <p className="text-[11px] text-[#57657e]">
+                Convenient pickup · Transparent daily quotes
+              </p>
+            </div>
+          </div>
+        </section>
 
       {/* Fleet Section */}
       <section id="fleet-section" className="mt-16 pt-8 border-t border-[#e0e6f1]">
@@ -389,10 +400,10 @@ function CatalogBrowserContent() {
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                     active
-                      ? "bg-primary text-white shadow-sm"
-                      : "border border-[#e0e6f1] bg-white text-[#57657e] hover:border-primary hover:text-primary"
+                      ? "bg-primary text-white shadow-sm shadow-primary/25"
+                      : "border border-[#e0e6f1] bg-white text-[#57657e] shadow-xs hover:border-primary/50 hover:bg-[#f0f5ff] hover:text-primary hover:shadow-sm"
                   }`}
                 >
                   <CarIcon size={14} />
@@ -405,12 +416,12 @@ function CatalogBrowserContent() {
 
         {/* Loading / Empty States */}
         {offerState && (
-          <div className="mt-8 rounded-[14px] bg-[#f0f5ff] p-8 text-center text-sm font-medium text-[#57657e]">
+          <div className="mt-8 rounded-[16px] bg-[#f0f5ff] p-8 text-center text-sm font-medium text-[#57657e] border border-[#dfe9fc]">
             {offerState}
           </div>
         )}
 
-        {/* Car Grid: 3-column open cards per Easy Days reference */}
+        {/* Car Grid: 3-column open cards per Easy Days reference with subtle hover elevation */}
         <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {filteredOffers.map((offer) => {
             const hasCustomImage = offer.images && offer.images.length > 0;
@@ -419,15 +430,15 @@ function CatalogBrowserContent() {
             return (
               <div
                 key={offer.id}
-                className="group flex flex-col transition-transform duration-200"
+                className="group flex flex-col rounded-[22px] p-2.5 transition-all duration-300 hover:bg-white hover:shadow-[0_16px_36px_-6px_rgba(37,49,76,0.08),0_2px_8px_rgba(37,49,76,0.02)] -m-2.5"
               >
                 {/* Vehicle image container with category pill */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-[#f0f5ff] border border-[#e0e6f1]/60 flex items-center justify-center">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-[#f0f5ff] border border-[#e0e6f1] shadow-[0_2px_6px_rgba(37,49,76,0.03)] flex items-center justify-center transition-all duration-300 group-hover:border-primary/30">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
                       alt={`${offer.brand} ${offer.model}`}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center text-primary/40">
@@ -439,7 +450,7 @@ function CatalogBrowserContent() {
                   )}
 
                   {/* Category badge pinned to top-left */}
-                  <span className="absolute top-3.5 left-3.5 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-[#25314c] shadow-sm backdrop-blur-sm">
+                  <span className="absolute top-3.5 left-3.5 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-[#25314c] shadow-xs backdrop-blur-sm border border-[#e0e6f1]">
                     {offer.seats > 5 ? "VAN" : offer.seats >= 5 ? "SEDAN" : "COMPACT"}
                   </span>
                 </div>
@@ -458,13 +469,13 @@ function CatalogBrowserContent() {
 
                   {/* Specs list */}
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#57657e]">
-                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-primary">
+                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-primary font-semibold">
                       {offer.seats} {t("seats")}
                     </span>
-                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
                       {offer.transmission}
                     </span>
-                    <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
                       {offer.fuelType}
                     </span>
                   </div>
@@ -484,7 +495,7 @@ function CatalogBrowserContent() {
                     <Button
                       asChild
                       variant="secondary"
-                      className="rounded-[8px] font-semibold text-xs h-10 px-4 hover:bg-primary hover:text-white transition-all shadow-none"
+                      className="rounded-[8px] font-semibold text-xs h-10 px-4 hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-sm cursor-pointer"
                     >
                       <Link href={`/offers/${offer.id}`}>
                         <span>{t("viewDetails")}</span>
@@ -498,6 +509,7 @@ function CatalogBrowserContent() {
           })}
         </div>
       </section>
+      </div>
     </main>
   );
 }
