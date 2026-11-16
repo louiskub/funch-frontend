@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useMemo, Suspense } from "react";
+import { useEffect, useState, useMemo, Suspense, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -11,12 +11,13 @@ import {
   Offer,
   parseBranches,
   parseCountries,
-  parseOffers,
+  parseOfferPage,
 } from "./catalog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
 import {
   MapPinIcon,
   SearchIcon,
@@ -48,6 +49,8 @@ function CatalogBrowserContent() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [offerTotal, setOfferTotal] = useState(0);
+  const [offerCategories, setOfferCategories] = useState<string[]>([]);
   const [countryCode, setCountryCode] = useState(urlCountry);
   const [branchId, setBranchId] = useState(urlBranch);
   const [offerState, setOfferState] = useState("");
@@ -69,6 +72,15 @@ function CatalogBrowserContent() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>(urlCategory);
   const [sortBy, setSortBy] = useState<string>("price-asc");
+  const batchSize = useResponsiveBatchSize(480, 400, 12);
+  const [hasMoreOffers, setHasMoreOffers] = useState(false);
+  const [loadingMoreOffers, setLoadingMoreOffers] = useState(false);
+  const [offerLoadError, setOfferLoadError] = useState("");
+  const nextOfferPage = useRef(1);
+  const offerRequestId = useRef(0);
+  const isRefreshingOffers = useRef(false);
+  const isLoadingMoreOffers = useRef(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Sync state to URL searchParams
   const syncUrlParams = (newParams: { country?: string; branch?: string; pickup?: string; return?: string; category?: string }) => {
@@ -134,6 +146,9 @@ function CatalogBrowserContent() {
         setBranchId(nextBranchId);
         syncUrlParams({ country: countryCode, branch: nextBranchId });
         setOffers([]);
+        setOfferTotal(0);
+        setOfferCategories([]);
+        setHasMoreOffers(false);
         setOfferState(
           items.length ? "Loading available cars…" : "No branches are available in this country."
         );
@@ -149,26 +164,47 @@ function CatalogBrowserContent() {
 
   useEffect(() => {
     if (!branchId) return;
+    const requestId = ++offerRequestId.current;
+    isRefreshingOffers.current = true;
     const controller = new AbortController();
+    const params = new URLSearchParams({
+      page: "1",
+      pageSize: String(batchSize),
+      category: selectedCategory,
+      sortBy,
+    });
     api(
-      `/branches/${encodeURIComponent(branchId)}/offers`,
-      parseOffers,
+      `/branches/${encodeURIComponent(branchId)}/offers?${params}`,
+      parseOfferPage,
       controller.signal
     )
-      .then((items) => {
-        setOffers(items);
+      .then((page) => {
+        if (requestId !== offerRequestId.current) return;
+        nextOfferPage.current = 2;
+        setOffers(page.items);
+        setOfferTotal(page.total);
+        setOfferCategories(page.categories);
+        setHasMoreOffers(page.items.length < page.total);
+        setOfferLoadError("");
         setOfferState(
-          items.length ? "" : "No cars are currently offered at this branch."
+          page.total ? "" : t("noCars")
         );
       })
       .catch((error: unknown) => {
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted && requestId === offerRequestId.current)
           setOfferState(
             error instanceof Error ? error.message : "Could not load cars."
           );
+      })
+      .finally(() => {
+        if (requestId === offerRequestId.current)
+          isRefreshingOffers.current = false;
       });
-    return () => controller.abort();
-  }, [branchId]);
+    return () => {
+      controller.abort();
+      isRefreshingOffers.current = false;
+    };
+  }, [batchSize, branchId, selectedCategory, sortBy, t]);
 
   const activeBranch = useMemo(
     () => branches.find((b) => b.id === branchId),
@@ -196,44 +232,50 @@ function CatalogBrowserContent() {
   );
 
   // Available categories inferred from car models / features
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    offers.forEach((o) => {
-      const brandModel = `${o.brand} ${o.model}`.toLowerCase();
-      if (brandModel.includes("suv") || o.features.some((f) => f.toLowerCase().includes("suv"))) {
-        set.add("SUV");
-      } else if (brandModel.includes("van") || brandModel.includes("commuter") || o.seats > 5) {
-        set.add("Van");
-      } else {
-        set.add("Sedan");
-      }
-    });
-    return ["ALL", ...Array.from(set)];
-  }, [offers]);
+  const categories = useMemo(() => ["ALL", ...offerCategories], [offerCategories]);
+  const visibleOffers = offers;
 
-  const filteredOffers = useMemo(() => {
-    let list = [...offers];
-    if (selectedCategory !== "ALL") {
-      list = list.filter((o) => {
-        const brandModel = `${o.brand} ${o.model}`.toLowerCase();
-        if (selectedCategory === "SUV") {
-          return brandModel.includes("suv") || o.features.some((f) => f.toLowerCase().includes("suv"));
-        }
-        if (selectedCategory === "Van") {
-          return brandModel.includes("van") || o.seats > 5;
-        }
-        return !brandModel.includes("suv") && o.seats <= 5;
-      });
-    }
-    if (sortBy === "price-asc") {
-      list.sort((a, b) => Number(a.baseDailyRate) - Number(b.baseDailyRate));
-    } else if (sortBy === "price-desc") {
-      list.sort((a, b) => Number(b.baseDailyRate) - Number(a.baseDailyRate));
-    } else if (sortBy === "name") {
-      list.sort((a, b) => `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`));
-    }
-    return list;
-  }, [offers, selectedCategory, sortBy]);
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element || !hasMoreOffers || offerLoadError || loadingMoreOffers || isRefreshingOffers.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || isLoadingMoreOffers.current) return;
+        isLoadingMoreOffers.current = true;
+        setLoadingMoreOffers(true);
+        const page = nextOfferPage.current;
+        const requestId = offerRequestId.current;
+        const params = new URLSearchParams({
+          page: String(page),
+          pageSize: String(batchSize),
+          category: selectedCategory,
+          sortBy,
+        });
+        void api(
+          `/branches/${encodeURIComponent(branchId)}/offers?${params}`,
+          parseOfferPage,
+        )
+          .then((result) => {
+            if (requestId !== offerRequestId.current) return;
+            setOffers((current) => [...current, ...result.items]);
+            setHasMoreOffers(page * batchSize < result.total);
+            nextOfferPage.current = page + 1;
+            setOfferState("");
+          })
+          .catch((error: unknown) => {
+            if (requestId !== offerRequestId.current) return;
+            setOfferLoadError(error instanceof Error ? error.message : "Could not load more cars.");
+          })
+          .finally(() => {
+            isLoadingMoreOffers.current = false;
+            setLoadingMoreOffers(false);
+          });
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [batchSize, branchId, hasMoreOffers, loadingMoreOffers, offerLoadError, selectedCategory, sortBy]);
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
@@ -268,10 +310,15 @@ function CatalogBrowserContent() {
                   icon={<MapPinIcon size={14} className="text-primary" />}
                   value={countryCode}
                   onChange={(newCode) => {
+                    offerRequestId.current++;
                     setCountryCode(newCode);
                     setBranches([]);
                     setBranchId("");
                     setOffers([]);
+                    setOfferTotal(0);
+                    setOfferCategories([]);
+                    setHasMoreOffers(false);
+                    setOfferLoadError("");
                     setOfferState("Loading branches…");
                     syncUrlParams({ country: newCode, branch: "" });
                   }}
@@ -287,8 +334,13 @@ function CatalogBrowserContent() {
                   icon={<MapPinIcon size={14} className="text-primary" />}
                   value={branchId}
                   onChange={(newBranch) => {
+                    offerRequestId.current++;
                     setBranchId(newBranch);
                     setOffers([]);
+                    setOfferTotal(0);
+                    setOfferCategories([]);
+                    setHasMoreOffers(false);
+                    setOfferLoadError("");
                     setOfferState("Loading available cars…");
                     syncUrlParams({ branch: newBranch });
                   }}
@@ -368,7 +420,7 @@ function CatalogBrowserContent() {
             <p className="mt-1 text-sm text-muted-foreground">
               {activeBranch ? (
                 <>
-                  Fleet available at <strong className="font-semibold text-foreground">{activeBranch.name}</strong> ({filteredOffers.length} vehicle types ready to book)
+                  Fleet available at <strong className="font-semibold text-foreground">{activeBranch.name}</strong> ({offerTotal} vehicle types ready to book)
                 </>
               ) : (
                 "Choose a branch to see vehicles"
@@ -381,7 +433,15 @@ function CatalogBrowserContent() {
             <span className="text-xs font-medium text-muted-foreground">{t("sortLabel")}</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                offerRequestId.current++;
+                setOffers([]);
+                setOfferTotal(0);
+                setOfferLoadError("");
+                setOfferState(t("loadingCars"));
+                setHasMoreOffers(false);
+                setSortBy(e.target.value);
+              }}
               className="rounded-[8px] border border-border bg-white px-3 py-1.5 text-xs font-semibold text-foreground outline-none"
             >
               <option value="price-asc">{t("sortRateAsc")}</option>
@@ -400,7 +460,15 @@ function CatalogBrowserContent() {
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    offerRequestId.current++;
+                    setOffers([]);
+                    setOfferTotal(0);
+                    setOfferLoadError("");
+                    setOfferState(t("loadingCars"));
+                    setHasMoreOffers(false);
+                    setSelectedCategory(cat);
+                  }}
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                     active
                       ? "bg-primary text-white shadow-sm shadow-primary/25"
@@ -424,7 +492,7 @@ function CatalogBrowserContent() {
 
         {/* Car Grid: 3-column open cards per Easy Days reference with subtle hover elevation */}
         <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredOffers.map((offer) => {
+          {visibleOffers.map((offer) => {
             const hasCustomImage = offer.images && offer.images.length > 0;
             const imageUrl = hasCustomImage ? offer.images[0].url : null;
 
@@ -509,6 +577,16 @@ function CatalogBrowserContent() {
             );
           })}
         </div>
+        {hasMoreOffers && (
+          <p ref={loadMoreRef} role="status" className="py-4 text-center text-xs text-muted-foreground">
+            {loadingMoreOffers ? t("loadingMore") : t("scrollForMore")}
+          </p>
+        )}
+        {offerLoadError && (
+          <Button variant="outline" className="mt-2 w-full" onClick={() => setOfferLoadError("")}>
+            {t("retryLoading")}
+          </Button>
+        )}
       </section>
       </div>
     </main>

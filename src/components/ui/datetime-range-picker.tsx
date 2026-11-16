@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useSyncExternalStore,
 } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CalendarIcon,
   ChevronLeftIcon,
@@ -22,6 +23,7 @@ interface DateTimeRangePickerProps {
   onPickupChange: (value: string) => void;
   onReturnChange: (value: string) => void;
   className?: string;
+  compact?: boolean;
 }
 
 const emptySubscribe = () => () => {};
@@ -34,22 +36,8 @@ function useTodayString() {
   );
 }
 
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const THAI_WEEKDAYS = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."];
 
 // Generate 24-hour slots with 15-minute intervals: "00:00", "00:15", "00:30", "00:45", "01:00", ...
 const TIME_SLOTS: string[] = [];
@@ -68,12 +56,12 @@ function parseISO(isoString: string) {
   return { date, time };
 }
 
-function formatDateDisplay(dateStr: string): string {
-  if (!dateStr) return "Select date";
+function formatDateDisplay(dateStr: string, locale: string, selectDate: string): string {
+  if (!dateStr) return selectDate;
   const [y, m, d] = dateStr.split("-").map(Number);
   if (!y || !m || !d) return dateStr;
   const dateObj = new Date(y, m - 1, d);
-  return dateObj.toLocaleDateString("en-US", {
+  return dateObj.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -114,11 +102,15 @@ function CustomTimePicker({
   onChange,
   minTime,
   label,
+  title,
+  compact,
 }: {
   value: string; // "HH:mm"
   onChange: (time: string) => void;
   minTime?: string; // If set, times <= minTime are disabled
   label: string;
+  title: string;
+  compact: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -158,13 +150,13 @@ function CustomTimePicker({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-subtle px-2.5 py-1 text-xs font-semibold text-foreground transition-all hover:border-primary hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20"
-        title={`Change ${label}`}
+        className={`flex items-center rounded-lg border border-border bg-surface-subtle py-1 text-xs font-semibold text-foreground transition-all hover:border-primary hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 ${compact ? "gap-1 px-1.5" : "gap-1.5 px-2.5"}`}
+        title={title}
       >
-        <ClockIcon size={13} className="text-primary" />
+        <ClockIcon size={compact ? 12 : 13} className="text-primary" />
         <span className="font-mono">{value || "10:00"}</span>
         <ChevronDownIcon
-          size={12}
+          size={compact ? 10 : 12}
           className={`text-muted-foreground transition-transform duration-150 ${
             isOpen ? "rotate-180" : ""
           }`}
@@ -221,7 +213,10 @@ export function DateTimeRangePicker({
   onPickupChange,
   onReturnChange,
   className = "",
+  compact = false,
 }: DateTimeRangePickerProps) {
+  const t = useTranslations("dateTimeRangePicker");
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { date: pickupDate, time: pickupTime } = useMemo(
@@ -462,11 +457,11 @@ export function DateTimeRangePicker({
 
     if (diffHours < 24) {
       const wholeHours = Math.round(diffHours * 10) / 10;
-      return `${wholeHours} hours rental`;
+      return t("hoursRental", { count: wholeHours });
     }
     const days = Math.ceil(diffHours / 24);
-    return `${days} ${days === 1 ? "day" : "days"} rental`;
-  }, [pickupDate, returnDate, pickupTime, returnTime]);
+    return t("daysRental", { count: days });
+  }, [pickupDate, returnDate, pickupTime, returnTime, t]);
 
   // Day styling logic for the calendar grid
   const getDayStyle = (dateStr: string) => {
@@ -502,7 +497,7 @@ export function DateTimeRangePicker({
   };
 
   return (
-    <div ref={containerRef} className={`relative sm:col-span-2 ${className}`}>
+    <div ref={containerRef} className={`relative ${compact ? "" : "sm:col-span-2"} ${className}`}>
       {/* Top 2 Input Cards: Pickup & Return */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Pickup Field */}
@@ -513,9 +508,9 @@ export function DateTimeRangePicker({
               : "border-border hover:border-border"
           }`}
         >
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <CalendarIcon size={14} className="text-primary" />
-            Pickup date and time
+            {t("pickupDateAndTime")}
           </span>
 
           <div className="mt-1 flex items-center justify-between gap-2">
@@ -528,14 +523,16 @@ export function DateTimeRangePicker({
               }}
               className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
             >
-              <span className="truncate">{formatDateDisplay(pickupDate)}</span>
+              <span className="truncate">{formatDateDisplay(pickupDate, locale, t("selectDate"))}</span>
             </button>
 
             <span className="text-border">|</span>
 
             {/* Custom Modern Time Picker */}
             <CustomTimePicker
-              label="Pickup Time"
+              label={t("pickupTime")}
+              title={t("changeTime", { label: t("pickupTime") })}
+              compact={compact}
               value={pickupTime}
               onChange={handlePickupTimeChange}
             />
@@ -550,9 +547,9 @@ export function DateTimeRangePicker({
               : "border-border hover:border-border"
           }`}
         >
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <CalendarIcon size={14} className="text-primary" />
-            Return date and time
+            {t("returnDateAndTime")}
           </span>
 
           <div className="mt-1 flex items-center justify-between gap-2">
@@ -565,14 +562,16 @@ export function DateTimeRangePicker({
               }}
               className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
             >
-              <span className="truncate">{formatDateDisplay(returnDate)}</span>
+              <span className="truncate">{formatDateDisplay(returnDate, locale, t("selectDate"))}</span>
             </button>
 
             <span className="text-border">|</span>
 
             {/* Custom Modern Time Picker with minTime enforcement when on the same day */}
             <CustomTimePicker
-              label="Return Time"
+              label={t("returnTime")}
+              title={t("changeTime", { label: t("returnTime") })}
+              compact={compact}
               value={returnTime}
               onChange={handleReturnTimeChange}
               minTime={pickupDate === returnDate ? pickupTime : undefined}
@@ -591,20 +590,20 @@ export function DateTimeRangePicker({
               onClick={handlePrevMonth}
               disabled={isPrevDisabled}
               className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors"
-              title="Previous month"
+              title={t("previousMonth")}
             >
               <ChevronLeftIcon size={18} />
             </button>
 
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <span>
-                Selecting:{" "}
+                {t("selecting")}{" "}
                 <span className="font-bold text-primary uppercase tracking-wide">
-                  {activeStep === "pickup" ? "Pickup Date" : "Return Date"}
+                  {activeStep === "pickup" ? t("pickupDate") : t("returnDate")}
                 </span>
               </span>
               {durationText && (
-                <span className="rounded-full bg-status-approved-bg px-2.5 py-0.5 text-[11px] font-bold text-status-approved-text">
+                <span className="rounded-full bg-status-approved-bg px-2.5 py-0.5 text-xs font-bold text-status-approved-text">
                   {durationText}
                 </span>
               )}
@@ -614,7 +613,7 @@ export function DateTimeRangePicker({
               type="button"
               onClick={handleNextMonth}
               className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-              title="Next month"
+              title={t("nextMonth")}
             >
               <ChevronRightIcon size={18} />
             </button>
@@ -625,14 +624,14 @@ export function DateTimeRangePicker({
             {/* Left Month */}
             <div>
               <div className="text-center font-bold text-foreground text-sm mb-3">
-                {MONTH_NAMES[viewMonth]} {viewYear}
+                {new Date(viewYear, viewMonth, 1).toLocaleDateString(locale, { month: "long", year: "numeric" })}
               </div>
 
               {/* Weekday labels */}
               <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-muted-foreground mb-1">
                 {WEEKDAYS.map((w) => (
                   <div key={`left-${w}`} className="py-1">
-                    {w}
+                  {locale === "th" ? THAI_WEEKDAYS[WEEKDAYS.indexOf(w)] : w}
                   </div>
                 ))}
               </div>
@@ -691,14 +690,14 @@ export function DateTimeRangePicker({
             {/* Right Month */}
             <div>
               <div className="text-center font-bold text-foreground text-sm mb-3">
-                {MONTH_NAMES[rightMonth]} {rightYear}
+                {new Date(rightYear, rightMonth, 1).toLocaleDateString(locale, { month: "long", year: "numeric" })}
               </div>
 
               {/* Weekday labels */}
               <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-muted-foreground mb-1">
                 {WEEKDAYS.map((w) => (
                   <div key={`right-${w}`} className="py-1">
-                    {w}
+                  {locale === "th" ? THAI_WEEKDAYS[WEEKDAYS.indexOf(w)] : w}
                   </div>
                 ))}
               </div>

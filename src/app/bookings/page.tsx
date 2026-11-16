@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { apiRecord, apiRequest } from "../catalog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
+import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -66,26 +67,80 @@ function BookingsContent() {
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const batchSize = useResponsiveBatchSize(250, 320, 24);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const nextPageRef = useRef(1);
+  const isLoadingMoreRef = useRef(false);
+  const isRefreshingRef = useRef(false);
+  const refreshRequestId = useRef(0);
 
   const refresh = useCallback(
-    () =>
-      apiRequest("/bookings/me")
-        .then(rows)
-        .then((value) => {
-          setItems(value);
-          setMessage(value.length ? "" : t("noBookingsDesc"));
-        })
-        .catch((error: unknown) =>
-          setMessage(
-            error instanceof Error ? error.message : "Could not load bookings.",
-          ),
-        ),
-    [t],
+    async () => {
+      const requestId = ++refreshRequestId.current;
+      isRefreshingRef.current = true;
+      try {
+        const page = await apiRequest(`/bookings/me?page=1&pageSize=${batchSize}`);
+        if (requestId !== refreshRequestId.current) return;
+        const data = apiRecord(page);
+        const value = rows(data.items);
+        setLoadFailed(false);
+        nextPageRef.current = 1;
+        setItems(value);
+        setHasMore(Number(data.total) > value.length);
+        nextPageRef.current = 2;
+        setMessage(value.length ? "" : t("noBookingsDesc"));
+      } catch (error) {
+        if (requestId === refreshRequestId.current)
+          setMessage(error instanceof Error ? error.message : "Could not load bookings.");
+      } finally {
+        if (requestId === refreshRequestId.current)
+          isRefreshingRef.current = false;
+      }
+    },
+    [batchSize, t],
   );
 
   useEffect(() => {
-    void refresh();
+    isRefreshingRef.current = true;
+    const timer = setTimeout(() => void refresh(), 0);
+    return () => clearTimeout(timer);
   }, [refresh]);
+
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element || !hasMore || loadingMore || loadFailed) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || isLoadingMoreRef.current || isRefreshingRef.current) return;
+        isLoadingMoreRef.current = true;
+        setLoadingMore(true);
+        const page = nextPageRef.current;
+        void apiRequest(`/bookings/me?page=${page}&pageSize=${batchSize}`)
+          .then((response) => {
+            const data = apiRecord(response);
+            const value = rows(data.items);
+            setItems((current) => [...current, ...value]);
+            setHasMore(page * batchSize < Number(data.total));
+            setMessage("");
+            nextPageRef.current = page + 1;
+          })
+          .catch((error: unknown) => {
+            setMessage(error instanceof Error ? error.message : "Could not load bookings.");
+            setLoadFailed(true);
+          })
+          .finally(() => {
+            isLoadingMoreRef.current = false;
+            setLoadingMore(false);
+          });
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [batchSize, hasMore, loadFailed, loadingMore]);
 
   async function detail(id: string) {
     setMessage("");
@@ -204,6 +259,16 @@ function BookingsContent() {
               </div>
             </div>
           ))}
+          {hasMore && (
+            <p ref={loadMoreRef} role="status" className="py-4 text-center text-xs text-muted-foreground">
+              {loadingMore ? t("loadingMore") : t("scrollForMore")}
+            </p>
+          )}
+          {loadFailed && (
+            <Button variant="outline" className="w-full" onClick={() => setLoadFailed(false)}>
+              {t("retryLoading")}
+            </Button>
+          )}
         </div>
 
         {/* Detail Panel */}

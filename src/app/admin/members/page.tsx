@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest } from "../../catalog";
@@ -108,6 +108,8 @@ function getInitials(name: string): string {
 export default function MembersPage() {
   const [allowed, setAllowed] = useState(false);
   const [items, setItems] = useState<Customer[]>([]);
+  const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState({ total: 0, active: 0, suspended: 0, withActiveTrips: 0 });
   const [query, setQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("ALL");
   const [message, setMessage] = useState("Checking administrator access…");
@@ -127,18 +129,34 @@ export default function MembersPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const refreshRequestId = useRef(0);
 
   // Modal Booking Pagination
   const [modalBookingPage, setModalBookingPage] = useState(1);
   const MODAL_BOOKINGS_PER_PAGE = 5;
 
   const refresh = useCallback(async () => {
+    const requestId = ++refreshRequestId.current;
     setIsLoading(true);
     try {
-      const value = await apiRequest(`/admin/members?query=${encodeURIComponent(query)}`);
-      if (!Array.isArray(value)) throw new Error("Unexpected member response.");
+      const params = new URLSearchParams({
+        query,
+        status: filterStatus,
+        page: String(currentPage),
+        pageSize: String(itemsPerPage),
+      });
+      const response = apiRecord(await apiRequest(`/admin/members?${params}`));
+      if (requestId !== refreshRequestId.current) return;
+      if (!Array.isArray(response.items)) throw new Error("Unexpected member response.");
+      const responseTotal = Number(response.total) || 0;
+      const lastPage = Math.max(1, Math.ceil(responseTotal / itemsPerPage));
+      setTotal(responseTotal);
+      if (currentPage > lastPage) {
+        setCurrentPage(lastPage);
+        return;
+      }
       setItems(
-        value.map((raw) => {
+        response.items.map((raw) => {
           const x = apiRecord(raw);
           return {
             id: String(x.id),
@@ -152,13 +170,21 @@ export default function MembersPage() {
           };
         }),
       );
+      const responseStats = apiRecord(response.stats);
+      setStats({
+        total: Number(responseStats.total) || 0,
+        active: Number(responseStats.active) || 0,
+        suspended: Number(responseStats.suspended) || 0,
+        withActiveTrips: Number(responseStats.withActiveTrips) || 0,
+      });
       setMessage("");
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not load customers.");
+      if (requestId === refreshRequestId.current)
+        setMessage(e instanceof Error ? e.message : "Could not load customers.");
     } finally {
-      setIsLoading(false);
+      if (requestId === refreshRequestId.current) setIsLoading(false);
     }
-  }, [query]);
+  }, [currentPage, filterStatus, itemsPerPage, query]);
 
   useEffect(() => {
     currentUser()
@@ -247,30 +273,9 @@ export default function MembersPage() {
   }
 
   // Filtered customer list
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (filterStatus === "ACTIVE") return !item.isSuspended;
-      if (filterStatus === "SUSPENDED") return item.isSuspended;
-      return true;
-    });
-  }, [items, filterStatus]);
-
-  // Pagination calculation
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(total / itemsPerPage));
   const validPage = Math.min(currentPage, totalPages);
-  const pagedItems = useMemo(() => {
-    const start = (validPage - 1) * itemsPerPage;
-    return filteredItems.slice(start, start + itemsPerPage);
-  }, [filteredItems, validPage, itemsPerPage]);
-
-  // Overall statistics
-  const stats = useMemo(() => {
-    const total = items.length;
-    const active = items.filter((i) => !i.isSuspended).length;
-    const suspended = items.filter((i) => i.isSuspended).length;
-    const withActiveTrips = items.filter((i) => (i.activeBookingCount || 0) > 0).length;
-    return { total, active, suspended, withActiveTrips };
-  }, [items]);
+  const pagedItems = items;
 
   // Keyboard accessibility for modals
   useEffect(() => {
@@ -398,7 +403,7 @@ export default function MembersPage() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            All ({items.length})
+            All ({stats.total})
           </button>
           <button
             type="button"
@@ -671,16 +676,16 @@ export default function MembersPage() {
         </Table>
 
         {/* Table Footer with Pagination (Always visible when items exist, Fleet Admin Style) */}
-        {filteredItems.length > 0 && (
+        {total > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border bg-secondary/40 px-6 py-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-3">
               <span>
                 Showing{" "}
                 <strong className="text-foreground tabular-nums">
                   {(validPage - 1) * itemsPerPage + 1}–
-                  {Math.min(validPage * itemsPerPage, filteredItems.length)}
+                  {Math.min(validPage * itemsPerPage, total)}
                 </strong>{" "}
-                of <strong className="text-foreground tabular-nums">{filteredItems.length}</strong>{" "}
+                of <strong className="text-foreground tabular-nums">{total}</strong>{" "}
                 customers
               </span>
               <div className="flex items-center gap-1.5 border-l border-border-subtle pl-3">

@@ -80,6 +80,17 @@ export const parseOffers = (value: unknown): Offer[] => {
   if (!Array.isArray(value)) throw new Error("The API returned unexpected data.");
   return value.map(offerFrom);
 };
+export const parseOfferPage = (value: unknown) => {
+  const page = apiRecord(value);
+  if (!Array.isArray(page.categories) || !page.categories.every((item) => typeof item === "string")) {
+    throw new Error("The API returned unexpected data.");
+  }
+  return {
+    items: parseOffers(page.items),
+    total: Number(page.total) || 0,
+    categories: page.categories as string[],
+  };
+};
 export const parseOffer = (value: unknown) => offerFrom(value);
 
 export type CarOption = {

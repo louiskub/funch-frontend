@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AdminLayout } from "../admin-layout";
@@ -42,7 +43,6 @@ import {
   bookingQueueSchema,
   bookingStage,
   branchTime,
-  filterBookings,
   filterOptions,
   isPickupCarReady,
   pickupCarsSchema,
@@ -52,6 +52,7 @@ import {
 } from "@/features/admin/bookings";
 
 const queueKey = ["admin", "booking-queue"];
+const queuePageSize = 20;
 const selectClass =
   "h-10 w-full min-w-0 rounded-[8px] border border-border bg-card px-3 text-xs text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50";
 
@@ -67,9 +68,11 @@ export default function AdminBookings() {
 }
 
 function BookingsWorkspace() {
+  const t = useTranslations("common");
   const [stageFilter, setStageFilter] = useState<BookingFilter>("ALL");
   const [branchId, setBranchId] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   // Modal states for dedicated workflows
@@ -80,28 +83,41 @@ function BookingsWorkspace() {
 
   const queryClient = useQueryClient();
   const queue = useQuery({
-    queryKey: queueKey,
-    queryFn: async ({ signal }) =>
-      bookingQueueSchema.parse(
-        await apiClient<unknown>("/admin/bookings", { signal }),
-      ),
+    queryKey: [...queueKey, stageFilter, branchId, search, currentPage],
+    queryFn: async ({ signal }) => {
+      const response = await apiClient<{
+        items: unknown;
+        total: number;
+        counts: Record<string, number>;
+        branches: { branchId: string; branchName: string }[];
+      }>("/admin/bookings", {
+        signal,
+        params: {
+          status: stageFilter,
+          branchId,
+          query: search,
+          page: String(currentPage),
+          pageSize: String(queuePageSize),
+        },
+      });
+      return { ...response, items: bookingQueueSchema.parse(response.items) };
+    },
   });
 
-  const items = queue.data ?? [];
-  const rows = filterBookings(items, { status: stageFilter, branchId, query: search });
+  const items = queue.data?.items ?? [];
+  const rows = items;
+  const totalPages = Math.max(1, Math.ceil((queue.data?.total ?? 0) / queuePageSize));
 
   const selectedBooking =
     items.find((item) => item.id === selectedBookingId) ?? null;
 
-  const branches = [
-    ...new Map(items.map((item) => [item.branchId, item.branchName])).entries(),
-  ];
+  const branches = (queue.data?.branches ?? []).map(({ branchId, branchName }) => [branchId, branchName] as const);
 
   // Quick KPI workflow metrics
-  const pendingCount = items.filter((item) => bookingStage(item) === "PENDING").length;
-  const approvedCount = items.filter((item) => bookingStage(item) === "APPROVED").length;
-  const inUseCount = items.filter((item) => bookingStage(item) === "IN_USE").length;
-  const returnReviewCount = items.filter((item) => bookingStage(item) === "RETURN_REVIEW").length;
+  const pendingCount = Number(queue.data?.counts.pending ?? 0);
+  const approvedCount = Number(queue.data?.counts.approved ?? 0);
+  const inUseCount = Number(queue.data?.counts.inUse ?? 0);
+  const returnReviewCount = Number(queue.data?.counts.returnReview ?? 0);
 
   const summary = [
     {
@@ -155,7 +171,10 @@ function BookingsWorkspace() {
               <select
                 id="branch-filter-select"
                 value={branchId}
-                onChange={(e) => setBranchId(e.target.value)}
+                onChange={(e) => {
+                  setBranchId(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="font-bold text-sm text-foreground bg-transparent outline-none cursor-pointer hover:text-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary rounded-[4px]"
               >
                 <option value="">All Branches ({branches.length} branches)</option>
@@ -194,7 +213,10 @@ function BookingsWorkspace() {
             <button
               key={value}
               type="button"
-              onClick={() => setStageFilter(isSelected ? "ALL" : value)}
+              onClick={() => {
+                setStageFilter(isSelected ? "ALL" : value);
+                setCurrentPage(1);
+              }}
               className={`flex items-center gap-3.5 rounded-[14px] border p-4 text-left transition-all duration-150 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isSelected
                   ? "border-primary bg-secondary shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--primary-shadow-color)) 10%, transparent)] ring-2 ring-primary/20"
@@ -238,13 +260,19 @@ function BookingsWorkspace() {
                 type="search"
                 placeholder="Search booking #, customer, email, vehicle, phone…"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="pl-9 h-10 text-xs"
               />
               {search && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    setCurrentPage(1);
+                  }}
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                 >
                   <XIcon size={14} />
@@ -254,7 +282,7 @@ function BookingsWorkspace() {
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>
-                Showing <strong>{rows.length}</strong> of {items.length} bookings
+                Showing <strong>{queue.data?.total ? (currentPage - 1) * queuePageSize + 1 : 0}–{Math.min(currentPage * queuePageSize, queue.data?.total ?? 0)}</strong> of {queue.data?.total ?? 0} bookings
               </span>
               {(stageFilter !== "ALL" || branchId || search) && (
                 <button
@@ -263,6 +291,7 @@ function BookingsWorkspace() {
                     setStageFilter("ALL");
                     setBranchId("");
                     setSearch("");
+                    setCurrentPage(1);
                   }}
                   className="text-primary font-bold hover:underline ml-2"
                 >
@@ -276,20 +305,30 @@ function BookingsWorkspace() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
             {filterOptions.map((opt) => {
               const active = stageFilter === opt.value;
-              const pillCount =
-                opt.value === "ALL"
-                  ? items.length
-                  : items.filter((item) =>
-                      opt.value === "RETURN_REVIEW"
-                        ? bookingStage(item) === "RETURN_REVIEW"
-                        : item.status === opt.value,
-                    ).length;
+              const countKey: Record<BookingFilter, string> = {
+                ALL: "total",
+                PENDING: "pending",
+                APPROVED: "approved",
+                IN_USE: "inUse",
+                RETURN_REVIEW: "returnReview",
+                COMPLETED: "completed",
+                REJECTED: "rejected",
+                CANCELLED: "cancelled",
+              };
+              const pillCount = Number(
+                countKey[opt.value] === "total"
+                  ? queue.data?.counts.total ?? 0
+                  : queue.data?.counts[countKey[opt.value]] ?? 0,
+              );
 
               return (
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setStageFilter(opt.value)}
+                  onClick={() => {
+                    setStageFilter(opt.value);
+                    setCurrentPage(1);
+                  }}
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.98] shrink-0 ${
                     active
                       ? "bg-primary text-white shadow-xs"
@@ -331,7 +370,7 @@ function BookingsWorkspace() {
             <CarIcon size={36} className="mx-auto text-primary/40" />
             <h3 className="text-sm font-bold text-foreground">No bookings found</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              {items.length
+              {queue.data?.total
                 ? "No reservations match your current search and stage filters."
                 : "No customer booking requests have been placed yet."}
             </p>
@@ -343,6 +382,7 @@ function BookingsWorkspace() {
                   setStageFilter("ALL");
                   setBranchId("");
                   setSearch("");
+                  setCurrentPage(1);
                 }}
               >
                 Reset all filters
@@ -543,6 +583,13 @@ function BookingsWorkspace() {
                 })}
               </TableBody>
             </Table>
+            <div className="flex items-center justify-between border-t border-border px-4 py-3 text-xs text-muted-foreground">
+              <span>{t("pageOf", { page: currentPage, totalPages })}</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={currentPage <= 1 || queue.isFetching} onClick={() => setCurrentPage((page) => page - 1)}>{t("previousPage")}</Button>
+                <Button variant="outline" size="sm" disabled={currentPage >= totalPages || queue.isFetching} onClick={() => setCurrentPage((page) => page + 1)}>{t("nextPage")}</Button>
+              </div>
+            </div>
           </div>
         )}
       </div>

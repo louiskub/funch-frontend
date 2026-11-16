@@ -18,7 +18,7 @@ export function AuthModal() {
   const router = useRouter();
   const t = useTranslations("auth");
   const { login, isLoggingIn, register, isRegistering } = useAuth();
-  const { isOpen, mode, onSuccess, closeAuthModal, setModalMode } =
+  const { isOpen, mode, redirectUrl, onSuccess, closeAuthModal, setModalMode } =
     useAuthModalStore();
 
   const [email, setEmail] = useState("");
@@ -93,7 +93,9 @@ export function AuthModal() {
         onSuccess();
       }
 
-      if (authenticatedUser.role === "ADMIN") {
+      if (redirectUrl?.startsWith("/") && !redirectUrl.startsWith("//")) {
+        router.push(redirectUrl);
+      } else if (authenticatedUser.role === "ADMIN") {
         router.push("/admin");
       } else {
         router.push("/");
@@ -256,7 +258,7 @@ export function AuthModal() {
                 className="h-11 text-sm rounded-[10px]"
               />
               {!isLogin && (
-                <span className="text-[11px] text-muted-foreground block">
+                <span className="text-xs text-muted-foreground block">
                   {t("passwordHint")}
                 </span>
               )}
