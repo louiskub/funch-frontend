@@ -149,7 +149,30 @@
     "fleet": "Fleet",
     "options": "Options",
     "members": "Members",
-    "reports": "Reports"
+    "reports": "Reports",
+    "fleetTimeline": {
+      "views": "Fleet views",
+      "manageTab": "Fleet management",
+      "timelineTab": "Fleet timeline",
+      "title": "Fleet capacity timeline",
+      "subtitle": "Daily peak capacity · {timezone}. Pending requests count as reserved.",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "refresh": "Refresh timeline",
+      "legend": "Availability legend",
+      "healthyLegend": "More than 2 available",
+      "lowLegend": "1–2 available",
+      "fullLegend": "No availability",
+      "pendingLegend": "P = peak pending requests (included in reserved)",
+      "loading": "Loading fleet capacity…",
+      "loadFailed": "Could not load the fleet timeline.",
+      "retry": "Try again",
+      "empty": "No vehicle models are assigned to this branch.",
+      "tableCaption": "Daily fleet availability for {branch} in {month}",
+      "vehicleModel": "Vehicle model",
+      "capacity": "{count, plural, one {# car} other {# cars}}",
+      "dayDescription": "{date}: {available} of {total} available at peak; {reserved} reserved, including {pending} pending."
+    }
   },
   "common": {
     "loading": "Loading…",

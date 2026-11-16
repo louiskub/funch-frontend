@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { z } from "zod";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest, apiString, CarOption, parseOptions } from "../../catalog";
 import { AdminLayout } from "../admin-layout";
@@ -38,7 +40,50 @@ type Branch = {
   city: string;
   currencyCode: string;
   isActive: boolean;
+  timezone: string;
 };
+
+const fleetTimelineSchema = z.object({
+  branch: z.object({ id: z.string(), name: z.string(), timezone: z.string() }),
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+  daysCount: z.number().int().min(28).max(31),
+  matrix: z.array(z.object({
+    carTypeId: z.string(),
+    carTypeBranchId: z.string(),
+    brand: z.string(),
+    model: z.string(),
+    totalCapacity: z.number().int().nonnegative(),
+    days: z.array(z.object({
+      day: z.number().int().min(1).max(31),
+      date: z.string(),
+      totalCapacity: z.number().int().nonnegative(),
+      peakReserved: z.number().int().nonnegative(),
+      peakPending: z.number().int().nonnegative(),
+      available: z.number().int().nonnegative(),
+      status: z.enum(["HEALTHY", "LOW", "FULL"]),
+    })),
+  })),
+});
+
+type FleetTimeline = z.infer<typeof fleetTimelineSchema>;
+
+function currentMonthInTimeZone(timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  if (!year || !month) throw new Error("Could not determine the branch month.");
+  return `${year}-${month}`;
+}
+
+function shiftMonth(month: string, offset: number): string {
+  const [year, monthNumber] = month.split("-");
+  const shifted = new Date(Date.UTC(Number(year), Number(monthNumber) - 1 + offset, 1));
+  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}`;
+}
 
 type CarType = {
   id: string;
@@ -120,6 +165,7 @@ function branchFrom(value: Record<string, unknown>): Branch {
     city: apiString(value.city),
     currencyCode: apiString(value.currencyCode),
     isActive: boolean(value.isActive),
+    timezone: apiString(value.timezone),
   };
 }
 
@@ -866,6 +912,14 @@ function CarHistoryModal({
 }
 
 export default function AdminFleetPage() {
+  const tTimeline = useTranslations("admin.fleetTimeline");
+  const locale = useLocale();
+  const [activeTab, setActiveTab] = useState<"manage" | "timeline">("manage");
+  const [timelineMonth, setTimelineMonth] = useState<string | null>(null);
+  const [fleetTimeline, setFleetTimeline] = useState<FleetTimeline | null>(null);
+  const [timelineCompletedKey, setTimelineCompletedKey] = useState("");
+  const [timelineError, setTimelineError] = useState<{ key: string; message: string } | null>(null);
+  const [timelineRefresh, setTimelineRefresh] = useState(0);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [types, setTypes] = useState<CarType[]>([]);
@@ -1170,6 +1224,53 @@ export default function AdminFleetPage() {
   // Filtered data for the active branch
   const activeBranch = branches.find((b) => b.id === selectedBranchId) || branches[0];
   const branchOffers = offers.filter((o) => o.branchId === activeBranch?.id);
+  const selectedTimelineMonth = activeBranch
+    ? timelineMonth ?? currentMonthInTimeZone(activeBranch.timezone)
+    : "";
+  const branchCurrentMonth = activeBranch
+    ? currentMonthInTimeZone(activeBranch.timezone)
+    : "";
+  const timelineRequestKey = activeBranch && selectedTimelineMonth
+    ? `${activeBranch.id}:${selectedTimelineMonth}:${timelineRefresh}`
+    : "";
+  const timelineErrorMessage = timelineError?.key === timelineRequestKey
+    ? timelineError.message
+    : "";
+  const timelineMatchesSelection = Boolean(
+    fleetTimeline &&
+    fleetTimeline.branch.id === activeBranch?.id &&
+    fleetTimeline.month === selectedTimelineMonth,
+  );
+  const timelineLoading = activeTab === "timeline" &&
+    !!timelineRequestKey &&
+    (timelineCompletedKey !== timelineRequestKey || !timelineMatchesSelection) &&
+    !timelineErrorMessage;
+
+  useEffect(() => {
+    if (activeTab !== "timeline" || !activeBranch || !selectedTimelineMonth) return;
+    let current = true;
+    apiRequest(
+      `/admin/fleet/timeline?branchId=${encodeURIComponent(activeBranch.id)}&month=${encodeURIComponent(selectedTimelineMonth)}`
+    )
+      .then((value) => fleetTimelineSchema.parse(apiRecord(value)))
+      .then((timeline) => {
+        if (current) {
+          setFleetTimeline(timeline);
+          setTimelineCompletedKey(timelineRequestKey);
+        }
+      })
+      .catch((error: unknown) => {
+        if (current) {
+          setTimelineError({
+            key: timelineRequestKey,
+            message: error instanceof Error ? error.message : tTimeline("loadFailed"),
+          });
+        }
+      })
+    return () => {
+      current = false;
+    };
+  }, [activeBranch, activeTab, selectedTimelineMonth, timelineRefresh, timelineRequestKey, tTimeline]);
 
   if (!allowed) {
     return (
@@ -1187,31 +1288,42 @@ export default function AdminFleetPage() {
       title="Fleet Administration"
       subtitle="Manage branch fleet offers, vehicle models, photo galleries, and physical cars."
       actions={
-        <div className="flex items-center gap-2">
+        activeTab === "manage" ? (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsNewCarTypeOpen(true)}
+              className="text-xs font-semibold h-9"
+            >
+              <PlusIcon size={14} className="mr-1" />
+              New Vehicle Model
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={openNewOfferModal}
+              className="text-xs font-bold h-9"
+              disabled={!branches.length || !types.length}
+            >
+              <PlusIcon size={14} className="mr-1" />
+              Add to Branch
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => void load()} className="text-xs h-9">
+              Refresh
+            </Button>
+          </div>
+        ) : (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsNewCarTypeOpen(true)}
-            className="text-xs font-semibold h-9"
+            onClick={() => setTimelineRefresh((value) => value + 1)}
+            className="text-xs h-9"
           >
-            <PlusIcon size={14} className="mr-1" />
-            New Vehicle Model
+            {tTimeline("refresh")}
           </Button>
-
-          <Button
-            size="sm"
-            onClick={openNewOfferModal}
-            className="text-xs font-bold h-9"
-            disabled={!branches.length || !types.length}
-          >
-            <PlusIcon size={14} className="mr-1" />
-            Add to Branch
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={() => void load()} className="text-xs h-9">
-            Refresh
-          </Button>
-        </div>
+        )
       }
     >
       {message && (
@@ -1219,6 +1331,31 @@ export default function AdminFleetPage() {
           {message}
         </div>
       )}
+
+      <div className="mb-6 flex gap-2 border-b border-border" role="tablist" aria-label={tTimeline("views")}>
+        <button
+          id="fleet-manage-tab"
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "manage"}
+          aria-controls="fleet-manage-panel"
+          onClick={() => setActiveTab("manage")}
+          className={`border-b-2 px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeTab === "manage" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          {tTimeline("manageTab")}
+        </button>
+        <button
+          id="fleet-timeline-tab"
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "timeline"}
+          aria-controls="fleet-timeline-panel"
+          onClick={() => setActiveTab("timeline")}
+          className={`border-b-2 px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeTab === "timeline" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          {tTimeline("timelineTab")}
+        </button>
+      </div>
 
       {/* Branch Filter & Station Switcher Bar */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[14px] border border-border bg-white p-4 shadow-xs">
@@ -1230,7 +1367,10 @@ export default function AdminFleetPage() {
 
           <select
             value={activeBranch?.id || ""}
-            onChange={(e) => setSelectedBranchId(e.target.value)}
+            onChange={(e) => {
+              setSelectedBranchId(e.target.value);
+              setTimelineMonth(null);
+            }}
             className="rounded-[8px] border border-border bg-surface-subtle px-3 py-1.5 text-xs font-bold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
           >
             {branches.map((b) => (
@@ -1256,8 +1396,133 @@ export default function AdminFleetPage() {
         </div>
       </div>
 
+      {activeTab === "timeline" && (
+        <section id="fleet-timeline-panel" role="tabpanel" aria-labelledby="fleet-timeline-tab" className="rounded-[16px] border border-border bg-white p-5 shadow-xs">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">{tTimeline("title")}</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {tTimeline("subtitle", { timezone: activeBranch?.timezone ?? "" })}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label={tTimeline("previousMonth")}
+                disabled={!selectedTimelineMonth || selectedTimelineMonth <= branchCurrentMonth}
+                onClick={() => setTimelineMonth(shiftMonth(selectedTimelineMonth, -1))}
+              >
+                <ChevronLeftIcon size={16} />
+              </Button>
+              <span className="min-w-36 text-center text-sm font-bold text-foreground">
+                {selectedTimelineMonth
+                  ? new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" })
+                      .format(new Date(`${selectedTimelineMonth}-01T00:00:00Z`))
+                  : "—"}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label={tTimeline("nextMonth")}
+                disabled={!selectedTimelineMonth}
+                onClick={() => setTimelineMonth(shiftMonth(selectedTimelineMonth, 1))}
+              >
+                <ChevronRightIcon size={16} />
+              </Button>
+            </div>
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground" aria-label={tTimeline("legend")}>
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-status-approved-bg" />{tTimeline("healthyLegend")}</span>
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-status-pending-bg" />{tTimeline("lowLegend")}</span>
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm bg-status-rejected-bg" />{tTimeline("fullLegend")}</span>
+            <span>{tTimeline("pendingLegend")}</span>
+          </div>
+
+          {timelineLoading ? (
+            <p className="rounded-[10px] bg-surface-soft p-8 text-center text-sm text-muted-foreground" role="status">
+              {tTimeline("loading")}
+            </p>
+          ) : timelineErrorMessage ? (
+            <div className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-5 text-center">
+              <p className="text-sm text-status-rejected-text" role="alert">{timelineErrorMessage}</p>
+              <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setTimelineRefresh((value) => value + 1)}>
+                {tTimeline("retry")}
+              </Button>
+            </div>
+          ) : fleetTimeline?.matrix.length === 0 ? (
+            <p className="rounded-[10px] border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              {tTimeline("empty")}
+            </p>
+          ) : fleetTimeline ? (
+            <div className="overflow-auto rounded-[10px] border border-border">
+              <table className="min-w-max border-collapse text-xs">
+                <caption className="sr-only">{tTimeline("tableCaption", { month: fleetTimeline.month, branch: fleetTimeline.branch.name })}</caption>
+                <thead>
+                  <tr className="bg-surface-soft text-muted-foreground">
+                    <th scope="col" className="sticky left-0 z-10 min-w-48 border-b border-r border-border bg-surface-soft px-3 py-3 text-left font-bold">
+                      {tTimeline("vehicleModel")}
+                    </th>
+                    {fleetTimeline.matrix[0]?.days.map((day) => (
+                      <th key={day.date} scope="col" className="min-w-12 border-b border-border px-2 py-3 text-center font-bold tabular-nums">
+                        {day.day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {fleetTimeline.matrix.map((model) => (
+                    <tr key={model.carTypeBranchId} className="border-b border-border last:border-b-0">
+                      <th scope="row" className="sticky left-0 z-10 border-r border-border bg-white px-3 py-2 text-left">
+                        <span className="block font-bold text-foreground">{model.brand} {model.model}</span>
+                        <span className="mt-0.5 block font-normal text-muted-foreground">
+                          {tTimeline("capacity", { count: model.totalCapacity })}
+                        </span>
+                      </th>
+                      {model.days.map((day) => (
+                        <td key={day.date} className="border-r border-border p-1 text-center last:border-r-0">
+                          <div
+                            aria-label={tTimeline("dayDescription", {
+                              date: day.date,
+                              available: day.available,
+                              pending: day.peakPending,
+                              reserved: day.peakReserved,
+                              total: day.totalCapacity,
+                            })}
+                            title={tTimeline("dayDescription", {
+                              date: day.date,
+                              available: day.available,
+                              pending: day.peakPending,
+                              reserved: day.peakReserved,
+                              total: day.totalCapacity,
+                            })}
+                            className={`mx-auto flex min-h-12 min-w-10 flex-col items-center justify-center rounded-[5px] font-bold tabular-nums ${
+                              day.status === "HEALTHY"
+                                ? "bg-status-approved-bg text-status-approved-text"
+                                : day.status === "LOW"
+                                  ? "bg-status-pending-bg text-status-pending-text"
+                                  : "bg-status-rejected-bg text-status-rejected-text"
+                            }`}
+                          >
+                            <span>{day.available}</span>
+                            {day.peakPending > 0 && <span className="text-[9px] font-semibold">P {day.peakPending}</span>}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      )}
+
       {/* Main Big Boxes: One per CarTypeBranch in the active branch */}
-      <div className="space-y-8">
+      <div id="fleet-manage-panel" role="tabpanel" aria-labelledby="fleet-manage-tab" className={activeTab === "manage" ? "space-y-8" : "hidden"}>
         {branchOffers.length === 0 ? (
           <div className="rounded-[16px] border border-dashed border-border bg-white p-12 text-center">
             <CarIcon size={48} className="mx-auto text-primary/40 mb-3" />
