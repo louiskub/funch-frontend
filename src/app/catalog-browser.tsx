@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   MapPinIcon,
   SearchIcon,
@@ -26,7 +27,7 @@ import {
 
 export default function CatalogBrowser() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-sm text-[#57657e]">Loading catalog…</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-sm text-muted-foreground">Loading catalog…</div>}>
       <CatalogBrowserContent />
     </Suspense>
   );
@@ -174,6 +175,26 @@ function CatalogBrowserContent() {
     [branches, branchId]
   );
 
+  const countryOptions = useMemo(
+    () =>
+      countries.map((c) => ({
+        value: c.code,
+        label: c.name,
+        badge: c.currencyCode,
+      })),
+    [countries]
+  );
+
+  const branchOptions = useMemo(
+    () =>
+      branches.map((b) => ({
+        value: b.id,
+        label: b.name,
+        sublabel: `${b.city} · ${b.timezone}`,
+      })),
+    [branches]
+  );
+
   // Available categories inferred from car models / features
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -215,13 +236,13 @@ function CatalogBrowserContent() {
   }, [offers, selectedCategory, sortBy]);
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen overflow-x-clip">
       {/* Ambient soft glow on hero backdrop */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px] overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute left-1/2 -top-[140px] -translate-x-1/2 w-[1100px] h-[520px] bg-[radial-gradient(ellipse_at_center,rgba(223,233,252,0.5)_0%,rgba(240,245,255,0.3)_45%,rgba(255,255,255,0)_75%)]" />
+        <div className="absolute left-1/2 -top-[140px] -translate-x-1/2 w-[1100px] h-[520px] bg-[radial-gradient(ellipse_at_center,color-mix(in_srgb,var(--accent) 50%, transparent)_0%,color-mix(in_srgb,var(--secondary) 30%, transparent)_45%,transparent_75%)]" />
       </div>
 
       <div className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -231,71 +252,51 @@ function CatalogBrowserContent() {
             <p className="text-[12px] font-bold tracking-[0.14em] text-primary uppercase">
               {t("badge")}
             </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.035em] text-[#25314c] sm:text-4xl lg:text-[43px] lg:leading-[1.15]">
+            <h1 className="mt-2 text-3xl font-extrabold tracking-[-0.035em] text-foreground sm:text-4xl lg:text-[43px] lg:leading-[1.15]">
               {t("title")}
             </h1>
-            <p className="mt-3 text-sm text-[#57657e] leading-relaxed">
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
               {t("subtitle")}
             </p>
 
             {/* Floating Command Card */}
-            <div className="mt-8 rounded-[24px] border border-[#e0e6f1] bg-white p-5 sm:p-7 shadow-[0_12px_36px_-6px_rgba(37,49,76,0.06),0_2px_8px_rgba(37,49,76,0.02)]">
+            <div className="mt-8 rounded-[24px] border border-border bg-white p-5 sm:p-7 shadow-[0_12px_36px_-6px_color-mix(in_srgb,rgb(var(--shadow-color)) 6%, transparent),0_2px_8px_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent)]">
               <div className="grid gap-3.5 sm:grid-cols-2">
                 {/* Country field */}
-                <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
-                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                    <MapPinIcon size={14} className="text-primary" />
-                    {t("country")}
-                  </span>
-                  <select
-                    id="country"
-                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50 cursor-pointer"
-                    value={countryCode}
-                    onChange={(e) => {
-                      const newCode = e.target.value;
-                      setCountryCode(newCode);
-                      setBranches([]);
-                      setBranchId("");
-                      setOffers([]);
-                      setOfferState("Loading branches…");
-                      syncUrlParams({ country: newCode, branch: "" });
-                    }}
-                    disabled={!countries.length}
-                  >
-                    {countries.map((c) => (
-                      <option key={c.id} value={c.code}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  label={t("country")}
+                  icon={<MapPinIcon size={14} className="text-primary" />}
+                  value={countryCode}
+                  onChange={(newCode) => {
+                    setCountryCode(newCode);
+                    setBranches([]);
+                    setBranchId("");
+                    setOffers([]);
+                    setOfferState("Loading branches…");
+                    syncUrlParams({ country: newCode, branch: "" });
+                  }}
+                  options={countryOptions}
+                  placeholder="Select country"
+                  searchPlaceholder="Search country..."
+                  disabled={!countries.length}
+                />
 
                 {/* Branch field */}
-                <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
-                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                    <MapPinIcon size={14} className="text-primary" />
-                    {t("branch")}
-                  </span>
-                  <select
-                    id="branch"
-                    className="mt-1 w-full bg-transparent text-sm font-semibold text-[#25314c] outline-none disabled:opacity-50 cursor-pointer"
-                    value={branchId}
-                    onChange={(e) => {
-                      const newBranch = e.target.value;
-                      setBranchId(newBranch);
-                      setOffers([]);
-                      setOfferState("Loading available cars…");
-                      syncUrlParams({ branch: newBranch });
-                    }}
-                    disabled={!branches.length}
-                  >
-                    {branches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.city})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  label={t("branch")}
+                  icon={<MapPinIcon size={14} className="text-primary" />}
+                  value={branchId}
+                  onChange={(newBranch) => {
+                    setBranchId(newBranch);
+                    setOffers([]);
+                    setOfferState("Loading available cars…");
+                    syncUrlParams({ branch: newBranch });
+                  }}
+                  options={branchOptions}
+                  placeholder="Select branch"
+                  searchPlaceholder="Search branch or airport..."
+                  disabled={!branches.length}
+                />
 
                 {/* Pickup & Return date range picker with popover */}
                 <DateTimeRangePicker
@@ -329,7 +330,7 @@ function CatalogBrowserContent() {
                 </div>
               </div>
 
-              <div className="mt-3.5 flex items-center gap-2 pt-3 border-t border-[#e0e6f1]/80 text-xs text-[#57657e]">
+              <div className="mt-3.5 flex items-center gap-2 pt-3 border-t border-border/80 text-xs text-muted-foreground">
                 <ClockIcon size={14} className="text-primary" />
                 <span>
                   Same branch pickup and return · Times shown in {activeBranch?.timezone || "branch local time"}
@@ -339,18 +340,18 @@ function CatalogBrowserContent() {
           </div>
 
           {/* Hero Visual on the right */}
-          <div className="relative overflow-hidden rounded-[24px] bg-[#f0f5ff] min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] flex items-end p-6 border border-[#e0e6f1] shadow-[0_12px_36px_-6px_rgba(37,49,76,0.06),0_2px_8px_rgba(37,49,76,0.02)]">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/75 via-[#0f172a]/20 to-transparent z-10" />
+          <div className="relative overflow-hidden rounded-[24px] bg-secondary min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] flex items-end p-6 border border-border shadow-[0_12px_36px_-6px_color-mix(in_srgb,rgb(var(--shadow-color)) 6%, transparent),0_2px_8px_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent)]">
+            <div className="absolute inset-0 bg-gradient-to-t from-overlay/75 via-overlay/20 to-transparent z-10" />
             <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
               <CarIcon size={120} className="text-primary/25" />
             </div>
             
             {/* Subtle caption */}
-            <div className="relative z-20 rounded-[12px] bg-white/95 px-4 py-2.5 shadow-md shadow-[#25314c]/5 backdrop-blur-md border border-[#e0e6f1]">
-              <p className="text-xs font-bold text-[#25314c]">
+            <div className="relative z-20 rounded-[12px] bg-white/95 px-4 py-2.5 shadow-md shadow-[var(--color-foreground)]/5 backdrop-blur-md border border-border">
+              <p className="text-xs font-bold text-foreground">
                 {activeBranch?.name || "Suvarnabhumi Airport (BKK)"}
               </p>
-              <p className="text-[11px] text-[#57657e]">
+              <p className="text-[11px] text-muted-foreground">
                 Convenient pickup · Transparent daily quotes
               </p>
             </div>
@@ -358,16 +359,16 @@ function CatalogBrowserContent() {
         </section>
 
       {/* Fleet Section */}
-      <section id="fleet-section" className="mt-16 pt-8 border-t border-[#e0e6f1]">
+      <section id="fleet-section" className="mt-16 pt-8 border-t border-border">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-[#25314c] sm:text-[27px]">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-[27px]">
               Find your kind of car.
             </h2>
-            <p className="mt-1 text-sm text-[#57657e]">
+            <p className="mt-1 text-sm text-muted-foreground">
               {activeBranch ? (
                 <>
-                  Fleet available at <strong className="font-semibold text-[#25314c]">{activeBranch.name}</strong> ({filteredOffers.length} vehicle types ready to book)
+                  Fleet available at <strong className="font-semibold text-foreground">{activeBranch.name}</strong> ({filteredOffers.length} vehicle types ready to book)
                 </>
               ) : (
                 "Choose a branch to see vehicles"
@@ -377,15 +378,15 @@ function CatalogBrowserContent() {
 
           {/* Sort selection */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-[#57657e]">Sort by</span>
+            <span className="text-xs font-medium text-muted-foreground">{t("sortLabel")}</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-[8px] border border-[#e0e6f1] bg-white px-3 py-1.5 text-xs font-semibold text-[#25314c] outline-none"
+              className="rounded-[8px] border border-border bg-white px-3 py-1.5 text-xs font-semibold text-foreground outline-none"
             >
-              <option value="price-asc">Rate: Low to High</option>
-              <option value="price-desc">Rate: High to Low</option>
-              <option value="name">Vehicle Model</option>
+              <option value="price-asc">{t("sortRateAsc")}</option>
+              <option value="price-desc">{t("sortRateDesc")}</option>
+              <option value="name">{t("sortModel")}</option>
             </select>
           </div>
         </div>
@@ -403,11 +404,11 @@ function CatalogBrowserContent() {
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                     active
                       ? "bg-primary text-white shadow-sm shadow-primary/25"
-                      : "border border-[#e0e6f1] bg-white text-[#57657e] shadow-xs hover:border-primary/50 hover:bg-[#f0f5ff] hover:text-primary hover:shadow-sm"
+                      : "border border-border bg-white text-muted-foreground shadow-xs hover:border-primary/50 hover:bg-secondary hover:text-primary hover:shadow-sm"
                   }`}
                 >
                   <CarIcon size={14} />
-                  <span>{cat === "ALL" ? "All vehicles" : cat}</span>
+                  <span>{cat === "ALL" ? t("allVehicles") : cat}</span>
                 </button>
               );
             })}
@@ -416,7 +417,7 @@ function CatalogBrowserContent() {
 
         {/* Loading / Empty States */}
         {offerState && (
-          <div className="mt-8 rounded-[16px] bg-[#f0f5ff] p-8 text-center text-sm font-medium text-[#57657e] border border-[#dfe9fc]">
+          <div className="mt-8 rounded-[16px] bg-secondary p-8 text-center text-sm font-medium text-muted-foreground border border-accent">
             {offerState}
           </div>
         )}
@@ -430,10 +431,10 @@ function CatalogBrowserContent() {
             return (
               <div
                 key={offer.id}
-                className="group flex flex-col rounded-[22px] p-2.5 transition-all duration-300 hover:bg-white hover:shadow-[0_16px_36px_-6px_rgba(37,49,76,0.08),0_2px_8px_rgba(37,49,76,0.02)] -m-2.5"
+                className="group flex flex-col rounded-[22px] p-2.5 transition-all duration-300 hover:bg-white hover:shadow-[0_16px_36px_-6px_color-mix(in_srgb,rgb(var(--shadow-color)) 8%, transparent),0_2px_8px_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent)] -m-2.5"
               >
                 {/* Vehicle image container with category pill */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-[#f0f5ff] border border-[#e0e6f1] shadow-[0_2px_6px_rgba(37,49,76,0.03)] flex items-center justify-center transition-all duration-300 group-hover:border-primary/30">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[18px] bg-secondary border border-border shadow-[0_2px_6px_color-mix(in_srgb,rgb(var(--shadow-color)) 3%, transparent)] flex items-center justify-center transition-all duration-300 group-hover:border-primary/30">
                   {imageUrl ? (
                     <img
                       src={imageUrl}
@@ -443,14 +444,14 @@ function CatalogBrowserContent() {
                   ) : (
                     <div className="flex flex-col items-center justify-center text-primary/40">
                       <CarIcon size={64} />
-                      <span className="mt-1 text-[11px] font-semibold text-[#57657e]">
+                      <span className="mt-1 text-[11px] font-semibold text-muted-foreground">
                         {offer.brand}
                       </span>
                     </div>
                   )}
 
                   {/* Category badge pinned to top-left */}
-                  <span className="absolute top-3.5 left-3.5 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-[#25314c] shadow-xs backdrop-blur-sm border border-[#e0e6f1]">
+                  <span className="absolute top-3.5 left-3.5 rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-foreground shadow-xs backdrop-blur-sm border border-border">
                     {offer.seats > 5 ? "VAN" : offer.seats >= 5 ? "SEDAN" : "COMPACT"}
                   </span>
                 </div>
@@ -458,37 +459,37 @@ function CatalogBrowserContent() {
                 {/* Car info: open layout, no enclosing box */}
                 <div className="mt-4 flex flex-1 flex-col">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="text-lg font-bold text-[#25314c] group-hover:text-primary transition-colors">
+                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                       {offer.brand} {offer.model}
                     </h3>
                   </div>
 
-                  <p className="mt-1 text-xs text-[#57657e]">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Ideal for city drives and highway travel · {offer.branchName}
                   </p>
 
                   {/* Specs list */}
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#57657e]">
-                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-primary font-semibold">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium text-muted-foreground">
+                    <span className="rounded-[6px] bg-secondary px-2 py-0.5 text-primary font-semibold">
                       {offer.seats} {t("seats")}
                     </span>
-                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                    <span className="rounded-[6px] bg-secondary px-2 py-0.5 text-muted-foreground">
                       {offer.transmission}
                     </span>
-                    <span className="rounded-[6px] bg-[#f0f5ff] px-2 py-0.5 text-[#57657e]">
+                    <span className="rounded-[6px] bg-secondary px-2 py-0.5 text-muted-foreground">
                       {offer.fuelType}
                     </span>
                   </div>
 
-                  <div className="my-4 border-t border-[#e0e6f1]" />
+                  <div className="my-4 border-t border-border" />
 
                   {/* Bottom rate and CTA */}
                   <div className="mt-auto flex items-end justify-between gap-3">
                     <div>
-                      <span className="text-[11px] text-[#57657e] block">Daily rate</span>
-                      <p className="text-lg font-bold tracking-tight text-[#25314c]">
+                      <span className="text-[11px] text-muted-foreground block">Daily rate</span>
+                      <p className="text-lg font-bold tracking-tight text-foreground">
                         {formatCurrency(offer.baseDailyRate, offer.currencyCode)}
-                        <span className="text-xs font-normal text-[#57657e]"> / {t("day")}</span>
+                        <span className="text-xs font-normal text-muted-foreground"> / {t("day")}</span>
                       </p>
                     </div>
 
@@ -497,7 +498,7 @@ function CatalogBrowserContent() {
                       variant="secondary"
                       className="rounded-[8px] font-semibold text-xs h-10 px-4 hover:bg-primary hover:text-white transition-all shadow-xs hover:shadow-sm cursor-pointer"
                     >
-                      <Link href={`/offers/${offer.id}`}>
+                      <Link href={`/offers/${offer.id}?pickup=${encodeURIComponent(pickupDate)}&return=${encodeURIComponent(returnDate)}`}>
                         <span>{t("viewDetails")}</span>
                         <ChevronRightIcon size={14} />
                       </Link>

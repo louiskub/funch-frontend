@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import {
   api,
@@ -17,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
 import {
   CalendarIcon,
   CarIcon,
@@ -78,13 +81,38 @@ export default function OfferDetails({
 }: {
   params: Promise<{ offerId: string }>;
 }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center p-8 text-sm text-muted-foreground">
+          Loading vehicle details…
+        </div>
+      }
+    >
+      <OfferDetailsContent params={params} />
+    </Suspense>
+  );
+}
+
+function OfferDetailsContent({
+  params,
+}: {
+  params: Promise<{ offerId: string }>;
+}) {
+  const tOffer = useTranslations("offer");
+  const tCatalog = useTranslations("catalog");
+  const tAuth = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const searchParams = useSearchParams();
+  const initialPickup = searchParams.get("pickup") || "";
+  const initialReturn = searchParams.get("return") || "";
   const { user, isAuthenticated } = useAuth();
   const [offer, setOffer] = useState<Offer | null>(null);
   const [status, setStatus] = useState("Loading vehicle details…");
   const [options, setOptions] = useState<CarOption[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [pickup, setPickup] = useState("");
-  const [returnAt, setReturnAt] = useState("");
+  const [pickup, setPickup] = useState(initialPickup);
+  const [returnAt, setReturnAt] = useState(initialReturn);
   const [quote, setQuote] = useState<Record<string, unknown> | null>(null);
   const [mode, setMode] = useState<"register" | "existing">("register");
   const [account, setAccount] = useState({
@@ -247,12 +275,12 @@ export default function OfferDetails({
   }
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen overflow-x-clip">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute left-1/2 -top-[120px] -translate-x-1/2 w-[1000px] h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(223,233,252,0.45)_0%,rgba(240,245,255,0.2)_45%,rgba(255,255,255,0)_75%)]" />
+        <div className="absolute left-1/2 -top-[120px] -translate-x-1/2 w-[1000px] h-[450px] bg-[radial-gradient(ellipse_at_center,color-mix(in_srgb,var(--accent) 45%, transparent)_0%,color-mix(in_srgb,var(--secondary) 20%, transparent)_45%,transparent_75%)]" />
       </div>
 
       <div className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -260,14 +288,14 @@ export default function OfferDetails({
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-[#1c358d]"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-hover"
         >
-          <span>← Back to all cars</span>
+          <span>{tOffer("backToAll")}</span>
         </Link>
       </div>
 
       {status && (
-        <div className="rounded-[14px] bg-[#f0f5ff] p-8 text-center text-sm font-medium text-[#57657e]">
+        <div className="rounded-[14px] bg-secondary p-8 text-center text-sm font-medium text-muted-foreground">
           {status}
         </div>
       )}
@@ -277,19 +305,19 @@ export default function OfferDetails({
           {/* Left Column: Photos, specs, and features */}
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="rounded-full bg-[#f0f5ff] px-3 py-1 text-xs font-bold text-primary">
+              <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-primary">
                 {offer.seats > 5 ? "VAN" : offer.seats >= 5 ? "SEDAN" : "COMPACT"}
               </span>
-              <span className="text-xs text-[#57657e]">
+              <span className="text-xs text-muted-foreground">
                 {offer.branchName} · {offer.city}
               </span>
             </div>
 
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[#25314c] sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
               {offer.brand} {offer.model}
             </h1>
 
-            <p className="mt-1 text-sm text-[#57657e] flex items-center gap-1.5">
+            <p className="mt-1 text-sm text-muted-foreground flex items-center gap-1.5">
               <ClockIcon size={14} className="text-primary" />
               <span>Times shown in {offer.timezone}</span>
             </p>
@@ -298,7 +326,7 @@ export default function OfferDetails({
             <div className="mt-6">
               {offer.images.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="overflow-hidden rounded-[18px] border border-[#e0e6f1] bg-[#f0f5ff]">
+                  <div className="overflow-hidden rounded-[18px] border border-border bg-secondary">
                     <img
                       src={offer.images[0].url}
                       alt={`${offer.brand} ${offer.model}`}
@@ -310,7 +338,7 @@ export default function OfferDetails({
                       {offer.images.map((img, idx) => (
                         <div
                           key={img.id}
-                          className="overflow-hidden rounded-[10px] border border-[#e0e6f1] bg-[#f0f5ff]"
+                          className="overflow-hidden rounded-[10px] border border-border bg-secondary"
                         >
                           <img
                             src={img.url}
@@ -323,7 +351,7 @@ export default function OfferDetails({
                   )}
                 </div>
               ) : (
-                <div className="flex aspect-[16/10] w-full items-center justify-center rounded-[18px] border border-[#e0e6f1] bg-[#f0f5ff] text-primary/30">
+                <div className="flex aspect-[16/10] w-full items-center justify-center rounded-[18px] border border-border bg-secondary text-primary/30">
                   <CarIcon size={80} />
                 </div>
               )}
@@ -331,55 +359,55 @@ export default function OfferDetails({
 
             {/* Specifications Cards */}
             <div className="mt-8">
-              <h2 className="text-lg font-bold text-[#25314c]">
-                Vehicle Specifications
+              <h2 className="text-lg font-bold text-foreground">
+                {tOffer("specs")}
               </h2>
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Seats
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("seats")}
                   </span>
-                  <span className="text-base font-bold text-[#25314c]">
-                    {offer.seats} Passengers
+                  <span className="text-base font-bold text-foreground">
+                    {offer.seats} {tCatalog("seats")}
                   </span>
                 </div>
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Transmission
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("transmission")}
                   </span>
-                  <span className="text-base font-bold text-[#25314c]">
+                  <span className="text-base font-bold text-foreground">
                     {offer.transmission}
                   </span>
                 </div>
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Fuel Type
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("fuel")}
                   </span>
-                  <span className="text-base font-bold text-[#25314c]">
+                  <span className="text-base font-bold text-foreground">
                     {offer.fuelType}
                   </span>
                 </div>
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Base Daily Rate
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("dailyRate")}
                   </span>
                   <span className="text-base font-bold text-primary">
                     {formatCurrency(offer.baseDailyRate, offer.currencyCode)}
                   </span>
                 </div>
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Base Hourly Rate
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("hourlyRate")}
                   </span>
-                  <span className="text-base font-bold text-[#25314c]">
+                  <span className="text-base font-bold text-foreground">
                     {formatCurrency(offer.baseHourlyRate, offer.currencyCode)}
                   </span>
                 </div>
-                <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
-                    Branch Location
+                <div className="rounded-[14px] border border-border bg-white p-3.5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
+                    {tOffer("branchLocation")}
                   </span>
-                  <span className="text-sm font-bold text-[#25314c] truncate block">
+                  <span className="text-sm font-bold text-foreground truncate block">
                     {offer.branchName}
                   </span>
                 </div>
@@ -389,14 +417,14 @@ export default function OfferDetails({
             {/* Features */}
             {offer.features.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-lg font-bold text-[#25314c]">Included Features</h2>
+                <h2 className="text-lg font-bold text-foreground">{tOffer("includedFeatures")}</h2>
                 <div className="mt-3 grid sm:grid-cols-2 gap-2.5">
                   {offer.features.map((feature) => (
                     <div
                       key={feature}
-                      className="flex items-center gap-2 text-sm text-[#25314c]"
+                      className="flex items-center gap-2 text-sm text-foreground"
                     >
-                      <CheckIcon size={16} className="text-[#17604a] flex-shrink-0" />
+                      <CheckIcon size={16} className="text-status-approved-text flex-shrink-0" />
                       <span>{feature}</span>
                     </div>
                   ))}
@@ -407,15 +435,15 @@ export default function OfferDetails({
 
           {/* Right Column: Reservation & Quote Card */}
           <div>
-            <Card className="sticky top-28 rounded-[22px] border-[#e0e6f1] bg-white shadow-[0_12px_36px_-6px_rgba(37,49,76,0.07),0_2px_8px_rgba(37,49,76,0.02)]">
-              <CardHeader className="border-b border-[#e0e6f1] p-6 pb-5">
+            <Card className="sticky top-28 rounded-[22px] border-border bg-white shadow-[0_12px_36px_-6px_color-mix(in_srgb,rgb(var(--shadow-color)) 7%, transparent),0_2px_8px_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent)]">
+              <CardHeader className="border-b border-border p-6 pb-5">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-semibold text-[#57657e] uppercase tracking-wider">
-                    Reserve this car
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {tOffer("reserveTitle")}
                   </span>
                   <span className="text-xl font-bold text-primary">
                     {formatCurrency(offer.baseDailyRate, offer.currencyCode)}
-                    <span className="text-xs font-normal text-[#57657e]"> / day</span>
+                    <span className="text-xs font-normal text-muted-foreground"> / {tCatalog("day")}</span>
                   </span>
                 </div>
               </CardHeader>
@@ -423,59 +451,36 @@ export default function OfferDetails({
               <CardContent className="p-6 space-y-6">
                 <form onSubmit={(e) => void getQuote(e)} className="space-y-5">
                   {/* Dates */}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                        <CalendarIcon size={13} className="text-primary" />
-                        Pickup date
-                      </span>
-                      <input
-                        required
-                        type="datetime-local"
-                        value={pickup}
-                        onChange={(e) => {
-                          setPickup(e.target.value);
-                          setQuote(null);
-                        }}
-                        className="mt-1 w-full bg-transparent text-xs font-semibold text-[#25314c] outline-none"
-                      />
-                    </div>
-
-                    <div className="flex flex-col justify-center rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] px-3.5 py-2.5 transition-all hover:bg-white focus-within:border-primary focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
-                        <CalendarIcon size={13} className="text-primary" />
-                        Return date
-                      </span>
-                      <input
-                        required
-                        type="datetime-local"
-                        value={returnAt}
-                        onChange={(e) => {
-                          setReturnAt(e.target.value);
-                          setQuote(null);
-                        }}
-                        className="mt-1 w-full bg-transparent text-xs font-semibold text-[#25314c] outline-none"
-                      />
-                    </div>
-                  </div>
+                  <DateTimeRangePicker
+                    pickupDateTime={pickup}
+                    returnDateTime={returnAt}
+                    onPickupChange={(val) => {
+                      setPickup(val);
+                      setQuote(null);
+                    }}
+                    onReturnChange={(val) => {
+                      setReturnAt(val);
+                      setQuote(null);
+                    }}
+                  />
 
                   {/* Add-on Options */}
                   {options.length > 0 && (
                     <div className="space-y-2.5">
-                      <span className="text-xs font-bold text-[#25314c] block">
-                        Add-ons & Options
+                      <span className="text-xs font-bold text-foreground block">
+                        {tOffer("addOnOptions")}
                       </span>
-                      <div className="divide-y divide-[#e0e6f1] rounded-[10px] border border-[#e0e6f1] bg-[#f0f5ff]/30 p-2">
+                      <div className="divide-y divide-border rounded-[10px] border border-border bg-secondary/30 p-2">
                         {options.map((option) => (
                           <div
                             key={option.id}
                             className="flex items-center justify-between gap-3 py-2.5 px-2"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-[#25314c]">
+                              <p className="text-xs font-semibold text-foreground">
                                 {option.name}
                               </p>
-                              <p className="text-[11px] text-[#57657e]">
+                              <p className="text-[11px] text-muted-foreground">
                                 {formatCurrency(option.price, offer.currencyCode)} ·{" "}
                                 {option.pricingType.toLowerCase().replaceAll("_", " ")}
                               </p>
@@ -494,7 +499,7 @@ export default function OfferDetails({
                                 }));
                                 setQuote(null);
                               }}
-                              className="h-8 w-16 rounded-[6px] border border-[#e0e6f1] bg-white px-2 text-center text-xs font-bold text-[#25314c] outline-none"
+                              className="h-8 w-16 rounded-[6px] border border-border bg-white px-2 text-center text-xs font-bold text-foreground outline-none"
                             />
                           </div>
                         ))}
@@ -508,40 +513,40 @@ export default function OfferDetails({
                     disabled={busy || !pickup || !returnAt}
                     className="h-11 w-full text-sm font-semibold shadow-none"
                   >
-                    {busy ? "Calculating quote…" : "Calculate total quote"}
+                    {busy ? tOffer("calculating") : tOffer("calculateQuote")}
                   </Button>
                 </form>
 
                 {/* Live Quote Breakdown Card */}
                 {quote && (
-                  <div className="rounded-[14px] bg-[#f0f5ff] p-5 border border-[#d7e2f5] space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#d7e2f5] pb-3">
+                  <div className="rounded-[14px] bg-secondary p-5 border border-border-subtle space-y-4">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                       <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                        Estimated Quote
+                        {tOffer("quoteSummary")}
                       </span>
-                      <span className="text-base font-extrabold text-[#25314c]">
+                      <span className="text-base font-extrabold text-foreground">
                         {formatCurrency(String(quote.totalAmount), String(quote.currencyCode))}
                       </span>
                     </div>
 
-                    <div className="space-y-1.5 text-xs text-[#57657e]">
+                    <div className="space-y-1.5 text-xs text-muted-foreground">
                       <div className="flex justify-between">
-                        <span>Vehicle rental</span>
-                        <span className="font-semibold text-[#25314c]">
+                        <span>{tOffer("carRental")}</span>
+                        <span className="font-semibold text-foreground">
                           {formatCurrency(String(quote.rentalSubtotal), String(quote.currencyCode))}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Selected options</span>
-                        <span className="font-semibold text-[#25314c]">
+                        <span>{tOffer("optionsTotal")}</span>
+                        <span className="font-semibold text-foreground">
                           {formatCurrency(String(quote.optionsSubtotal), String(quote.currencyCode))}
                         </span>
                       </div>
                     </div>
 
                     {/* Stock note */}
-                    <div className="rounded-[8px] bg-white p-3 text-[11px] text-[#57657e] border border-[#d7e2f5]">
-                      <span className="font-semibold text-[#25314c] block mb-0.5">
+                    <div className="rounded-[8px] bg-white p-3 text-[11px] text-muted-foreground border border-border-subtle">
+                      <span className="font-semibold text-foreground block mb-0.5">
                         Approval Notice:
                       </span>
                       Estimated branch capacity:{" "}
@@ -551,16 +556,16 @@ export default function OfferDetails({
                     {/* Checkout Form */}
                     <form onSubmit={(e) => void checkout(e)} className="pt-2 space-y-3.5">
                       {isAuthenticated && user ? (
-                        <div className="rounded-[8px] bg-white p-3 border border-[#d7e2f5] text-xs space-y-1">
-                          <span className="text-[#57657e] block">Booking with verified account:</span>
-                          <span className="font-bold text-[#25314c] block">{user.name}</span>
-                          <span className="text-[#57657e] block text-[11px]">
+                        <div className="rounded-[8px] bg-white p-3 border border-border-subtle text-xs space-y-1">
+                          <span className="text-muted-foreground block">Booking with verified account:</span>
+                          <span className="font-bold text-foreground block">{user.name}</span>
+                          <span className="text-muted-foreground block text-[11px]">
                             {user.email} · {user.phone}
                           </span>
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-center gap-4 text-xs font-semibold text-[#25314c]">
+                          <div className="flex items-center gap-4 text-xs font-semibold text-foreground">
                             <label className="flex items-center gap-1.5 cursor-pointer">
                               <input
                                 type="radio"
@@ -586,7 +591,7 @@ export default function OfferDetails({
                           {mode === "register" && (
                             <div className="space-y-2">
                               <Input
-                                placeholder="Full name"
+                                placeholder={tAuth("name")}
                                 required
                                 value={account.name}
                                 onChange={(e) =>
@@ -595,7 +600,7 @@ export default function OfferDetails({
                                 className="h-10 text-xs"
                               />
                               <Input
-                                placeholder="Phone number"
+                                placeholder={tAuth("phone")}
                                 required
                                 value={account.phone}
                                 onChange={(e) =>
@@ -608,7 +613,7 @@ export default function OfferDetails({
 
                           <div className="space-y-2">
                             <Input
-                              placeholder="Email address"
+                              placeholder={tAuth("email")}
                               type="email"
                               required
                               value={account.email}
@@ -618,7 +623,7 @@ export default function OfferDetails({
                               className="h-10 text-xs"
                             />
                             <Input
-                              placeholder="Password"
+                              placeholder={tAuth("password")}
                               type="password"
                               required
                               value={account.password}
@@ -634,9 +639,9 @@ export default function OfferDetails({
                       <Button
                         type="submit"
                         disabled={busy}
-                        className="h-12 w-full text-sm font-bold bg-primary hover:bg-[#1c358d] text-white shadow-none mt-2"
+                        className="h-12 w-full text-sm font-bold bg-primary hover:bg-primary-hover text-white shadow-none mt-2"
                       >
-                        {busy ? "Submitting request…" : "Submit Booking Request"}
+                        {busy ? tOffer("submitting") : tOffer("submitBooking")}
                       </Button>
                     </form>
                   </div>
@@ -647,8 +652,8 @@ export default function OfferDetails({
                     role="status"
                     className={`rounded-[10px] p-4 text-xs font-medium leading-relaxed ${
                       message.includes("PENDING")
-                        ? "bg-[#fff0ce] text-[#815110] border border-[#fed7aa]"
-                        : "bg-[#fce8e8] text-[#a22f2f] border border-[#fecaca]"
+                        ? "bg-status-pending-bg text-status-pending-text border border-status-pending-border"
+                        : "bg-status-rejected-bg text-status-rejected-text border border-status-rejected-border"
                     }`}
                   >
                     {message}

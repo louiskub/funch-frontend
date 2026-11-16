@@ -303,20 +303,20 @@ export default function OptionsAdmin() {
     >
       {/* Toast / Status banner */}
       {status && (
-        <div className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]">
+        <div className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-secondary text-foreground border border-border-subtle">
           {status}
         </div>
       )}
 
       {/* Branch Selector Bar (matches Fleet tab sub-nav location) */}
-      <div className="mb-8 rounded-[16px] border border-[#e0e6f1] bg-white p-5 shadow-xs">
+      <div className="mb-8 rounded-[16px] border border-border bg-white p-5 shadow-xs">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#f0f5ff] text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-secondary text-primary">
               <MapPinIcon size={20} />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#57657e]">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Active Branch
               </label>
               <div className="mt-0.5 flex items-center gap-2">
@@ -326,7 +326,7 @@ export default function OptionsAdmin() {
                     setBranchId(e.target.value);
                     setSelectedCategory("ALL");
                   }}
-                  className="h-8 rounded-[6px] border border-[#e0e6f1] bg-white px-2.5 text-xs font-bold text-[#25314c] outline-none hover:border-primary focus:border-primary"
+                  className="h-8 rounded-[6px] border border-border bg-white px-2.5 text-xs font-bold text-foreground outline-none hover:border-primary focus:border-primary"
                 >
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
@@ -335,7 +335,7 @@ export default function OptionsAdmin() {
                   ))}
                 </select>
                 {currentBranch && (
-                  <span className="rounded-full bg-[#f0f5ff] px-2 py-0.5 text-[10px] font-bold text-primary">
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-primary">
                     Currency: {branchCurrency}
                   </span>
                 )}
@@ -345,10 +345,10 @@ export default function OptionsAdmin() {
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <span className="block text-xs font-bold text-[#25314c]">
+              <span className="block text-xs font-bold text-foreground">
                 {options.length} Total Options
               </span>
-              <span className="block text-[10px] text-[#57657e]">
+              <span className="block text-[10px] text-muted-foreground">
                 {options.filter((o) => o.isActive).length} active · {options.filter((o) => !o.isActive).length} inactive
               </span>
             </div>
@@ -363,8 +363,8 @@ export default function OptionsAdmin() {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="mt-4 flex items-center gap-1.5 border-t border-[#f0f4fa] pt-3 overflow-x-auto">
-          <span className="text-[10px] font-bold text-[#57657e] uppercase tracking-wider mr-1">
+        <div className="mt-4 flex items-center gap-1.5 border-t border-surface-alt pt-3 overflow-x-auto">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mr-1">
             Category:
           </span>
           {(["ALL", "EQUIPMENT", "PROTECTION", "SERVICE"] as const).map((cat) => {
@@ -377,7 +377,7 @@ export default function OptionsAdmin() {
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   selectedCategory === cat
                     ? "bg-primary text-white shadow-2xs"
-                    : "bg-[#f8faff] text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary"
+                    : "bg-surface-subtle text-muted-foreground hover:bg-secondary hover:text-primary"
                 }`}
               >
                 {cat === "ALL" ? "All Options" : cat === "EQUIPMENT" ? "Equipment" : cat === "PROTECTION" ? "Protection" : "Services"} ({count})
@@ -389,12 +389,12 @@ export default function OptionsAdmin() {
 
       {/* Main Options Grid */}
       {filteredOptions.length === 0 ? (
-        <div className="rounded-[16px] border border-dashed border-[#e0e6f1] bg-white p-12 text-center">
+        <div className="rounded-[16px] border border-dashed border-border bg-white p-12 text-center">
           <ShieldCheckIcon size={44} className="mx-auto text-primary/40 mb-3" />
-          <h3 className="text-base font-bold text-[#25314c]">
+          <h3 className="text-base font-bold text-foreground">
             No options found in {currentBranch?.name || "this branch"}
           </h3>
-          <p className="mt-1 text-xs text-[#57657e]">
+          <p className="mt-1 text-xs text-muted-foreground">
             {selectedCategory === "ALL"
               ? "Add equipment, child seats, GPS units, or insurance packages for renters at this branch."
               : `No options under category "${selectedCategory}" configured yet.`}
@@ -410,7 +410,7 @@ export default function OptionsAdmin() {
           {filteredOptions.map((option) => (
             <div
               key={option.id}
-              className="rounded-[16px] border border-[#e0e6f1] bg-white p-5 shadow-xs transition-all hover:shadow-md flex flex-col justify-between"
+              className="rounded-[16px] border border-border bg-white p-5 shadow-xs transition-all hover:shadow-md flex flex-col justify-between"
             >
               {/* Card Header & Metadata */}
               <div>
@@ -418,10 +418,10 @@ export default function OptionsAdmin() {
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       option.category === "EQUIPMENT"
-                        ? "bg-[#e8f0fe] text-primary"
+                        ? "bg-surface-tint text-primary"
                         : option.category === "PROTECTION"
-                        ? "bg-[#e3f3eb] text-[#17604a]"
-                        : "bg-[#fff0ce] text-[#815110]"
+                        ? "bg-status-approved-bg text-status-approved-text"
+                        : "bg-status-pending-bg text-status-pending-text"
                     }`}
                   >
                     {option.category}
@@ -431,8 +431,8 @@ export default function OptionsAdmin() {
                     onClick={() => void toggleActive(option)}
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold transition-colors ${
                       option.isActive
-                        ? "bg-[#e3f3eb] text-[#17604a] hover:bg-emerald-100"
-                        : "bg-[#f0f4fa] text-[#57657e] hover:bg-[#e0e6f1]"
+                        ? "bg-status-approved-bg text-status-approved-text hover:bg-status-approved-bg"
+                        : "bg-surface-alt text-muted-foreground hover:bg-border"
                     }`}
                     title="Click to toggle active status"
                   >
@@ -441,34 +441,34 @@ export default function OptionsAdmin() {
                 </div>
 
                 <div className="flex items-baseline gap-2">
-                  <span className="font-mono text-xs font-bold text-primary bg-[#f0f5ff] px-2 py-0.5 rounded-[4px]">
+                  <span className="font-mono text-xs font-bold text-primary bg-secondary px-2 py-0.5 rounded-[4px]">
                     {option.code}
                   </span>
-                  <h3 className="text-sm font-bold text-[#25314c] truncate" title={option.name}>
+                  <h3 className="text-sm font-bold text-foreground truncate" title={option.name}>
                     {option.name}
                   </h3>
                 </div>
 
                 {option.description ? (
-                  <p className="mt-2 text-xs text-[#57657e] line-clamp-2" title={option.description}>
+                  <p className="mt-2 text-xs text-muted-foreground line-clamp-2" title={option.description}>
                     {option.description}
                   </p>
                 ) : (
-                  <p className="mt-2 text-xs text-[#57657e]/60 italic">
+                  <p className="mt-2 text-xs text-muted-foreground/60 italic">
                     No description provided
                   </p>
                 )}
               </div>
 
               {/* Card Middle: Pricing & Inventory */}
-              <div className="my-4 pt-3 border-t border-[#f0f4fa] space-y-2">
+              <div className="my-4 pt-3 border-t border-surface-alt space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-[#57657e]">Rental Price</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Rental Price</span>
                   <div className="text-right">
-                    <span className="text-sm font-bold text-[#25314c]">
+                    <span className="text-sm font-bold text-foreground">
                       {formatCurrency(option.price, branchCurrency)}
                     </span>
-                    <span className="text-[10px] text-[#57657e] ml-1">
+                    <span className="text-[10px] text-muted-foreground ml-1">
                       {option.pricingType === "PER_DAY"
                         ? "/ day"
                         : option.pricingType === "PER_UNIT_PER_DAY"
@@ -479,14 +479,14 @@ export default function OptionsAdmin() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[10px] uppercase font-bold text-[#57657e]">Inventory Stock</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Inventory Stock</span>
                   <span
                     className={`text-[10px] font-semibold ${
                       option.quantityStock === null
-                        ? "text-[#17604a]"
+                        ? "text-status-approved-text"
                         : option.quantityStock === 0
-                        ? "text-red-500 font-bold"
-                        : "text-[#25314c]"
+                        ? "text-destructive font-bold"
+                        : "text-foreground"
                     }`}
                   >
                     {option.quantityStock === null
@@ -497,7 +497,7 @@ export default function OptionsAdmin() {
               </div>
 
               {/* Card Footer: Action Buttons */}
-              <div className="flex items-center justify-between border-t border-[#f0f4fa] pt-3">
+              <div className="flex items-center justify-between border-t border-surface-alt pt-3">
                 <button
                   type="button"
                   onClick={() => void toggleActive(option)}
@@ -509,7 +509,7 @@ export default function OptionsAdmin() {
                   <button
                     type="button"
                     onClick={() => openModal(option)}
-                    className="inline-flex items-center gap-1 rounded-[6px] border border-[#e0e6f1] bg-white px-2 py-1 text-xs font-semibold text-[#25314c] hover:border-primary hover:text-primary hover:bg-[#f0f5ff] transition-colors whitespace-nowrap cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded-[6px] border border-border bg-white px-2 py-1 text-xs font-semibold text-foreground hover:border-primary hover:text-primary hover:bg-secondary transition-colors whitespace-nowrap cursor-pointer"
                     title="Edit option"
                   >
                     <EditIcon size={12} />
@@ -518,7 +518,7 @@ export default function OptionsAdmin() {
                   <button
                     type="button"
                     onClick={() => setOptionToDelete(option)}
-                    className="rounded-[6px] border border-[#e0e6f1] bg-white p-1 text-red-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
+                    className="rounded-[6px] border border-border bg-white p-1 text-destructive hover:text-destructive hover:bg-status-rejected-bg hover:border-status-rejected-border transition-colors"
                     title="Delete option"
                   >
                     <TrashIcon size={13} />
@@ -537,20 +537,20 @@ export default function OptionsAdmin() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-lg rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">
+                <h3 className="text-base font-bold text-foreground">
                   {editingOption ? `Edit Option: ${editingOption.name}` : `Add New Option to ${currentBranch?.name}`}
                 </h3>
-                <p className="text-xs text-[#57657e]">
+                <p className="text-xs text-muted-foreground">
                   {editingOption ? "Update pricing, inventory stock, and description" : "Register new add-on or coverage package"}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -558,7 +558,7 @@ export default function OptionsAdmin() {
 
             <form onSubmit={handleSubmitOption} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Option Code
                   <Input
                     required
@@ -570,7 +570,7 @@ export default function OptionsAdmin() {
                   />
                 </label>
 
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Option Name
                   <Input
                     required
@@ -584,7 +584,7 @@ export default function OptionsAdmin() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Category
                   <select
                     value={form.category}
@@ -592,7 +592,7 @@ export default function OptionsAdmin() {
                       const cat = categoryValue(e.target.value);
                       if (cat) setForm({ ...form, category: cat });
                     }}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none hover:border-primary focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none hover:border-primary focus:border-primary"
                   >
                     <option value="EQUIPMENT">Equipment</option>
                     <option value="PROTECTION">Protection</option>
@@ -600,12 +600,12 @@ export default function OptionsAdmin() {
                   </select>
                 </label>
 
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Pricing Model
                   {editingOption ? (
-                    <div className="mt-1 h-9 flex items-center rounded-[8px] border border-[#e0e6f1] bg-[#f8faff] px-2.5 text-xs text-[#57657e]">
+                    <div className="mt-1 h-9 flex items-center rounded-[8px] border border-border bg-surface-subtle px-2.5 text-xs text-muted-foreground">
                       <span className="font-semibold">{editingOption.pricingType}</span>
-                      <span className="ml-auto text-[10px] text-[#57657e]">(Locked)</span>
+                      <span className="ml-auto text-[10px] text-muted-foreground">(Locked)</span>
                     </div>
                   ) : (
                     <select
@@ -614,7 +614,7 @@ export default function OptionsAdmin() {
                         const pricingType = pricingTypeValue(e.target.value);
                         if (pricingType) setForm({ ...form, pricingType });
                       }}
-                      className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none hover:border-primary focus:border-primary"
+                      className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none hover:border-primary focus:border-primary"
                     >
                       <option value="PER_DAY">Per day</option>
                       <option value="PER_UNIT_PER_DAY">Per unit per day</option>
@@ -625,7 +625,7 @@ export default function OptionsAdmin() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Price Rate ({branchCurrency} · {getCurrencyMinorUnits(branchCurrency)} {getCurrencyMinorUnits(branchCurrency) === 1 ? "dec" : "decs"})
                   <Input
                     required
@@ -647,7 +647,7 @@ export default function OptionsAdmin() {
                   />
                 </label>
 
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Stock Quantity (Optional)
                   <Input
                     type="number"
@@ -661,7 +661,7 @@ export default function OptionsAdmin() {
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Description
                 <textarea
                   maxLength={1000}
@@ -669,11 +669,11 @@ export default function OptionsAdmin() {
                   placeholder="Customer visible description detailing what is included…"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="mt-1 w-full rounded-[8px] border border-[#e0e6f1] p-2.5 text-xs text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 w-full rounded-[8px] border border-border p-2.5 text-xs text-foreground outline-none focus:border-primary"
                 />
               </label>
 
-              <label className="flex items-center gap-2 pt-1 font-semibold text-[#25314c] cursor-pointer">
+              <label className="flex items-center gap-2 pt-1 font-semibold text-foreground cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.isActive}
@@ -683,7 +683,7 @@ export default function OptionsAdmin() {
                 <span>Active in catalog (visible to customers during checkout)</span>
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
@@ -708,41 +708,41 @@ export default function OptionsAdmin() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-status-rejected-bg text-destructive">
                 <TrashIcon size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Delete Rental Option</h3>
-                <p className="text-xs text-[#57657e]">This action cannot be undone.</p>
+                <h3 className="text-base font-bold text-foreground">Delete Rental Option</h3>
+                <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
               </div>
             </div>
 
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 text-xs space-y-1.5">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-xs space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Option Code:</span>
-                <span className="font-mono font-bold text-[#25314c]">{optionToDelete.code}</span>
+                <span className="text-muted-foreground">Option Code:</span>
+                <span className="font-mono font-bold text-foreground">{optionToDelete.code}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Option Name:</span>
-                <span className="font-semibold text-[#25314c]">{optionToDelete.name}</span>
+                <span className="text-muted-foreground">Option Name:</span>
+                <span className="font-semibold text-foreground">{optionToDelete.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Category:</span>
-                <span className="font-medium text-[#25314c]">{optionToDelete.category}</span>
+                <span className="text-muted-foreground">Category:</span>
+                <span className="font-medium text-foreground">{optionToDelete.category}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Price:</span>
-                <span className="font-bold text-[#25314c]">{formatCurrency(optionToDelete.price, branchCurrency)}</span>
+                <span className="text-muted-foreground">Price:</span>
+                <span className="font-bold text-foreground">{formatCurrency(optionToDelete.price, branchCurrency)}</span>
               </div>
             </div>
 
-            <p className="text-xs text-[#57657e]">
+            <p className="text-xs text-muted-foreground">
               Are you sure you want to permanently remove this option from <strong>{currentBranch?.name}</strong>? If this option is reserved in active customer rentals, deletion will be guarded.
             </p>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#e0e6f1]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
               <Button
                 type="button"
                 variant="outline"
@@ -758,7 +758,7 @@ export default function OptionsAdmin() {
                 variant="destructive"
                 disabled={deleting}
                 onClick={() => void handleConfirmDelete()}
-                className="font-bold bg-red-600 hover:bg-red-700 text-white"
+                className="font-bold bg-destructive hover:bg-destructive-hover text-white"
               >
                 {deleting ? "Deleting…" : "Confirm Delete"}
               </Button>

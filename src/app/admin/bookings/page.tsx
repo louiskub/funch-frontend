@@ -53,7 +53,7 @@ import {
 
 const queueKey = ["admin", "booking-queue"];
 const selectClass =
-  "h-10 w-full min-w-0 rounded-[8px] border border-[#e0e6f1] bg-white px-3 text-xs text-[#25314c] outline-none transition-colors hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50";
+  "h-10 w-full min-w-0 rounded-[8px] border border-border bg-card px-3 text-xs text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50";
 
 export default function AdminBookings() {
   return (
@@ -109,28 +109,28 @@ function BookingsWorkspace() {
       label: "Awaiting Review",
       count: pendingCount,
       icon: ClockIcon,
-      color: "bg-[#fff0ce] text-[#815110] border-[#fde199]",
+      color: "bg-status-pending-bg text-status-pending-text border-status-pending-border",
     },
     {
       value: "APPROVED" as BookingFilter,
       label: "Ready for Pickup",
       count: approvedCount,
       icon: CarIcon,
-      color: "bg-[#e8f0fe] text-primary border-[#c2d7fe]",
+      color: "bg-accent text-primary border-status-in-use-border",
     },
     {
       value: "IN_USE" as BookingFilter,
       label: "On the Road",
       count: inUseCount,
       icon: CalendarIcon,
-      color: "bg-[#e9f0fc] text-[#28569c] border-[#b8d2fb]",
+      color: "bg-status-in-use-bg text-status-in-use-text border-status-in-use-border",
     },
     {
       value: "RETURN_REVIEW" as BookingFilter,
       label: "Return Review & Settle",
       count: returnReviewCount,
       icon: ShieldCheckIcon,
-      color: "bg-[#e3f3eb] text-[#17604a] border-[#b5e3ce]",
+      color: "bg-status-approved-bg text-status-approved-text border-status-approved-border",
     },
   ];
 
@@ -142,13 +142,13 @@ function BookingsWorkspace() {
   return (
     <div className="space-y-6">
       {/* Top Controls Bar: Branch Selector & Live Refresh */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[16px] border border-[#e0e6f1] bg-white p-4 shadow-[0_1px_3px_0_rgba(37,49,76,0.04)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[16px] border border-border bg-card p-4 shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--shadow-color)) 4%, transparent)]">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#f0f5ff] text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-secondary text-primary">
             <MapPinIcon size={20} />
           </div>
           <div>
-            <label htmlFor="branch-filter-select" className="text-xs font-semibold text-[#57657e] block">
+            <label htmlFor="branch-filter-select" className="text-xs font-semibold text-muted-foreground block">
               Filter by branch
             </label>
             <div className="flex items-center gap-2 mt-0.5">
@@ -156,7 +156,7 @@ function BookingsWorkspace() {
                 id="branch-filter-select"
                 value={branchId}
                 onChange={(e) => setBranchId(e.target.value)}
-                className="font-bold text-sm text-[#25314c] bg-transparent outline-none cursor-pointer hover:text-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary rounded-[4px]"
+                className="font-bold text-sm text-foreground bg-transparent outline-none cursor-pointer hover:text-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary rounded-[4px]"
               >
                 <option value="">All Branches ({branches.length} branches)</option>
                 {branches.map(([id, name]) => (
@@ -197,8 +197,8 @@ function BookingsWorkspace() {
               onClick={() => setStageFilter(isSelected ? "ALL" : value)}
               className={`flex items-center gap-3.5 rounded-[14px] border p-4 text-left transition-all duration-150 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isSelected
-                  ? "border-primary bg-[#f0f5ff] shadow-[0_1px_3px_0_rgba(39,71,183,0.1)] ring-2 ring-primary/20"
-                  : "border-[#e0e6f1] bg-white hover:border-[#b0c0de] hover:shadow-[0_1px_3px_0_rgba(37,49,76,0.04)]"
+                  ? "border-primary bg-secondary shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--primary-shadow-color)) 10%, transparent)] ring-2 ring-primary/20"
+                  : "border-border bg-card hover:border-border hover:shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--shadow-color)) 4%, transparent)]"
               }`}
             >
               <div
@@ -207,15 +207,15 @@ function BookingsWorkspace() {
                 <Icon size={20} />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-xs font-medium text-[#57657e] truncate block">
+                <span className="text-xs font-medium text-muted-foreground truncate block">
                   {label}
                 </span>
-                <strong className="text-xl font-bold tabular-nums text-[#25314c] mt-0.5 block">
+                <strong className="text-xl font-bold tabular-nums text-foreground mt-0.5 block">
                   {queue.isPending ? "…" : count}
                 </strong>
               </div>
               {isSelected && (
-                <span className="text-[10px] font-bold text-primary bg-white px-2 py-0.5 rounded-full border border-primary/20">
+                <span className="text-[10px] font-bold text-primary bg-card px-2 py-0.5 rounded-full border border-primary/20">
                   Filtered
                 </span>
               )}
@@ -225,14 +225,14 @@ function BookingsWorkspace() {
       </div>
 
       {/* Main Workspace: Table with Search & Status Pills */}
-      <div className="rounded-[16px] border border-[#e0e6f1] bg-white p-5 shadow-xs space-y-4">
+      <div className="rounded-[16px] border border-border bg-card p-5 shadow-xs space-y-4">
         {/* Search & Status Pills Row */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-md">
               <SearchIcon
                 size={16}
-                className="absolute left-3 top-3 text-[#57657e]"
+                className="absolute left-3 top-3 text-muted-foreground"
               />
               <Input
                 type="search"
@@ -245,14 +245,14 @@ function BookingsWorkspace() {
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-3 top-3 text-[#57657e] hover:text-[#25314c]"
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                 >
                   <XIcon size={14} />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-[#57657e]">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>
                 Showing <strong>{rows.length}</strong> of {items.length} bookings
               </span>
@@ -293,7 +293,7 @@ function BookingsWorkspace() {
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-150 active:scale-[0.98] shrink-0 ${
                     active
                       ? "bg-primary text-white shadow-xs"
-                      : "bg-[#f0f4fa] text-[#57657e] hover:bg-[#e0e6f1] hover:text-[#25314c]"
+                      : "bg-surface-alt text-muted-foreground hover:bg-border hover:text-foreground"
                   }`}
                 >
                   <span>{opt.label}</span>
@@ -301,7 +301,7 @@ function BookingsWorkspace() {
                     className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold tabular-nums ${
                       active
                         ? "bg-white/20 text-white"
-                        : "bg-white text-[#57657e]"
+                        : "bg-card text-muted-foreground"
                     }`}
                   >
                     {pillCount}
@@ -316,21 +316,21 @@ function BookingsWorkspace() {
         {queue.isPending ? (
           <div className="py-16 text-center space-y-3">
             <RefreshCwIcon size={24} className="mx-auto animate-spin text-primary" />
-            <p className="text-xs text-[#57657e]">Loading booking queue…</p>
+            <p className="text-xs text-muted-foreground">Loading booking queue…</p>
           </div>
         ) : queue.isError ? (
-          <div className="rounded-[10px] border border-red-200 bg-red-50 p-6 text-center text-xs text-red-600 space-y-3">
-            <AlertCircleIcon size={24} className="mx-auto text-red-500" />
+          <div className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-6 text-center text-xs text-status-rejected-text space-y-3">
+            <AlertCircleIcon size={24} className="mx-auto text-status-rejected-text" />
             <p>Could not load the booking queue: {queue.error.message}</p>
             <Button size="sm" variant="outline" onClick={() => void queue.refetch()}>
               Try again
             </Button>
           </div>
         ) : rows.length === 0 ? (
-          <div className="rounded-[12px] border border-dashed border-[#e0e6f1] p-12 text-center space-y-3">
+          <div className="rounded-[12px] border border-dashed border-border p-12 text-center space-y-3">
             <CarIcon size={36} className="mx-auto text-primary/40" />
-            <h3 className="text-sm font-bold text-[#25314c]">No bookings found</h3>
-            <p className="text-xs text-[#57657e] max-w-sm mx-auto">
+            <h3 className="text-sm font-bold text-foreground">No bookings found</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               {items.length
                 ? "No reservations match your current search and stage filters."
                 : "No customer booking requests have been placed yet."}
@@ -350,60 +350,60 @@ function BookingsWorkspace() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[10px] border border-[#e0e6f1]">
+          <div className="overflow-x-auto rounded-[10px] border border-border">
             <Table>
-              <TableHeader className="bg-[#f8faff]">
-                <TableRow className="border-b border-[#e0e6f1]">
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+              <TableHeader className="bg-surface-subtle">
+                <TableRow className="border-b border-border">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Booking # & Customer
                   </TableHead>
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Vehicle & Branch
                   </TableHead>
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Physical Vehicle
                   </TableHead>
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Rental Schedule
                   </TableHead>
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Booking Value
                   </TableHead>
-                  <TableHead className="font-bold text-xs text-[#25314c]">
+                  <TableHead className="font-bold text-xs text-foreground">
                     Stage & Status
                   </TableHead>
-                  <TableHead className="text-right font-bold text-xs text-[#25314c]">
+                  <TableHead className="text-right font-bold text-xs text-foreground">
                     Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-[#e0e6f1]">
+              <TableBody className="divide-y divide-border">
                 {rows.map((booking) => {
                   const stage = bookingStage(booking);
                   return (
                     <TableRow
                       key={booking.id}
-                      className="hover:bg-[#f8faff] transition-colors duration-150"
+                      className="hover:bg-surface-subtle transition-colors duration-150"
                     >
                       {/* Booking Number & Customer */}
                       <TableCell className="align-top py-3.5">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-xs font-bold text-primary bg-[#f0f5ff] px-2 py-0.5 rounded-[4px] tabular-nums">
+                          <span className="font-mono text-xs font-bold text-primary bg-secondary px-2 py-0.5 rounded-[4px] tabular-nums">
                             {booking.bookingNumber}
                           </span>
                           <button
                             type="button"
                             onClick={() => copyText(booking.bookingNumber, "Booking number")}
-                            className="text-[#57657e] hover:text-primary transition-colors p-0.5 rounded hover:bg-[#e0e6f1]/50"
+                            className="text-muted-foreground hover:text-primary transition-colors p-0.5 rounded hover:bg-border/50"
                             title="Copy booking number"
                           >
                             <CopyIcon size={12} />
                           </button>
                         </div>
-                        <div className="mt-1 font-semibold text-xs text-[#25314c]">
+                        <div className="mt-1 font-semibold text-xs text-foreground">
                           {booking.customerName}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#57657e]">
+                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground">
                           <a
                             href={`mailto:${booking.customerEmail}`}
                             className="hover:text-primary inline-flex items-center gap-1 transition-colors"
@@ -427,10 +427,10 @@ function BookingsWorkspace() {
 
                       {/* Vehicle & Branch */}
                       <TableCell className="align-top py-3.5">
-                        <div className="text-xs font-bold text-[#25314c]">
+                        <div className="text-xs font-bold text-foreground">
                           {booking.brand} {booking.model}
                         </div>
-                        <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-[#57657e]">
+                        <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                           <MapPinIcon size={11} className="text-primary" />
                           <span>{booking.branchName}</span>
                         </div>
@@ -439,12 +439,12 @@ function BookingsWorkspace() {
                       {/* Physical Vehicle Assigned */}
                       <TableCell className="align-top py-3.5">
                         {booking.licensePlate ? (
-                          <div className="inline-flex items-center gap-1 rounded bg-[#e8f0fe] px-2 py-0.5 font-mono text-xs font-bold text-primary border border-primary/20 tabular-nums">
+                          <div className="inline-flex items-center gap-1 rounded bg-accent px-2 py-0.5 font-mono text-xs font-bold text-primary border border-primary/20 tabular-nums">
                             <CarIcon size={12} />
                             <span>{booking.licensePlate}</span>
                           </div>
                         ) : (
-                          <span className="rounded bg-[#f0f4fa] px-2 py-0.5 text-[10px] font-medium text-[#57657e]">
+                          <span className="rounded bg-surface-alt px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                             Unassigned
                           </span>
                         )}
@@ -452,14 +452,14 @@ function BookingsWorkspace() {
 
                       {/* Rental Schedule */}
                       <TableCell className="align-top py-3.5 text-xs min-w-[160px] tabular-nums">
-                        <div className="font-medium text-[#25314c]">
+                        <div className="font-medium text-foreground">
                           {branchTime(booking.pickupAt, booking.timezone)}
                         </div>
-                        <div className="text-[11px] text-[#57657e] mt-0.5">
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
                           to {branchTime(booking.returnAt, booking.timezone)}
                         </div>
                         {booking.actualReturnAt && (
-                          <div className="text-[10px] text-[#17604a] font-semibold mt-1">
+                          <div className="text-[10px] text-status-approved-text font-semibold mt-1">
                             Returned: {branchTime(booking.actualReturnAt, booking.timezone)}
                           </div>
                         )}
@@ -467,11 +467,11 @@ function BookingsWorkspace() {
 
                       {/* Booking Value */}
                       <TableCell className="align-top py-3.5 whitespace-nowrap">
-                        <div className="text-xs font-bold font-mono text-[#25314c] tabular-nums">
+                        <div className="text-xs font-bold font-mono text-foreground tabular-nums">
                           {formatCurrency(booking.finalAmount, booking.currencyCode)}
                         </div>
                         {booking.charges.length > 0 && (
-                          <span className="inline-block mt-0.5 rounded-full bg-[#f0f4fa] px-2 py-0.5 text-[9px] font-bold text-[#57657e] tabular-nums">
+                          <span className="inline-block mt-0.5 rounded-full bg-surface-alt px-2 py-0.5 text-[9px] font-bold text-muted-foreground tabular-nums">
                             {booking.charges.length} extra charge{booking.charges.length > 1 ? "s" : ""}
                           </span>
                         )}
@@ -661,29 +661,29 @@ function BookingDetailsDrawer({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex justify-end bg-[#25314c]/60 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in-0"
+      className="fixed inset-0 z-50 flex justify-end bg-foreground/60 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in-0"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300 ease-out">
+      <div className="w-full max-w-md bg-card h-full shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300 ease-out">
         {/* Drawer Header */}
-        <div className="p-5 border-b border-[#e0e6f1] flex items-center justify-between bg-[#f8faff] sticky top-0 z-10">
+        <div className="p-5 border-b border-border flex items-center justify-between bg-surface-subtle sticky top-0 z-10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold text-primary bg-[#e8f0fe] px-2 py-0.5 rounded tabular-nums">
+              <span className="font-mono text-sm font-bold text-primary bg-accent px-2 py-0.5 rounded tabular-nums">
                 {booking.bookingNumber}
               </span>
               <StatusBadge status={booking.status} className="text-[10px]" />
             </div>
-            <p className="text-xs text-[#57657e] mt-1 tabular-nums">
+            <p className="text-xs text-muted-foreground mt-1 tabular-nums">
               Created on {branchTime(booking.pickupAt, booking.timezone)}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#57657e] hover:text-[#25314c] p-1.5 rounded-full hover:bg-[#e0e6f1] transition-colors"
+            className="text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-secondary transition-colors"
           >
             <XIcon size={18} />
           </button>
@@ -692,25 +692,25 @@ function BookingDetailsDrawer({
         {/* Drawer Body */}
         <div className="p-5 space-y-5 text-xs flex-1">
           {/* Customer Profile Box */}
-          <div className="rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] p-3.5 space-y-2">
-            <h4 className="text-xs font-bold text-[#25314c]">
+          <div className="rounded-[12px] border border-border bg-surface-subtle p-3.5 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
               Customer details
             </h4>
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm text-[#25314c]">
+              <span className="font-bold text-sm text-foreground">
                 {booking.customerName}
               </span>
             </div>
             <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2 text-[#57657e]">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <MailIcon size={12} className="text-primary" />
-                <a href={`mailto:${booking.customerEmail}`} className="hover:underline text-[#25314c]">
+                <a href={`mailto:${booking.customerEmail}`} className="hover:underline text-foreground">
                   {booking.customerEmail}
                 </a>
               </div>
-              <div className="flex items-center gap-2 text-[#57657e]">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <PhoneIcon size={12} className="text-primary" />
-                <a href={`tel:${booking.customerPhone}`} className="hover:underline text-[#25314c] tabular-nums">
+                <a href={`tel:${booking.customerPhone}`} className="hover:underline text-foreground tabular-nums">
                   {booking.customerPhone}
                 </a>
               </div>
@@ -718,58 +718,58 @@ function BookingDetailsDrawer({
           </div>
 
           {/* Vehicle & Assignment Box */}
-          <div className="rounded-[12px] border border-[#e0e6f1] p-3.5 space-y-2">
-            <h4 className="text-xs font-bold text-[#25314c]">
+          <div className="rounded-[12px] border border-border p-3.5 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
               Vehicle & assignment
             </h4>
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-bold text-sm text-[#25314c]">
+                <span className="font-bold text-sm text-foreground">
                   {booking.brand} {booking.model}
                 </span>
-                <p className="text-[11px] text-[#57657e]">Branch: {booking.branchName}</p>
+                <p className="text-[11px] text-muted-foreground">Branch: {booking.branchName}</p>
               </div>
               {data?.licensePlate ? (
-                <div className="rounded bg-[#e8f0fe] px-2.5 py-1 text-right border border-primary/20 tabular-nums">
+                <div className="rounded bg-accent px-2.5 py-1 text-right border border-primary/20 tabular-nums">
                   <span className="text-[9px] font-semibold text-primary block">Car Plate</span>
                   <span className="font-mono text-xs font-bold text-primary">
                     {data.licensePlate}
                   </span>
                 </div>
               ) : (
-                <span className="rounded bg-[#f0f4fa] px-2 py-0.5 text-[10px] font-semibold text-[#57657e]">
+                <span className="rounded bg-surface-alt px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                   Not assigned
                 </span>
               )}
             </div>
             {data?.carVin && (
-              <div className="text-[10px] text-[#57657e] font-mono pt-1 border-t border-[#f0f4fa] tabular-nums">
+              <div className="text-[10px] text-muted-foreground font-mono pt-1 border-t border-border tabular-nums">
                 VIN: {data.carVin} {data.carYear ? `· Year ${data.carYear}` : ""}
               </div>
             )}
           </div>
 
           {/* Rental Schedule Box */}
-          <div className="rounded-[12px] border border-[#e0e6f1] p-3.5 space-y-2">
-            <h4 className="text-xs font-bold text-[#25314c]">
+          <div className="rounded-[12px] border border-border p-3.5 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
               Rental schedule
             </h4>
             <div className="grid grid-cols-2 gap-2 tabular-nums">
-              <div className="rounded bg-[#f8faff] p-2">
-                <span className="text-[10px] text-[#57657e] block">Pickup</span>
-                <span className="font-semibold text-[#25314c] block mt-0.5">
+              <div className="rounded bg-surface-subtle p-2">
+                <span className="text-[10px] text-muted-foreground block">Pickup</span>
+                <span className="font-semibold text-foreground block mt-0.5">
                   {branchTime(booking.pickupAt, booking.timezone)}
                 </span>
               </div>
-              <div className="rounded bg-[#f8faff] p-2">
-                <span className="text-[10px] text-[#57657e] block">Scheduled Return</span>
-                <span className="font-semibold text-[#25314c] block mt-0.5">
+              <div className="rounded bg-surface-subtle p-2">
+                <span className="text-[10px] text-muted-foreground block">Scheduled Return</span>
+                <span className="font-semibold text-foreground block mt-0.5">
                   {branchTime(booking.returnAt, booking.timezone)}
                 </span>
               </div>
             </div>
             {booking.actualReturnAt && (
-              <div className="rounded bg-[#e3f3eb] p-2 border border-[#b5e3ce] text-[#17604a] tabular-nums">
+              <div className="rounded bg-status-approved-bg p-2 border border-status-approved-border text-status-approved-text tabular-nums">
                 <span className="text-[10px] font-bold block">Actual Return</span>
                 <span className="font-bold text-xs mt-0.5 block">
                   {branchTime(booking.actualReturnAt, booking.timezone)}
@@ -778,26 +778,26 @@ function BookingDetailsDrawer({
             )}
             {booking.actualReturnAt &&
               (data?.readyAt || booking.readyAt ? (
-                <div className="rounded bg-[#e8f0fe] p-2 border border-[#b8d1f8] text-[#185abc] tabular-nums">
+                <div className="rounded bg-accent p-2 border border-status-in-use-border text-status-in-use-text tabular-nums">
                   <span className="text-[10px] font-bold block">Vehicle Readiness</span>
                   <span className="font-bold text-xs mt-0.5 block">
                     ● Ready for Next Rental ({branchTime(String(data?.readyAt || booking.readyAt), booking.timezone)})
                   </span>
                 </div>
               ) : (
-                <div className="rounded bg-amber-50 p-2.5 border border-amber-200 text-amber-900 flex items-center justify-between gap-2">
+                <div className="rounded bg-status-pending-bg p-2.5 border border-status-pending-border text-status-pending-text flex items-center justify-between gap-2">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-status-pending-text block">
                       Turnaround / Cooldown
                     </span>
-                    <span className="text-[11px] text-amber-800 block mt-0.5">
+                    <span className="text-[11px] text-status-pending-text block mt-0.5">
                       Standard 1-hr cooldown in effect
                     </span>
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="bg-white border-amber-300 text-amber-800 hover:bg-amber-100 text-xs font-bold h-7 shrink-0"
+                    className="bg-card border-status-pending-border text-status-pending-text hover:bg-status-pending-bg text-xs font-bold h-7 shrink-0"
                     onClick={handleMarkReady}
                     disabled={markingReady}
                   >
@@ -808,49 +808,49 @@ function BookingDetailsDrawer({
           </div>
 
           {/* Selected Add-on Options */}
-          <div className="rounded-[12px] border border-[#e0e6f1] p-3.5 space-y-2">
-            <h4 className="text-xs font-bold text-[#25314c]">
+          <div className="rounded-[12px] border border-border p-3.5 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
               Selected add-on options
             </h4>
             {detail.isPending ? (
-              <p className="text-[#57657e]">Loading options…</p>
+              <p className="text-muted-foreground">Loading options…</p>
             ) : data?.options.length ? (
-              <div className="divide-y divide-[#f0f4fa]">
+              <div className="divide-y divide-border">
                 {data.options.map((opt) => (
                   <div key={opt.id} className="py-1.5 flex justify-between items-center text-xs">
                     <div>
-                      <span className="font-semibold text-[#25314c]">{opt.name}</span>
-                      <span className="text-[#57657e] ml-1 tabular-nums">× {opt.quantity}</span>
+                      <span className="font-semibold text-foreground">{opt.name}</span>
+                      <span className="text-muted-foreground ml-1 tabular-nums">× {opt.quantity}</span>
                     </div>
-                    <span className="font-mono font-bold text-[#25314c] tabular-nums">
+                    <span className="font-mono font-bold text-foreground tabular-nums">
                       {money(opt.totalAmount)}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-[#57657e] italic">No add-ons requested with this booking.</p>
+              <p className="text-muted-foreground italic">No add-ons requested with this booking.</p>
             )}
           </div>
 
           {/* Additional Charges / Damages if any */}
           {data?.charges && data.charges.length > 0 && (
-            <div className="rounded-[12px] border border-amber-200 bg-amber-50/50 p-3.5 space-y-2">
-              <h4 className="text-xs font-bold text-amber-800">
+            <div className="rounded-[12px] border border-status-pending-border bg-status-pending-bg/50 p-3.5 space-y-2">
+              <h4 className="text-xs font-bold text-status-pending-text">
                 Additional charges ({data.charges.length})
               </h4>
-              <div className="divide-y divide-amber-200/60">
+              <div className="divide-y divide-status-pending-border/60">
                 {data.charges.map((chg) => (
                   <div key={chg.id} className="py-1.5 flex justify-between items-center text-xs">
                     <div>
-                      <span className="font-semibold text-[#25314c]">{chg.description}</span>
-                      <span className="text-[10px] text-amber-800 ml-1">({chg.type})</span>
+                      <span className="font-semibold text-foreground">{chg.description}</span>
+                      <span className="text-[10px] text-status-pending-text ml-1">({chg.type})</span>
                     </div>
                     <div className="text-right">
-                      <span className="font-mono font-bold text-[#25314c] block tabular-nums">
+                      <span className="font-mono font-bold text-foreground block tabular-nums">
                         {money(chg.amount)}
                       </span>
-                      <span className="text-[9px] font-semibold text-[#57657e]">
+                      <span className="text-[9px] font-semibold text-muted-foreground">
                         {chg.status}
                       </span>
                     </div>
@@ -861,20 +861,20 @@ function BookingDetailsDrawer({
           )}
 
           {/* Financial Breakdown */}
-          <div className="rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] p-3.5 space-y-2">
-            <h4 className="text-xs font-bold text-[#25314c]">
+          <div className="rounded-[12px] border border-border bg-surface-subtle p-3.5 space-y-2">
+            <h4 className="text-xs font-bold text-foreground">
               Payment & settlement
             </h4>
             <div className="space-y-1.5 pt-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Vehicle Rental Subtotal</span>
+                <span className="text-muted-foreground">Vehicle Rental Subtotal</span>
                 <span className="font-mono tabular-nums">{money(data?.rentalSubtotal || booking.totalAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Add-on Options Subtotal</span>
+                <span className="text-muted-foreground">Add-on Options Subtotal</span>
                 <span className="font-mono tabular-nums">{money(data?.optionsSubtotal || "0")}</span>
               </div>
-              <div className="flex justify-between pt-1 border-t border-[#e0e6f1] font-bold text-sm text-[#25314c]">
+              <div className="flex justify-between pt-1 border-t border-border font-bold text-sm text-foreground">
                 <span>Final Balance</span>
                 <span className="font-mono text-primary tabular-nums">
                   {money(data?.finalAmount || booking.finalAmount)}
@@ -885,7 +885,7 @@ function BookingDetailsDrawer({
 
           {/* Rejection / Cancellation Reason */}
           {(data?.rejectionReason || data?.cancellationReason) && (
-            <div className="rounded-[12px] border border-red-200 bg-red-50 p-3.5 text-xs text-red-700 space-y-1">
+            <div className="rounded-[12px] border border-status-rejected-border bg-status-rejected-bg p-3.5 text-xs text-status-rejected-text space-y-1">
               <strong className="block font-bold">
                 {data.rejectionReason ? "Rejection Reason" : "Cancellation Reason"}:
               </strong>
@@ -895,7 +895,7 @@ function BookingDetailsDrawer({
         </div>
 
         {/* Drawer Footer Actions */}
-        <div className="p-4 border-t border-[#e0e6f1] bg-white sticky bottom-0 z-10 flex gap-2">
+        <div className="p-4 border-t border-border bg-card sticky bottom-0 z-10 flex gap-2">
           {booking.status === "PENDING" && (
             <Button
               className="w-full font-bold text-xs"
@@ -1017,45 +1017,45 @@ function ReviewBookingModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#25314c]/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
     >
-      <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+      <div className="w-full max-w-lg rounded-[16px] border border-border bg-card p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="text-base font-bold text-[#25314c]">
+            <h3 className="text-base font-bold text-foreground">
               Review Reservation Request
             </h3>
-            <p className="text-[10px] text-[#57657e] tabular-nums">
+            <p className="text-[10px] text-muted-foreground tabular-nums">
               Booking #{booking.bookingNumber} · {booking.brand} {booking.model}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-[#57657e] hover:text-[#25314c] p-1 rounded-full hover:bg-[#e0e6f1]/50 transition-colors">
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-border/50 transition-colors">
             <XIcon size={18} />
           </button>
         </div>
 
         {/* Verification Summary */}
         <div className="space-y-3 text-xs">
-          <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 space-y-1.5">
+          <div className="rounded-[10px] border border-border bg-surface-subtle p-3 space-y-1.5">
             <div className="flex justify-between">
-              <span className="text-[#57657e]">Customer:</span>
-              <span className="font-semibold text-[#25314c]">{booking.customerName}</span>
+              <span className="text-muted-foreground">Customer:</span>
+              <span className="font-semibold text-foreground">{booking.customerName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#57657e]">Contact:</span>
-              <span className="text-[#25314c] tabular-nums">{booking.customerEmail} · {booking.customerPhone}</span>
+              <span className="text-muted-foreground">Contact:</span>
+              <span className="text-foreground tabular-nums">{booking.customerEmail} · {booking.customerPhone}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#57657e]">Branch:</span>
-              <span className="font-semibold text-[#25314c]">{booking.branchName}</span>
+              <span className="text-muted-foreground">Branch:</span>
+              <span className="font-semibold text-foreground">{booking.branchName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#57657e]">Period:</span>
+              <span className="text-muted-foreground">Period:</span>
               <span className="tabular-nums">
                 {branchTime(booking.pickupAt, booking.timezone)} → {branchTime(booking.returnAt, booking.timezone)}
               </span>
             </div>
-            <div className="flex justify-between font-bold pt-1 border-t border-[#e0e6f1]">
+            <div className="flex justify-between font-bold pt-1 border-t border-border">
               <span>Total Value:</span>
               <span className="font-mono text-primary tabular-nums">
                 {formatCurrency(booking.totalAmount, booking.currencyCode)}
@@ -1065,23 +1065,23 @@ function ReviewBookingModal({
 
           {!isRejecting ? (
             <div className="space-y-4 pt-2">
-              <label className="flex items-start gap-2.5 text-xs text-[#25314c] cursor-pointer bg-[#f0f5ff]/60 p-3 rounded-[8px] border border-primary/20">
+              <label className="flex items-start gap-2.5 text-xs text-foreground cursor-pointer bg-secondary/60 p-3 rounded-[8px] border border-primary/20">
                 <input
                   type="checkbox"
                   checked={reviewed}
                   onChange={(e) => setReviewed(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-[#e0e6f1] text-primary focus:ring-primary accent-[#2747b7]"
+                  className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
                 />
                 <span>
                   I have verified customer contact details and confirmed fleet capacity & option inventory on the server.
                 </span>
               </label>
 
-              <div className="flex justify-between items-center pt-2 border-t border-[#e0e6f1]">
+              <div className="flex justify-between items-center pt-2 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsRejecting(true)}
-                  className="text-xs font-bold text-[#a22f2f] hover:underline cursor-pointer"
+                  className="text-xs font-bold text-destructive hover:underline cursor-pointer"
                 >
                   Reject request…
                 </button>
@@ -1103,7 +1103,7 @@ function ReviewBookingModal({
             </div>
           ) : (
             <form onSubmit={(e) => void handleReject(e)} className="space-y-3 pt-2">
-              <label className="block text-xs font-semibold text-[#25314c]">
+              <label className="block text-xs font-semibold text-foreground">
                 Reason for Rejection (Customer visible)
                 <textarea
                   required
@@ -1112,14 +1112,14 @@ function ReviewBookingModal({
                   placeholder="e.g. Requested model or options unavailable for this date range…"
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  className="mt-1 w-full rounded-[8px] border border-[#e0e6f1] p-2.5 text-xs text-[#25314c] outline-none focus:border-red-500"
+                  className="mt-1 w-full rounded-[8px] border border-border bg-card p-2.5 text-xs text-foreground outline-none focus:border-destructive"
                 />
               </label>
-              <div className="flex justify-between items-center pt-2 border-t border-[#e0e6f1]">
+              <div className="flex justify-between items-center pt-2 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsRejecting(false)}
-                  className="text-xs font-semibold text-[#57657e] hover:underline"
+                  className="text-xs font-semibold text-muted-foreground hover:underline"
                 >
                   ← Back to approval
                 </button>
@@ -1201,27 +1201,27 @@ function PickupCarModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#25314c]/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
     >
-      <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+      <div className="w-full max-w-lg rounded-[16px] border border-border bg-card p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="text-base font-bold text-[#25314c]">
+            <h3 className="text-base font-bold text-foreground">
               Assign Vehicle at Pickup
             </h3>
-            <p className="text-[10px] text-[#57657e] tabular-nums">
+            <p className="text-[10px] text-muted-foreground tabular-nums">
               Booking #{booking.bookingNumber} · Customer: {booking.customerName}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-[#57657e] hover:text-[#25314c] p-1 rounded-full hover:bg-[#e0e6f1]/50 transition-colors">
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-border/50 transition-colors">
             <XIcon size={18} />
           </button>
         </div>
 
         {/* Early Handover Guard Alert */}
         {!isPickupDue && (
-          <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 flex items-start gap-2">
-            <AlertCircleIcon size={16} className="shrink-0 mt-0.5 text-amber-600" />
+          <div className="rounded-[10px] border border-status-pending-border bg-status-pending-bg p-3 text-xs text-status-pending-text flex items-start gap-2">
+            <AlertCircleIcon size={16} className="shrink-0 mt-0.5 text-status-pending-text" />
             <div>
               <strong className="block font-bold">Scheduled Pickup Not Reached:</strong>
               Pickup is scheduled for <span className="tabular-nums">{branchTime(booking.pickupAt, booking.timezone)}</span>. Early handover is not permitted.
@@ -1231,7 +1231,7 @@ function PickupCarModal({
 
         {/* Physical Cars List */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-[#25314c]">
+          <div className="flex items-center justify-between text-xs font-semibold text-foreground">
             <span>Select Available Physical Vehicle ({booking.brand} {booking.model})</span>
             <button
               type="button"
@@ -1244,9 +1244,9 @@ function PickupCarModal({
           </div>
 
           {carsQuery.isPending ? (
-            <p className="text-xs text-[#57657e] py-4 text-center">Loading fleet readiness…</p>
+            <p className="text-xs text-muted-foreground py-4 text-center">Loading fleet readiness…</p>
           ) : cars.length === 0 ? (
-            <div className="rounded-[10px] border border-dashed border-[#e0e6f1] p-6 text-center text-xs text-[#57657e]">
+            <div className="rounded-[10px] border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
               No physical vehicles registered for this model at this branch.
             </div>
           ) : (
@@ -1263,10 +1263,10 @@ function PickupCarModal({
                     }}
                     className={`flex items-center justify-between p-3 rounded-[10px] border transition-all duration-150 ${
                       isSelected
-                        ? "border-primary bg-[#f0f5ff] ring-2 ring-primary/20 cursor-pointer shadow-xs"
+                        ? "border-primary bg-secondary ring-2 ring-primary/20 cursor-pointer shadow-xs"
                         : isReady
-                        ? "border-[#e0e6f1] bg-white hover:border-primary/40 cursor-pointer hover:shadow-xs"
-                        : "border-[#e0e6f1] bg-[#f8faff] opacity-60 cursor-not-allowed"
+                        ? "border-border bg-card hover:border-primary/40 cursor-pointer hover:shadow-xs"
+                        : "border-border bg-surface-subtle opacity-60 cursor-not-allowed"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -1276,13 +1276,13 @@ function PickupCarModal({
                         checked={isSelected}
                         disabled={!isReady}
                         onChange={() => setSelectedCarId(car.id)}
-                        className="h-4 w-4 text-primary focus:ring-primary accent-[#2747b7]"
+                        className="h-4 w-4 text-primary focus:ring-primary accent-primary"
                       />
                       <div>
-                        <span className="font-mono text-sm font-bold text-[#25314c] block tabular-nums">
+                        <span className="font-mono text-sm font-bold text-foreground block tabular-nums">
                           {car.licensePlate}
                         </span>
-                        <span className="text-[10px] text-[#57657e]">
+                        <span className="text-[10px] text-muted-foreground">
                           Status: {car.status}
                         </span>
                       </div>
@@ -1290,23 +1290,23 @@ function PickupCarModal({
 
                     <div>
                       {isReady ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e3f3eb] px-2.5 py-0.5 text-[10px] font-bold text-[#17604a]">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-status-approved-bg px-2.5 py-0.5 text-[10px] font-bold text-status-approved-text">
                           <span className="relative flex h-1.5 w-1.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#17604a]"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-approved-text opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-status-approved-text"></span>
                           </span>
                           Ready for Pickup
                         </span>
                       ) : car.isOutOnRent ? (
-                        <span className="rounded-full bg-[#f0f4fa] px-2 py-0.5 text-[10px] font-bold text-[#57657e]">
+                        <span className="rounded-full bg-surface-alt px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
                           Out on Rent
                         </span>
                       ) : car.status !== "ACTIVE" ? (
-                        <span className="rounded-full bg-[#fce8e8] px-2 py-0.5 text-[10px] font-bold text-red-600">
+                        <span className="rounded-full bg-status-rejected-bg px-2 py-0.5 text-[10px] font-bold text-status-rejected-text">
                           {car.status}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200 tabular-nums">
+                        <span className="rounded-full bg-status-pending-bg px-2 py-0.5 text-[10px] font-bold text-status-pending-text border border-status-pending-border tabular-nums">
                           Cooldown until {branchTime(car.readyAt, booking.timezone)}
                         </span>
                       )}
@@ -1319,8 +1319,8 @@ function PickupCarModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex justify-between items-center pt-3 border-t border-[#e0e6f1]">
-          <span className="text-[11px] text-[#57657e]">
+        <div className="flex justify-between items-center pt-3 border-t border-border">
+          <span className="text-[11px] text-muted-foreground">
             {selectedCar ? (
               <span className="tabular-nums">Selected: <strong className="font-mono text-primary">{selectedCar.licensePlate}</strong></span>
             ) : "Select a vehicle plate"}
@@ -1473,25 +1473,25 @@ function ReturnSettlementModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#25314c]/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
     >
-      <div className="w-full max-w-xl rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+      <div className="w-full max-w-xl rounded-[16px] border border-border bg-card p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="text-base font-bold text-[#25314c]">
+            <h3 className="text-base font-bold text-foreground">
               Vehicle Return & Settlement
             </h3>
-            <p className="text-[10px] text-[#57657e] tabular-nums">
+            <p className="text-[10px] text-muted-foreground tabular-nums">
               Booking #{booking.bookingNumber} · {booking.brand} {booking.model} ({booking.customerName})
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-[#57657e] hover:text-[#25314c] p-1 rounded-full hover:bg-[#e0e6f1]/50 transition-colors">
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-border/50 transition-colors">
             <XIcon size={18} />
           </button>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-between gap-1.5 p-1 bg-[#f0f4fa] rounded-[10px]">
+        <div className="flex items-center justify-between gap-1.5 p-1 bg-surface-alt rounded-[10px]">
           {[
             { id: "return" as const, num: 1, label: "Return & Surcharge" },
             { id: "charges" as const, num: 2, label: `Damages & Fuel (${data?.charges.length || 0})` },
@@ -1505,13 +1505,13 @@ function ReturnSettlementModal({
                 onClick={() => setStep(s.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[8px] text-xs transition-all duration-150 ${
                   active
-                    ? "bg-white text-primary shadow-xs font-bold"
-                    : "text-[#57657e] font-semibold hover:text-[#25314c] hover:bg-white/50"
+                    ? "bg-card text-primary shadow-xs font-bold"
+                    : "text-muted-foreground font-semibold hover:text-foreground hover:bg-card/50"
                 }`}
               >
                 <span
                   className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
-                    active ? "bg-primary text-white" : "bg-[#d0dae8] text-[#57657e]"
+                    active ? "bg-primary text-white" : "bg-border text-muted-foreground"
                   }`}
                 >
                   {s.num}
@@ -1525,19 +1525,19 @@ function ReturnSettlementModal({
         {/* STEP 1: Return Inspection & Late Surcharge Preview */}
         {step === "return" && (
           <div className="space-y-4 text-xs">
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3.5 space-y-2">
-              <h4 className="text-xs font-bold text-[#25314c]">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3.5 space-y-2">
+              <h4 className="text-xs font-bold text-foreground">
                 Schedule comparison
               </h4>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Scheduled Return:</span>
-                <span className="font-semibold text-[#25314c] tabular-nums">
+                <span className="text-muted-foreground">Scheduled Return:</span>
+                <span className="font-semibold text-foreground tabular-nums">
                   {branchTime(booking.returnAt, booking.timezone)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Actual Return Recorded:</span>
-                <span className="font-semibold text-[#25314c] tabular-nums">
+                <span className="text-muted-foreground">Actual Return Recorded:</span>
+                <span className="font-semibold text-foreground tabular-nums">
                   {booking.actualReturnAt
                     ? branchTime(booking.actualReturnAt, booking.timezone)
                     : "Not recorded yet (Current time will be used)"}
@@ -1546,34 +1546,34 @@ function ReturnSettlementModal({
             </div>
 
             {/* Overdue Surcharge Preview */}
-            <div className="rounded-[10px] border border-[#e0e6f1] p-3.5 space-y-2">
-              <h4 className="text-xs font-bold text-[#25314c]">
+            <div className="rounded-[10px] border border-border p-3.5 space-y-2">
+              <h4 className="text-xs font-bold text-foreground">
                 Calculated surcharges (overdue fees)
               </h4>
               {previewQuery.isPending ? (
-                <p className="text-[#57657e]">Calculating surcharges…</p>
+                <p className="text-muted-foreground">Calculating surcharges…</p>
               ) : preview?.lines.length ? (
-                <div className="space-y-1.5 divide-y divide-[#f0f4fa]">
+                <div className="space-y-1.5 divide-y divide-border">
                   {preview.lines.map((line, idx) => (
                     <div key={idx} className="flex justify-between pt-1 font-medium">
                       <span>{line.kind === "EXTRA_RENTAL" ? "Extra Vehicle Rental" : "Extra Add-on Rental"}</span>
-                      <span className="font-mono text-red-600 tabular-nums">+{money(line.amount.amount)}</span>
+                      <span className="font-mono text-destructive tabular-nums">+{money(line.amount.amount)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between pt-2 font-bold text-[#25314c]">
+                  <div className="flex justify-between pt-2 font-bold text-foreground">
                     <span>Projected Total:</span>
                     <span className="font-mono text-primary tabular-nums">{money(preview.projectedFinalAmount)}</span>
                   </div>
                 </div>
               ) : (
-                <p className="text-[#17604a] font-medium">
+                <p className="text-status-approved-text font-medium">
                   ✓ Returned within agreed schedule. No extra rental surcharges applied.
                 </p>
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-[#e0e6f1]">
-              <span className="text-[#57657e]">
+            <div className="flex justify-between items-center pt-2 border-t border-border">
+              <span className="text-muted-foreground">
                 {booking.actualReturnAt ? "Return already recorded." : "Record return time now."}
               </span>
               <div className="flex gap-2">
@@ -1600,13 +1600,13 @@ function ReturnSettlementModal({
         {step === "charges" && (
           <div className="space-y-4 text-xs">
             {/* Add Charge Form */}
-            <form onSubmit={(e) => void handleAddCharge(e)} className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3.5 space-y-3">
-              <h4 className="text-xs font-bold text-[#25314c]">
+            <form onSubmit={(e) => void handleAddCharge(e)} className="rounded-[10px] border border-border bg-surface-subtle p-3.5 space-y-3">
+              <h4 className="text-xs font-bold text-foreground">
                 Add surcharge (damage, fuel, cleaning, fines)
               </h4>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Charge Category
                   <select
                     value={chargeType}
@@ -1621,7 +1621,7 @@ function ReturnSettlementModal({
                   </select>
                 </label>
 
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Amount ({booking.currencyCode} · {getCurrencyMinorUnits(booking.currencyCode)} dec)
                   <Input
                     required
@@ -1637,7 +1637,7 @@ function ReturnSettlementModal({
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Description / Damage Note
                 <Input
                   required
@@ -1650,7 +1650,7 @@ function ReturnSettlementModal({
               </label>
 
               {chargeError && (
-                <p className="text-red-600 text-[11px] font-semibold">{chargeError}</p>
+                <p className="text-destructive text-[11px] font-semibold">{chargeError}</p>
               )}
 
               <Button
@@ -1665,7 +1665,7 @@ function ReturnSettlementModal({
 
             {/* Existing Charges List */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#25314c]">
+              <h4 className="text-xs font-bold text-foreground">
                 Logged charges ({data?.charges.length || 0})
               </h4>
 
@@ -1674,22 +1674,22 @@ function ReturnSettlementModal({
                   {data.charges.map((chg) => (
                     <div
                       key={chg.id}
-                      className="flex items-center justify-between p-2.5 rounded-[8px] border border-[#e0e6f1] bg-white text-xs"
+                      className="flex items-center justify-between p-2.5 rounded-[8px] border border-border bg-card text-xs"
                     >
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-[#25314c]">{chg.description}</span>
-                          <span className="rounded bg-[#f0f4fa] px-1.5 py-0.2 text-[9px] font-bold text-[#57657e]">
+                          <span className="font-bold text-foreground">{chg.description}</span>
+                          <span className="rounded bg-surface-alt px-1.5 py-0.2 text-[9px] font-bold text-muted-foreground">
                             {chg.type}
                           </span>
                         </div>
-                        <span className="text-[10px] text-[#57657e]">
+                        <span className="text-[10px] text-muted-foreground">
                           Status: <strong>{chg.status}</strong>
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="font-mono font-bold text-[#25314c] tabular-nums">
+                        <span className="font-mono font-bold text-foreground tabular-nums">
                           {money(chg.amount)}
                         </span>
                         {chg.status === "PENDING" && (
@@ -1719,11 +1719,11 @@ function ReturnSettlementModal({
                   ))}
                 </div>
               ) : (
-                <p className="text-[#57657e] italic">No extra damages or fuel charges logged.</p>
+                <p className="text-muted-foreground italic">No extra damages or fuel charges logged.</p>
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-[#e0e6f1]">
+            <div className="flex justify-between items-center pt-2 border-t border-border">
               <Button variant="outline" size="sm" onClick={() => setStep("return")} className="transition-all active:scale-[0.98]">
                 ← Back
               </Button>
@@ -1737,24 +1737,24 @@ function ReturnSettlementModal({
         {/* STEP 3: Final Settlement & Completion */}
         {step === "settle" && (
           <div className="space-y-4 text-xs">
-            <div className="rounded-[12px] border border-[#e0e6f1] bg-[#f8faff] p-4 space-y-2.5">
-              <h4 className="text-xs font-bold text-[#25314c]">
+            <div className="rounded-[12px] border border-border bg-surface-subtle p-4 space-y-2.5">
+              <h4 className="text-xs font-bold text-foreground">
                 Final bill summary
               </h4>
               <div className="space-y-1.5 pt-1">
                 <div className="flex justify-between">
-                  <span className="text-[#57657e]">Original Booking Value:</span>
+                  <span className="text-muted-foreground">Original Booking Value:</span>
                   <span className="font-mono tabular-nums">{money(booking.totalAmount)}</span>
                 </div>
                 {data?.charges
                   .filter((c) => c.status === "CONFIRMED")
                   .map((c) => (
-                    <div key={c.id} className="flex justify-between text-amber-800">
+                    <div key={c.id} className="flex justify-between text-status-pending-text">
                       <span>{c.description}:</span>
                       <span className="font-mono tabular-nums">+{money(c.amount)}</span>
                     </div>
                   ))}
-                <div className="flex justify-between pt-2 border-t border-[#e0e6f1] text-base font-bold text-[#25314c]">
+                <div className="flex justify-between pt-2 border-t border-border text-base font-bold text-foreground">
                   <span>Total Amount to Settle:</span>
                   <span className="font-mono text-primary tabular-nums">
                     {money(data?.finalAmount || booking.finalAmount)}
@@ -1764,12 +1764,12 @@ function ReturnSettlementModal({
             </div>
 
             {pendingCharges.length > 0 && (
-              <div className="rounded-[8px] border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-800">
+              <div className="rounded-[8px] border border-status-pending-border bg-status-pending-bg p-2.5 text-xs text-status-pending-text">
                 ⚠️ You have <strong>{pendingCharges.length} pending charge(s)</strong>. Confirm or waive them in Step 2 before completing the return.
               </div>
             )}
 
-            <div className="flex justify-between items-center pt-2 border-t border-[#e0e6f1]">
+            <div className="flex justify-between items-center pt-2 border-t border-border">
               <Button variant="outline" size="sm" onClick={() => setStep("charges")} className="transition-all active:scale-[0.98]">
                 ← Back to Charges
               </Button>
@@ -1827,29 +1827,29 @@ function CancelBookingModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#25314c]/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-4 backdrop-blur-xs animate-in fade-in-0 duration-200"
     >
-      <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+      <div className="w-full max-w-md rounded-[16px] border border-border bg-card p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="text-base font-bold text-red-600">
+            <h3 className="text-base font-bold text-destructive">
               Cancel Booking Reservation
             </h3>
-            <p className="text-[10px] text-[#57657e] tabular-nums">
+            <p className="text-[10px] text-muted-foreground tabular-nums">
               Booking #{booking.bookingNumber} · Customer: {booking.customerName}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-[#57657e] hover:text-[#25314c] p-1 rounded-full hover:bg-[#e0e6f1]/50 transition-colors">
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-border/50 transition-colors">
             <XIcon size={18} />
           </button>
         </div>
 
         <form onSubmit={(e) => void handleConfirmCancel(e)} className="space-y-3 text-xs">
-          <p className="text-[#57657e]">
+          <p className="text-muted-foreground">
             Cancelling will release all reserved fleet capacity and option inventory. Please provide a clear audit reason.
           </p>
 
-          <label className="block font-semibold text-[#25314c]">
+          <label className="block font-semibold text-foreground">
             Reason for Cancellation (Customer visible)
             <textarea
               required
@@ -1858,11 +1858,11 @@ function CancelBookingModal({
               placeholder="e.g. Customer requested cancellation via phone, or vehicle unavailable…"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="mt-1 w-full rounded-[8px] border border-[#e0e6f1] p-2.5 text-xs text-[#25314c] outline-none focus:border-red-500"
+              className="mt-1 w-full rounded-[8px] border border-border p-2.5 text-xs text-foreground outline-none focus:border-destructive"
             />
           </label>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[#e0e6f1]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button variant="outline" size="sm" onClick={onClose} disabled={busy} className="transition-all active:scale-[0.98]">
               Close
             </Button>

@@ -32,7 +32,51 @@
     "day": "day",
     "hour": "hour",
     "viewDetails": "View details & book",
-    "seats": "seats"
+    "seats": "seats",
+    "sortLabel": "Sort by",
+    "sortRateAsc": "Rate: Low to High",
+    "sortRateDesc": "Rate: High to Low",
+    "sortModel": "Vehicle Model",
+    "allVehicles": "All vehicles"
+  },
+  "offer": {
+    "backToAll": "← Back to all cars",
+    "specs": "Vehicle Specifications",
+    "seats": "Seats",
+    "transmission": "Transmission",
+    "fuel": "Fuel Type",
+    "hourlyRate": "Hourly Rate",
+    "dailyRate": "Daily Rate",
+    "branchLocation": "Branch Location",
+    "includedFeatures": "Included Features",
+    "reserveTitle": "Reserve this car",
+    "calculateQuote": "Calculate Quote",
+    "calculating": "Calculating quote…",
+    "addOnOptions": "Available Add-on Options",
+    "quoteSummary": "Quote Breakdown",
+    "carRental": "Vehicle rental",
+    "optionsTotal": "Add-on options",
+    "total": "Estimated total",
+    "checkoutTitle": "Checkout & Reserve",
+    "submitBooking": "Submit Booking Request",
+    "submitting": "Submitting request…"
+  },
+  "bookings": {
+    "title": "My bookings",
+    "subtitle": "Review your rental requests, confirmed vehicles, and active trips.",
+    "findAnotherCar": "Find another car",
+    "reservationDetails": "Reservation details",
+    "cancelBooking": "Cancel reservation",
+    "cancelling": "Cancelling…",
+    "noBookings": "No bookings found",
+    "noBookingsDesc": "You haven't placed any car rental reservations yet."
+  },
+  "account": {
+    "title": "My account",
+    "subtitle": "Manage your profile details and preferences.",
+    "profile": "Personal Profile",
+    "saveChanges": "Save profile",
+    "saving": "Saving…"
   },
   "admin": {
     "navigation": "Admin navigation",

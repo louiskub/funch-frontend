@@ -287,8 +287,8 @@ export default function MembersPage() {
   if (!allowed) {
     return (
       <main className="mx-auto max-w-5xl flex-1 p-8">
-        <h1 className="text-2xl font-bold text-[#25314c]">Customer Administration</h1>
-        <p role="status" className="mt-4 text-sm text-[#57657e]">
+        <h1 className="text-2xl font-bold text-foreground">Customer Administration</h1>
+        <p role="status" className="mt-4 text-sm text-muted-foreground">
           {message}
         </p>
       </main>
@@ -317,7 +317,7 @@ export default function MembersPage() {
       {message && (
         <div
           role="alert"
-          className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]"
+          className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-secondary text-foreground border border-border-subtle"
         >
           {message}
         </div>
@@ -326,66 +326,66 @@ export default function MembersPage() {
       {/* KPI Metric Summary Bar (Fleet Admin Style) */}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {/* Total Customers */}
-        <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+        <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#57657e]">Total Customers</span>
-            <div className="rounded-full bg-[#f0f5ff] p-1.5 text-primary">
+            <span className="text-xs font-medium text-muted-foreground">Total Customers</span>
+            <div className="rounded-full bg-secondary p-1.5 text-primary">
               <UsersIcon size={16} />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#25314c] tabular-nums">
+          <p className="mt-2 text-2xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.total}
           </p>
-          <span className="text-xs text-[#57657e]">Registered accounts</span>
+          <span className="text-xs text-muted-foreground">Registered accounts</span>
         </div>
 
         {/* Active Accounts */}
-        <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+        <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#57657e]">Active Accounts</span>
-            <div className="rounded-full bg-[#e3f3eb] p-1.5 text-[#17604a]">
+            <span className="text-xs font-medium text-muted-foreground">Active Accounts</span>
+            <div className="rounded-full bg-status-approved-bg p-1.5 text-status-approved-text">
               <CheckIcon size={16} />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#17604a] tabular-nums">
+          <p className="mt-2 text-2xl font-bold tracking-tight text-status-approved-text tabular-nums">
             {stats.active}
           </p>
-          <span className="text-xs text-[#57657e]">In good standing</span>
+          <span className="text-xs text-muted-foreground">In good standing</span>
         </div>
 
         {/* Suspended Accounts */}
-        <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+        <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#57657e]">Suspended Accounts</span>
-            <div className="rounded-full bg-[#fce8e8] p-1.5 text-[#a22f2f]">
+            <span className="text-xs font-medium text-muted-foreground">Suspended Accounts</span>
+            <div className="rounded-full bg-status-rejected-bg p-1.5 text-status-rejected-text">
               <BanIcon size={16} />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#a22f2f] tabular-nums">
+          <p className="mt-2 text-2xl font-bold tracking-tight text-status-rejected-text tabular-nums">
             {stats.suspended}
           </p>
-          <span className="text-xs text-[#57657e]">Access suspended</span>
+          <span className="text-xs text-muted-foreground">Access suspended</span>
         </div>
 
         {/* Active Trips */}
-        <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+        <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[#57657e]">Active Renters</span>
-            <div className="rounded-full bg-[#e9f0fc] p-1.5 text-[#28569c]">
+            <span className="text-xs font-medium text-muted-foreground">Active Renters</span>
+            <div className="rounded-full bg-status-in-use-bg p-1.5 text-status-in-use-text">
               <CarIcon size={16} />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#28569c] tabular-nums">
+          <p className="mt-2 text-2xl font-bold tracking-tight text-status-in-use-text tabular-nums">
             {stats.withActiveTrips}
           </p>
-          <span className="text-xs text-[#57657e]">Ongoing or pending trips</span>
+          <span className="text-xs text-muted-foreground">Ongoing or pending trips</span>
         </div>
       </div>
 
       {/* Filter & Search Toolbar */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[14px] border border-border bg-white p-4 shadow-xs">
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1 rounded-[10px] bg-[#f0f5ff] p-1">
+        <div className="flex items-center gap-1 rounded-[10px] bg-secondary p-1">
           <button
             type="button"
             onClick={() => {
@@ -395,7 +395,7 @@ export default function MembersPage() {
             className={`rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all ${
               filterStatus === "ALL"
                 ? "bg-white text-primary shadow-xs"
-                : "text-[#57657e] hover:text-[#25314c]"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             All ({items.length})
@@ -408,8 +408,8 @@ export default function MembersPage() {
             }}
             className={`rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all ${
               filterStatus === "ACTIVE"
-                ? "bg-white text-[#17604a] shadow-xs"
-                : "text-[#57657e] hover:text-[#25314c]"
+                ? "bg-white text-status-approved-text shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Active ({stats.active})
@@ -422,8 +422,8 @@ export default function MembersPage() {
             }}
             className={`rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all ${
               filterStatus === "SUSPENDED"
-                ? "bg-white text-[#a22f2f] shadow-xs"
-                : "text-[#57657e] hover:text-[#25314c]"
+                ? "bg-white text-status-rejected-text shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Suspended ({stats.suspended})
@@ -435,7 +435,7 @@ export default function MembersPage() {
           <div className="relative w-72">
             <SearchIcon
               size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#57657e]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               placeholder="Search by customer name or email…"
@@ -456,7 +456,7 @@ export default function MembersPage() {
                   setQuery("");
                   void refresh();
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#57657e] hover:text-[#25314c]"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 title="Clear search"
               >
                 <XIcon size={14} />
@@ -475,23 +475,23 @@ export default function MembersPage() {
       </div>
 
       {/* Main Customers Table */}
-      <div className="rounded-[18px] border border-[#e0e6f1] bg-white shadow-sm overflow-hidden">
+      <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-[#f0f5ff]/60 border-b border-[#e0e6f1]">
-              <TableHead className="py-3.5 pl-6 font-semibold text-[#25314c] text-xs">
+            <TableRow className="bg-secondary/60 border-b border-border">
+              <TableHead className="py-3.5 pl-6 font-semibold text-foreground text-xs">
                 Customer Profile
               </TableHead>
-              <TableHead className="py-3.5 font-semibold text-[#25314c] text-xs">
+              <TableHead className="py-3.5 font-semibold text-foreground text-xs">
                 Contact Details
               </TableHead>
-              <TableHead className="py-3.5 font-semibold text-[#25314c] text-xs">
+              <TableHead className="py-3.5 font-semibold text-foreground text-xs">
                 Rental Activity
               </TableHead>
-              <TableHead className="py-3.5 font-semibold text-[#25314c] text-xs">
+              <TableHead className="py-3.5 font-semibold text-foreground text-xs">
                 Account Status
               </TableHead>
-              <TableHead className="py-3.5 pr-6 text-right font-semibold text-[#25314c] text-xs">
+              <TableHead className="py-3.5 pr-6 text-right font-semibold text-foreground text-xs">
                 Actions
               </TableHead>
             </TableRow>
@@ -502,8 +502,8 @@ export default function MembersPage() {
                 <TableCell colSpan={5} className="py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <UsersIcon size={36} className="mx-auto text-primary/40 mb-2" />
-                    <h3 className="text-sm font-bold text-[#25314c]">No customers found</h3>
-                    <p className="text-xs text-[#57657e]">
+                    <h3 className="text-sm font-bold text-foreground">No customers found</h3>
+                    <p className="text-xs text-muted-foreground">
                       {query
                         ? `No customer records matched "${query}". Try adjusting your keywords or clearing the filter.`
                         : "No customer accounts match the selected status filter."}
@@ -530,26 +530,26 @@ export default function MembersPage() {
                 return (
                   <TableRow
                     key={c.id}
-                    className="hover:bg-[#f0f5ff]/30 transition-colors border-b border-[#e0e6f1] last:border-none"
+                    className="hover:bg-secondary/30 transition-colors border-b border-border last:border-none"
                   >
                     {/* Customer Profile Column */}
                     <TableCell className="py-3.5 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dfe9fc] text-xs font-bold text-primary">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-primary">
                           {getInitials(c.name)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#25314c] text-xs">{c.name}</span>
+                            <span className="font-bold text-foreground text-xs">{c.name}</span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="font-mono text-[10px] text-[#57657e]" title={c.id}>
+                            <span className="font-mono text-[10px] text-muted-foreground" title={c.id}>
                               ID: {c.id.slice(0, 8)}…
                             </span>
                             {c.createdAt && (
                               <>
-                                <span className="text-[#d7e2f5]">•</span>
-                                <span className="text-[10px] text-[#57657e]">
+                                <span className="text-border-subtle">•</span>
+                                <span className="text-[10px] text-muted-foreground">
                                   Joined {formatDateOnly(c.createdAt)}
                                 </span>
                               </>
@@ -562,36 +562,36 @@ export default function MembersPage() {
                     {/* Contact Details Column */}
                     <TableCell className="py-3.5">
                       <div className="space-y-1 text-xs">
-                        <div className="flex items-center gap-1.5 text-[#25314c]">
+                        <div className="flex items-center gap-1.5 text-foreground">
                           <span className="truncate max-w-[200px]" title={c.email}>
                             {c.email}
                           </span>
                           <button
                             type="button"
                             onClick={() => copyToClipboard(c.email, `email-${c.id}`)}
-                            className="text-[#57657e] hover:text-primary transition-colors"
+                            className="text-muted-foreground hover:text-primary transition-colors"
                             title="Copy email address"
                             aria-label={`Copy email for ${c.name}`}
                           >
                             {copiedKey === `email-${c.id}` ? (
-                              <CheckIcon size={13} className="text-[#17604a]" />
+                              <CheckIcon size={13} className="text-status-approved-text" />
                             ) : (
                               <CopyIcon size={13} />
                             )}
                           </button>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[#57657e] text-xs">
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                           <span>{c.phone || "No phone recorded"}</span>
                           {c.phone && (
                             <button
                               type="button"
                               onClick={() => copyToClipboard(c.phone, `phone-${c.id}`)}
-                              className="text-[#57657e] hover:text-primary transition-colors"
+                              className="text-muted-foreground hover:text-primary transition-colors"
                               title="Copy phone number"
                               aria-label={`Copy phone for ${c.name}`}
                             >
                               {copiedKey === `phone-${c.id}` ? (
-                                <CheckIcon size={12} className="text-[#17604a]" />
+                                <CheckIcon size={12} className="text-status-approved-text" />
                               ) : (
                                 <CopyIcon size={12} />
                               )}
@@ -604,7 +604,7 @@ export default function MembersPage() {
                     {/* Rental Activity Column */}
                     <TableCell className="py-3.5">
                       <div className="space-y-1">
-                        <span className="font-semibold text-xs text-[#25314c] tabular-nums">
+                        <span className="font-semibold text-xs text-foreground tabular-nums">
                           {c.bookingCount} {c.bookingCount === 1 ? "booking" : "bookings"}
                         </span>
                         <div>
@@ -613,9 +613,9 @@ export default function MembersPage() {
                               <CarIcon size={11} className="mr-0.5" /> Active Trip
                             </Badge>
                           ) : c.bookingCount > 0 ? (
-                            <span className="text-xs text-[#57657e]">Past renter</span>
+                            <span className="text-xs text-muted-foreground">Past renter</span>
                           ) : (
-                            <span className="text-xs text-[#57657e]">No bookings yet</span>
+                            <span className="text-xs text-muted-foreground">No bookings yet</span>
                           )}
                         </div>
                       </div>
@@ -638,7 +638,7 @@ export default function MembersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => void openDetail(c.id)}
-                          className="h-8 text-xs font-semibold text-primary hover:bg-[#f0f5ff]"
+                          className="h-8 text-xs font-semibold text-primary hover:bg-secondary"
                         >
                           View History
                         </Button>
@@ -655,8 +655,8 @@ export default function MembersPage() {
                           }}
                           className={`h-8 text-xs font-semibold ${
                             c.isSuspended
-                              ? "text-[#17604a] hover:bg-[#e3f3eb]"
-                              : "text-[#a22f2f] hover:bg-[#fce8e8]"
+                              ? "text-status-approved-text hover:bg-status-approved-bg"
+                              : "text-status-rejected-text hover:bg-status-rejected-bg"
                           }`}
                         >
                           {c.isSuspended ? "Unsuspend" : "Suspend"}
@@ -672,26 +672,26 @@ export default function MembersPage() {
 
         {/* Table Footer with Pagination (Always visible when items exist, Fleet Admin Style) */}
         {filteredItems.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#e0e6f1] bg-[#f0f5ff]/40 px-6 py-3 text-xs text-[#57657e]">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border bg-secondary/40 px-6 py-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-3">
               <span>
                 Showing{" "}
-                <strong className="text-[#25314c] tabular-nums">
+                <strong className="text-foreground tabular-nums">
                   {(validPage - 1) * itemsPerPage + 1}–
                   {Math.min(validPage * itemsPerPage, filteredItems.length)}
                 </strong>{" "}
-                of <strong className="text-[#25314c] tabular-nums">{filteredItems.length}</strong>{" "}
+                of <strong className="text-foreground tabular-nums">{filteredItems.length}</strong>{" "}
                 customers
               </span>
-              <div className="flex items-center gap-1.5 border-l border-[#d7e2f5] pl-3">
-                <span className="text-xs text-[#57657e]">Per page:</span>
+              <div className="flex items-center gap-1.5 border-l border-border-subtle pl-3">
+                <span className="text-xs text-muted-foreground">Per page:</span>
                 <select
                   value={itemsPerPage}
                   onChange={(e) => {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="rounded-[6px] border border-[#e0e6f1] bg-white px-2 py-0.5 text-xs font-semibold text-[#25314c] outline-none cursor-pointer"
+                  className="rounded-[6px] border border-border bg-white px-2 py-0.5 text-xs font-semibold text-foreground outline-none cursor-pointer"
                 >
                   <option value={5}>5</option>
                   <option value={10}>10</option>
@@ -711,7 +711,7 @@ export default function MembersPage() {
               >
                 <ChevronLeftIcon size={14} />
               </Button>
-              <span className="px-2 font-medium text-[#25314c] tabular-nums">
+              <span className="px-2 font-medium text-foreground tabular-nums">
                 Page {validPage} of {totalPages}
               </span>
               <Button
@@ -738,18 +738,18 @@ export default function MembersPage() {
           onClick={() => setSelectedCustomer(null)}
         >
           <div
-            className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-[20px] bg-white shadow-2xl border border-[#e0e6f1] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-[20px] bg-white shadow-2xl border border-border overflow-hidden animate-in fade-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] bg-[#f0f5ff]/60 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-6 py-4">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#dfe9fc] text-sm font-bold text-primary">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">
                   {getInitials(selectedCustomer.name)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-[#25314c]">
+                    <h2 className="text-base font-bold text-foreground">
                       {selectedCustomer.name}
                     </h2>
                     <Badge
@@ -759,7 +759,7 @@ export default function MembersPage() {
                       {selectedCustomer.isSuspended ? "Suspended" : "Active Account"}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-[#57657e] mt-0.5">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                     <span>{selectedCustomer.email}</span>
                     <span>•</span>
                     <span>{selectedCustomer.phone || "No phone"}</span>
@@ -776,7 +776,7 @@ export default function MembersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedCustomer(null)}
-                className="rounded-[8px] p-1.5 text-[#57657e] hover:bg-white hover:text-[#25314c] transition-colors"
+                className="rounded-[8px] p-1.5 text-muted-foreground hover:bg-white hover:text-foreground transition-colors"
                 aria-label="Close dialog"
               >
                 <XIcon size={18} />
@@ -786,17 +786,17 @@ export default function MembersPage() {
             {/* Modal Body & History Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Quick Summary Strip */}
-              <div className="grid grid-cols-3 gap-4 rounded-[12px] bg-[#f0f5ff] p-4 border border-[#d7e2f5]">
+              <div className="grid grid-cols-3 gap-4 rounded-[12px] bg-secondary p-4 border border-border-subtle">
                 <div>
-                  <span className="text-xs font-medium text-[#57657e] block">
+                  <span className="text-xs font-medium text-muted-foreground block">
                     Total Lifetime Bookings
                   </span>
-                  <span className="text-lg font-bold text-[#25314c] tabular-nums">
+                  <span className="text-lg font-bold text-foreground tabular-nums">
                     {selectedCustomer.bookingCount}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-[#57657e] block">
+                  <span className="text-xs font-medium text-muted-foreground block">
                     Active / Upcoming Trips
                   </span>
                   <span className="text-lg font-bold text-primary tabular-nums">
@@ -804,12 +804,12 @@ export default function MembersPage() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-[#57657e] block">
+                  <span className="text-xs font-medium text-muted-foreground block">
                     Account Standing
                   </span>
                   <span
                     className={`text-lg font-bold ${
-                      selectedCustomer.isSuspended ? "text-[#a22f2f]" : "text-[#17604a]"
+                      selectedCustomer.isSuspended ? "text-status-rejected-text" : "text-status-approved-text"
                     }`}
                   >
                     {selectedCustomer.isSuspended ? "Suspended" : "In Good Standing"}
@@ -820,7 +820,7 @@ export default function MembersPage() {
               {/* History Table Section */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-[#25314c]">
+                  <h3 className="text-sm font-bold text-foreground">
                     Rental & Booking History ({selectedCustomer.bookings.length})
                   </h3>
                   <Link
@@ -833,12 +833,12 @@ export default function MembersPage() {
                 </div>
 
                 {selectedCustomer.bookings.length === 0 ? (
-                  <div className="rounded-[14px] border border-dashed border-[#e0e6f1] p-8 text-center">
+                  <div className="rounded-[14px] border border-dashed border-border p-8 text-center">
                     <ClockIcon size={32} className="mx-auto text-primary/40 mb-2" />
-                    <p className="text-xs font-semibold text-[#25314c]">
+                    <p className="text-xs font-semibold text-foreground">
                       No previous bookings recorded
                     </p>
-                    <p className="text-xs text-[#57657e] mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       This customer has not submitted any rental reservations yet.
                     </p>
                   </div>
@@ -854,26 +854,26 @@ export default function MembersPage() {
                   );
 
                   return (
-                    <div className="rounded-[14px] border border-[#e0e6f1] overflow-hidden">
+                    <div className="rounded-[14px] border border-border overflow-hidden">
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-[#f0f5ff]/60 border-b border-[#e0e6f1]">
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c]">
+                          <TableRow className="bg-secondary/60 border-b border-border">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground">
                               Booking #
                             </TableHead>
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c]">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground">
                               Vehicle Model
                             </TableHead>
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c]">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground">
                               Branch Station
                             </TableHead>
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c]">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground">
                               Rental Period
                             </TableHead>
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c]">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground">
                               Total Amount
                             </TableHead>
-                            <TableHead className="py-2.5 font-semibold text-xs text-[#25314c] text-right">
+                            <TableHead className="py-2.5 font-semibold text-xs text-foreground text-right">
                               Status
                             </TableHead>
                           </TableRow>
@@ -882,32 +882,32 @@ export default function MembersPage() {
                           {pagedBookings.map((b) => (
                             <TableRow
                               key={b.id}
-                              className="border-b border-[#e0e6f1] last:border-none text-xs"
+                              className="border-b border-border last:border-none text-xs"
                             >
                               <TableCell className="py-2.5 font-mono font-bold text-primary">
                                 #{b.bookingNumber}
                               </TableCell>
-                              <TableCell className="py-2.5 font-semibold text-[#25314c]">
+                              <TableCell className="py-2.5 font-semibold text-foreground">
                                 {b.brand} {b.model}
                               </TableCell>
-                              <TableCell className="py-2.5 text-[#57657e]">
+                              <TableCell className="py-2.5 text-muted-foreground">
                                 {b.branchName}
                               </TableCell>
-                              <TableCell className="py-2.5 text-[#57657e] tabular-nums whitespace-nowrap">
+                              <TableCell className="py-2.5 text-muted-foreground tabular-nums whitespace-nowrap">
                                 <div>
-                                  <span className="text-[10px] uppercase font-bold text-[#57657e]">
+                                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
                                     Pick:
                                   </span>{" "}
                                   {formatDateTime(b.pickupAt)}
                                 </div>
                                 <div>
-                                  <span className="text-[10px] uppercase font-bold text-[#57657e]">
+                                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
                                     Ret:
                                   </span>{" "}
                                   {formatDateTime(b.returnAt)}
                                 </div>
                               </TableCell>
-                              <TableCell className="py-2.5 font-semibold text-[#25314c] tabular-nums">
+                              <TableCell className="py-2.5 font-semibold text-foreground tabular-nums">
                                 {formatCurrency(b.totalAmount, b.currencyCode)}
                               </TableCell>
                               <TableCell className="py-2.5 text-right">
@@ -919,10 +919,10 @@ export default function MembersPage() {
                       </Table>
 
                       {/* Modal Booking Pagination Controls (Always visible when bookings exist) */}
-                      <div className="flex items-center justify-between border-t border-[#e0e6f1] bg-[#f0f5ff]/40 px-4 py-2.5 text-xs text-[#57657e]">
+                      <div className="flex items-center justify-between border-t border-border bg-secondary/40 px-4 py-2.5 text-xs text-muted-foreground">
                         <span>
                           Showing{" "}
-                          <strong className="text-[#25314c] tabular-nums">
+                          <strong className="text-foreground tabular-nums">
                             {(validBookingPage - 1) * MODAL_BOOKINGS_PER_PAGE + 1}–
                             {Math.min(
                               validBookingPage * MODAL_BOOKINGS_PER_PAGE,
@@ -930,7 +930,7 @@ export default function MembersPage() {
                             )}
                           </strong>{" "}
                           of{" "}
-                          <strong className="text-[#25314c] tabular-nums">
+                          <strong className="text-foreground tabular-nums">
                             {selectedCustomer.bookings.length}
                           </strong>{" "}
                           bookings
@@ -941,16 +941,16 @@ export default function MembersPage() {
                             type="button"
                             onClick={() => setModalBookingPage((p) => Math.max(1, p - 1))}
                             disabled={validBookingPage <= 1}
-                            className={`rounded-[6px] border border-[#e0e6f1] p-1 transition-all ${
+                            className={`rounded-[6px] border border-border p-1 transition-all ${
                               validBookingPage <= 1
                                 ? "opacity-30 cursor-not-allowed"
-                                : "hover:bg-white text-[#25314c]"
+                                : "hover:bg-white text-foreground"
                             }`}
                             aria-label="Previous booking page"
                           >
                             <ChevronLeftIcon size={12} />
                           </button>
-                          <span className="px-1.5 text-xs font-semibold text-[#25314c] tabular-nums">
+                          <span className="px-1.5 text-xs font-semibold text-foreground tabular-nums">
                             {validBookingPage} / {totalBookingPages}
                           </span>
                           <button
@@ -959,10 +959,10 @@ export default function MembersPage() {
                               setModalBookingPage((p) => Math.min(totalBookingPages, p + 1))
                             }
                             disabled={validBookingPage >= totalBookingPages}
-                            className={`rounded-[6px] border border-[#e0e6f1] p-1 transition-all ${
+                            className={`rounded-[6px] border border-border p-1 transition-all ${
                               validBookingPage >= totalBookingPages
                                 ? "opacity-30 cursor-not-allowed"
-                                : "hover:bg-white text-[#25314c]"
+                                : "hover:bg-white text-foreground"
                             }`}
                             aria-label="Next booking page"
                           >
@@ -977,8 +977,8 @@ export default function MembersPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between border-t border-[#e0e6f1] bg-[#f0f5ff]/40 px-6 py-3.5">
-              <span className="text-xs text-[#57657e]">
+            <div className="flex items-center justify-between border-t border-border bg-secondary/40 px-6 py-3.5">
+              <span className="text-xs text-muted-foreground">
                 Customer Account ID: <code className="font-mono">{selectedCustomer.id}</code>
               </span>
               <div className="flex items-center gap-2">
@@ -995,8 +995,8 @@ export default function MembersPage() {
                   }}
                   className={`h-8 text-xs font-semibold ${
                     selectedCustomer.isSuspended
-                      ? "text-[#17604a] border-[#17604a]/30 hover:bg-[#e3f3eb]"
-                      : "text-[#a22f2f] border-[#a22f2f]/30 hover:bg-[#fce8e8]"
+                      ? "text-status-approved-text border-status-approved-text/30 hover:bg-status-approved-bg"
+                      : "text-status-rejected-text border-status-rejected-text/30 hover:bg-status-rejected-bg"
                   }`}
                 >
                   {selectedCustomer.isSuspended ? "Unsuspend Account" : "Suspend Account"}
@@ -1023,25 +1023,25 @@ export default function MembersPage() {
           onClick={() => setSuspensionTarget(null)}
         >
           <div
-            className="w-full max-w-md rounded-[18px] bg-white p-6 shadow-2xl border border-[#e0e6f1] animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-md rounded-[18px] bg-white p-6 shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 text-[#a22f2f] mb-3">
-              <div className="rounded-full bg-[#fce8e8] p-2">
+            <div className="flex items-center gap-3 text-status-rejected-text mb-3">
+              <div className="rounded-full bg-status-rejected-bg p-2">
                 <AlertCircleIcon size={22} />
               </div>
-              <h2 className="text-base font-bold text-[#25314c]">Suspend Customer Account</h2>
+              <h2 className="text-base font-bold text-foreground">Suspend Customer Account</h2>
             </div>
 
-            <p className="text-xs text-[#57657e] leading-relaxed mb-4">
+            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
               Are you sure you want to suspend{" "}
-              <strong className="text-[#25314c]">{suspensionTarget.name}</strong> (
-              <span className="font-mono text-[#25314c]">{suspensionTarget.email}</span>)?
+              <strong className="text-foreground">{suspensionTarget.name}</strong> (
+              <span className="font-mono text-foreground">{suspensionTarget.email}</span>)?
             </p>
 
             {/* Active Trips Warning Notice */}
             {(suspensionTarget.activeBookingCount || 0) > 0 && (
-              <div className="mb-4 rounded-[10px] bg-[#fff0ce] p-3.5 border border-[#ffd580] text-xs text-[#815110] space-y-1">
+              <div className="mb-4 rounded-[10px] bg-status-pending-bg p-3.5 border border-status-pending-border text-xs text-status-pending-text space-y-1">
                 <div className="flex items-center gap-1.5 font-bold">
                   <AlertCircleIcon size={15} />
                   <span>Active Rental in Progress</span>
@@ -1055,8 +1055,8 @@ export default function MembersPage() {
               </div>
             )}
 
-            <div className="rounded-[10px] bg-[#f0f5ff] p-3 text-xs text-[#57657e] border border-[#d7e2f5] mb-5">
-              <p className="font-medium text-[#25314c]">What happens upon suspension:</p>
+            <div className="rounded-[10px] bg-secondary p-3 text-xs text-muted-foreground border border-border-subtle mb-5">
+              <p className="font-medium text-foreground">What happens upon suspension:</p>
               <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
                 <li>All active web sessions are immediately terminated</li>
                 <li>The customer cannot log in or submit new reservations</li>
@@ -1078,7 +1078,7 @@ export default function MembersPage() {
                 size="sm"
                 onClick={() => void confirmSuspensionToggle(suspensionTarget)}
                 disabled={isSuspending}
-                className="h-9 text-xs font-bold bg-[#a22f2f] hover:bg-[#842323] text-white"
+                className="h-9 text-xs font-bold bg-status-rejected-text hover:bg-destructive-hover text-white"
               >
                 {isSuspending ? "Suspending…" : "Confirm Suspension"}
               </Button>

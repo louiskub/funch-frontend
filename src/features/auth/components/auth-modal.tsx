@@ -117,7 +117,7 @@ export function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#25314c]/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-foreground/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
       onClick={handleClose}
       aria-hidden={!isOpen}
     >
@@ -126,11 +126,11 @@ export function AuthModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="relative w-full max-w-[460px] rounded-[18px] border border-[#e0e6f1] bg-white shadow-2xl overflow-hidden transition-all duration-200 animate-in zoom-in-95"
+        className="relative w-full max-w-[460px] rounded-[18px] border border-border bg-card shadow-2xl overflow-hidden transition-all duration-200 animate-in zoom-in-95"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="border-b border-[#e0e6f1] bg-[#f0f5ff]/60 px-6 pt-6 pb-4 sm:px-7">
+        <div className="border-b border-border bg-secondary/60 px-6 pt-6 pb-4 sm:px-7">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="grid size-9 place-items-center rounded-full bg-primary text-white shadow-xs">
@@ -145,7 +145,7 @@ export function AuthModal() {
               onClick={handleClose}
               disabled={isPending}
               aria-label={t("close")}
-              className="grid size-8 place-items-center rounded-[8px] text-[#57657e] transition-colors hover:bg-white hover:text-[#25314c] focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 cursor-pointer"
+              className="grid size-8 place-items-center rounded-[8px] text-muted-foreground transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 cursor-pointer"
             >
               <XIcon size={18} />
             </button>
@@ -154,24 +154,24 @@ export function AuthModal() {
           <div className="mt-4">
             <h2
               id="auth-modal-title"
-              className="text-xl font-bold tracking-[-0.02em] text-[#25314c]"
+              className="text-xl font-bold tracking-[-0.02em] text-foreground"
             >
               {isLogin ? t("signInTitle") : t("registerTitle")}
             </h2>
-            <p className="mt-1 text-xs text-[#57657e]">
+            <p className="mt-1 text-xs text-muted-foreground">
               {isLogin ? t("signInSubtitle") : t("registerSubtitle")}
             </p>
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="mt-5 flex border-b border-[#d7e2f5]">
+          <div className="mt-5 flex border-b border-border">
             <button
               type="button"
               className={cn(
                 "pb-2.5 text-xs font-bold transition-all relative cursor-pointer",
                 isLogin
                   ? "text-primary border-b-2 border-primary"
-                  : "text-[#57657e] hover:text-[#25314c]",
+                  : "text-muted-foreground hover:text-foreground",
               )}
               onClick={() => handleSwitchMode("login")}
             >
@@ -183,7 +183,7 @@ export function AuthModal() {
                 "ml-6 pb-2.5 text-xs font-bold transition-all relative cursor-pointer",
                 !isLogin
                   ? "text-primary border-b-2 border-primary"
-                  : "text-[#57657e] hover:text-[#25314c]",
+                  : "text-muted-foreground hover:text-foreground",
               )}
               onClick={() => handleSwitchMode("register")}
             >
@@ -197,7 +197,7 @@ export function AuthModal() {
           {errorMessage && (
             <div
               role="alert"
-              className="mb-4 flex items-start gap-2.5 rounded-[10px] border border-[#fecaca] bg-[#fce8e8] p-3 text-xs font-medium text-[#a22f2f] animate-in fade-in"
+              className="mb-4 flex items-start gap-2.5 rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-3 text-xs font-medium text-status-rejected-text animate-in fade-in"
             >
               <AlertCircleIcon size={16} className="mt-0.5 shrink-0" />
               <span className="flex-1 leading-relaxed">{errorMessage}</span>
@@ -207,7 +207,7 @@ export function AuthModal() {
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {!isLogin && (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#25314c]">
+                <label className="text-xs font-bold text-foreground">
                   {t("name")}
                 </label>
                 <Input
@@ -224,7 +224,7 @@ export function AuthModal() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#25314c]">
+              <label className="text-xs font-bold text-foreground">
                 {t("email")}
               </label>
               <Input
@@ -241,7 +241,7 @@ export function AuthModal() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#25314c]">
+              <label className="text-xs font-bold text-foreground">
                 {t("password")}
               </label>
               <Input
@@ -256,7 +256,7 @@ export function AuthModal() {
                 className="h-11 text-sm rounded-[10px]"
               />
               {!isLogin && (
-                <span className="text-[11px] text-[#57657e] block">
+                <span className="text-[11px] text-muted-foreground block">
                   {t("passwordHint")}
                 </span>
               )}
@@ -264,7 +264,7 @@ export function AuthModal() {
 
             {!isLogin && (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#25314c]">
+                <label className="text-xs font-bold text-foreground">
                   {t("phone")}
                 </label>
                 <Input
@@ -284,7 +284,7 @@ export function AuthModal() {
             <Button
               type="submit"
               disabled={isPending}
-              className="mt-2 h-12 w-full rounded-[10px] bg-primary text-sm font-bold text-white shadow-sm hover:bg-[#1c358d] active:bg-[#1c358d]"
+              className="mt-2 h-12 w-full rounded-[10px] bg-primary text-sm font-bold text-white shadow-sm hover:bg-primary-hover active:bg-primary-hover"
             >
               {isPending
                 ? isLogin
@@ -297,7 +297,7 @@ export function AuthModal() {
           </form>
 
           {/* Bottom Switch Link */}
-          <div className="mt-5 border-t border-[#e0e6f1] pt-4 text-center text-xs text-[#57657e]">
+          <div className="mt-5 border-t border-border pt-4 text-center text-xs text-muted-foreground">
             {isLogin ? (
               <p>
                 {t("noAccount")}{" "}

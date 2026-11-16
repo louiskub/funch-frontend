@@ -8,14 +8,14 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-white",
-        secondary: "bg-[#f0f5ff] text-primary",
-        outline: "border border-[#e0e6f1] text-[#25314c]",
-        pill: "rounded-full bg-white border border-[#e0e6f1] text-[#57657e] px-3 py-1 font-medium",
-        pending: "bg-[#fff0ce] text-[#815110]",
-        approved: "bg-[#e3f3eb] text-[#17604a]",
-        inUse: "bg-[#e9f0fc] text-[#28569c]",
-        completed: "bg-[#edf0ef] text-[#56615e]",
-        rejected: "bg-[#fce8e8] text-[#a22f2f]",
+        secondary: "bg-secondary text-primary",
+        outline: "border border-border text-foreground",
+        pill: "rounded-full bg-card border border-border text-muted-foreground px-3 py-1 font-medium",
+        pending: "bg-status-pending-bg text-status-pending-text border border-status-pending-border",
+        approved: "bg-status-approved-bg text-status-approved-text border border-status-approved-border",
+        inUse: "bg-status-in-use-bg text-status-in-use-text border border-status-in-use-border",
+        completed: "bg-status-completed-bg text-status-completed-text border border-status-completed-border",
+        rejected: "bg-status-rejected-bg text-status-rejected-text border border-status-rejected-border",
       },
     },
     defaultVariants: {

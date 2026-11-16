@@ -14,12 +14,12 @@ export function ErrorBanner({ message, onRetry, className }: ErrorBannerProps) {
     <div
       role="alert"
       className={cn(
-        "flex items-center justify-between rounded-[10px] border border-[#fecaca] bg-[#fce8e8] p-4 text-xs font-medium text-[#a22f2f]",
+        "flex items-center justify-between rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-4 text-xs font-medium text-status-rejected-text",
         className
       )}
     >
       <div className="flex items-center gap-2.5">
-        <AlertCircleIcon size={16} className="flex-shrink-0 text-[#a22f2f]" />
+        <AlertCircleIcon size={16} className="flex-shrink-0 text-status-rejected-text" />
         <span>{message}</span>
       </div>
       {onRetry && (

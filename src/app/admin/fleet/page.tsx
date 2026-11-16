@@ -216,28 +216,28 @@ function FeaturesTagInput({
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-xs font-semibold text-[#57657e]">
+      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
         <span>Features</span>
         {isSaving ? (
           <span className="text-[10px] text-primary">Saving…</span>
         ) : savedTick ? (
-          <span className="flex items-center gap-1 text-[10px] text-[#17604a]">
+          <span className="flex items-center gap-1 text-[10px] text-status-approved-text">
             <CheckIcon size={12} /> Saved
           </span>
         ) : null}
       </div>
 
-      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-[10px] border border-[#e0e6f1] bg-white p-1.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+      <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-[10px] border border-border bg-white p-1.5 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
         {features.map((tag, idx) => (
           <span
             key={`${tag}-${idx}`}
-            className="flex items-center gap-1 rounded-[6px] border border-[#d7e2f5] bg-[#f0f5ff] px-2 py-0.5 text-xs font-medium text-[#25314c]"
+            className="flex items-center gap-1 rounded-[6px] border border-border-subtle bg-secondary px-2 py-0.5 text-xs font-medium text-foreground"
           >
             <span>{tag}</span>
             <button
               type="button"
               onClick={() => void removeTag(idx)}
-              className="text-[#57657e] hover:text-[#a22f2f] transition-colors"
+              className="text-muted-foreground hover:text-status-rejected-text transition-colors"
               title="Remove feature"
             >
               <XIcon size={12} />
@@ -261,7 +261,7 @@ function FeaturesTagInput({
             if (inputValue.trim()) void addTag(inputValue);
           }}
           placeholder={features.length === 0 ? "Type feature and press Enter…" : "Add more…"}
-          className="min-w-[120px] flex-1 bg-transparent px-1 py-0.5 text-xs text-[#25314c] outline-none placeholder:text-[#64736d]"
+          className="min-w-[120px] flex-1 bg-transparent px-1 py-0.5 text-xs text-foreground outline-none placeholder:text-muted-foreground"
         />
       </div>
     </div>
@@ -681,32 +681,32 @@ function CarHistoryModal({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-[16px] border border-[#e0e6f1] bg-white shadow-xl overflow-hidden">
+      <div className="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-[16px] border border-border bg-white shadow-xl overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#e0e6f1] p-5">
+        <div className="flex items-center justify-between border-b border-border p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#f0f5ff] text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-secondary text-primary">
               <CarIcon size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-[#25314c]">
+                <h3 className="text-base font-bold text-foreground">
                   {car.brand} {car.model}
                 </h3>
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#f0f4fa] text-[#25314c] border border-[#e0e6f1]">
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-surface-alt text-foreground border border-border">
                   {car.licensePlate}
                 </span>
                 {car.inUse ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#f0f5ff] px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> In Use Now
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f3eb] px-2 py-0.5 text-[10px] font-bold text-[#17604a]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#17604a]" /> Available
+                  <span className="inline-flex items-center gap-1 rounded-full bg-status-approved-bg px-2 py-0.5 text-[10px] font-bold text-status-approved-text">
+                    <span className="h-1.5 w-1.5 rounded-full bg-status-approved-text" /> Available
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-[#57657e] mt-0.5">
+              <p className="text-[10px] text-muted-foreground mt-0.5">
                 VIN: <span className="font-mono">{car.vin}</span> · Year {car.year} · Branch: {car.branchName}
               </p>
             </div>
@@ -714,7 +714,7 @@ function CarHistoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-[#57657e] hover:bg-[#f0f4fa] hover:text-[#25314c] transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface-alt hover:text-foreground transition-colors"
           >
             <XIcon size={18} />
           </button>
@@ -724,25 +724,25 @@ function CarHistoryModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Quick Metrics */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 text-center">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#57657e]">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-center">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Total Trips
               </span>
-              <span className="text-lg font-bold text-[#25314c]">{records.length}</span>
+              <span className="text-lg font-bold text-foreground">{records.length}</span>
             </div>
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 text-center">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#57657e]">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-center">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Operational Status
               </span>
               <span className="text-sm font-bold text-primary mt-0.5 block">
                 {car.inUse ? "In Use" : car.status === "ACTIVE" ? "Available" : car.status}
               </span>
             </div>
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 text-center">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#57657e]">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-center">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Generated Revenue
               </span>
-              <span className="text-sm font-bold text-[#25314c] mt-0.5 block">
+              <span className="text-sm font-bold text-foreground mt-0.5 block">
                 {formatCurrency(totalRevenue.toFixed(2), records[0]?.currencyCode || "THB")}
               </span>
             </div>
@@ -750,29 +750,29 @@ function CarHistoryModal({
 
           {/* Active Trip Banner if car is currently in use */}
           {activeRecord && (
-            <div className="rounded-[12px] border border-primary/30 bg-[#f0f5ff] p-4 text-xs">
+            <div className="rounded-[12px] border border-primary/30 bg-secondary p-4 text-xs">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="font-bold text-primary flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
                   Active Rental in Progress · Booking #{activeRecord.bookingNumber}
                 </span>
-                <span className="font-bold text-[#25314c]">
+                <span className="font-bold text-foreground">
                   {formatCurrency(activeRecord.totalAmount, activeRecord.currencyCode)}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-[#57657e] pt-1">
+              <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
                 <div>
-                  <span className="font-medium text-[#25314c]">Renter:</span> {activeRecord.customerName}
+                  <span className="font-medium text-foreground">Renter:</span> {activeRecord.customerName}
                   {activeRecord.customerPhone ? ` (${activeRecord.customerPhone})` : ""}
                 </div>
                 <div>
-                  <span className="font-medium text-[#25314c]">Pickup:</span> {formatDateTime(activeRecord.pickupAt)}
+                  <span className="font-medium text-foreground">Pickup:</span> {formatDateTime(activeRecord.pickupAt)}
                 </div>
                 <div>
-                  <span className="font-medium text-[#25314c]">Scheduled Return:</span> {formatDateTime(activeRecord.returnAt)}
+                  <span className="font-medium text-foreground">Scheduled Return:</span> {formatDateTime(activeRecord.returnAt)}
                 </div>
                 <div>
-                  <span className="font-medium text-[#25314c]">Return Branch:</span> {activeRecord.returnBranchName || activeRecord.pickupBranchName}
+                  <span className="font-medium text-foreground">Return Branch:</span> {activeRecord.returnBranchName || activeRecord.pickupBranchName}
                 </div>
               </div>
             </div>
@@ -780,31 +780,31 @@ function CarHistoryModal({
 
           {/* History List Table */}
           <div>
-            <h4 className="text-xs font-bold text-[#25314c] uppercase tracking-wider mb-2">
+            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-2">
               Rental History Log ({records.length})
             </h4>
 
             {loading ? (
-              <div className="py-12 text-center text-xs text-[#57657e]">
+              <div className="py-12 text-center text-xs text-muted-foreground">
                 <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
                 <p>Loading rental records…</p>
               </div>
             ) : error ? (
-              <div className="rounded-[10px] border border-red-200 bg-red-50 p-4 text-center text-xs text-red-600">
+              <div className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-4 text-center text-xs text-destructive">
                 {error}
               </div>
             ) : records.length === 0 ? (
-              <div className="rounded-[10px] border border-dashed border-[#e0e6f1] bg-[#f8faff] p-8 text-center text-xs text-[#57657e]">
+              <div className="rounded-[10px] border border-dashed border-border bg-surface-subtle p-8 text-center text-xs text-muted-foreground">
                 <ClockIcon size={28} className="mx-auto text-primary/30 mb-2" />
-                <p className="font-semibold text-[#25314c]">No rental history found</p>
-                <p className="text-[10px] text-[#57657e] mt-0.5">
+                <p className="font-semibold text-foreground">No rental history found</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
                   This car has not been assigned to any customer bookings yet.
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-[10px] border border-[#e0e6f1]">
+              <div className="overflow-x-auto rounded-[10px] border border-border">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#f8faff] border-b border-[#e0e6f1] text-[10px] uppercase font-bold text-[#57657e]">
+                  <thead className="bg-surface-subtle border-b border-border text-[10px] uppercase font-bold text-muted-foreground">
                     <tr>
                       <th className="py-2.5 px-3">Booking #</th>
                       <th className="py-2.5 px-3">Customer</th>
@@ -813,36 +813,36 @@ function CarHistoryModal({
                       <th className="py-2.5 px-3 text-right">Amount</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#f0f4fa]">
+                  <tbody className="divide-y divide-surface-alt">
                     {records.map((r) => (
-                      <tr key={r.id} className="hover:bg-[#f8faff] transition-colors">
+                      <tr key={r.id} className="hover:bg-surface-subtle transition-colors">
                         <td className="py-2.5 px-3 font-mono font-bold text-primary">
                           #{r.bookingNumber}
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="font-semibold text-[#25314c] block">{r.customerName}</span>
-                          <span className="text-[10px] text-[#57657e] block">{r.customerPhone || r.customerEmail}</span>
+                          <span className="font-semibold text-foreground block">{r.customerName}</span>
+                          <span className="text-[10px] text-muted-foreground block">{r.customerPhone || r.customerEmail}</span>
                         </td>
-                        <td className="py-2.5 px-3 text-[#57657e] text-[10px]">
-                          <div>From: <span className="font-medium text-[#25314c]">{formatDateTime(r.pickupAt)}</span></div>
-                          <div>To: <span className="font-medium text-[#25314c]">{formatDateTime(r.actualReturnAt || r.returnAt)}</span></div>
+                        <td className="py-2.5 px-3 text-muted-foreground text-[10px]">
+                          <div>From: <span className="font-medium text-foreground">{formatDateTime(r.pickupAt)}</span></div>
+                          <div>To: <span className="font-medium text-foreground">{formatDateTime(r.actualReturnAt || r.returnAt)}</span></div>
                         </td>
                         <td className="py-2.5 px-3">
                           <span
                             className={`inline-block rounded-[4px] px-2 py-0.5 text-[10px] font-bold ${
                               r.status === "IN_USE"
-                                ? "bg-[#f0f5ff] text-primary"
+                                ? "bg-secondary text-primary"
                                 : r.status === "COMPLETED"
-                                ? "bg-[#e3f3eb] text-[#17604a]"
+                                ? "bg-status-approved-bg text-status-approved-text"
                                 : r.status === "CANCELLED"
-                                ? "bg-[#f0f4fa] text-[#57657e]"
-                                : "bg-[#fff0ce] text-[#815110]"
+                                ? "bg-surface-alt text-muted-foreground"
+                                : "bg-status-pending-bg text-status-pending-text"
                             }`}
                           >
                             {r.status}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-right font-bold text-[#25314c]">
+                        <td className="py-2.5 px-3 text-right font-bold text-foreground">
                           {formatCurrency(r.totalAmount, r.currencyCode)}
                         </td>
                       </tr>
@@ -855,7 +855,7 @@ function CarHistoryModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="border-t border-[#e0e6f1] p-3 flex justify-end bg-[#f8faff]">
+        <div className="border-t border-border p-3 flex justify-end bg-surface-subtle">
           <Button size="sm" variant="outline" onClick={onClose} className="text-xs h-8">
             Close
           </Button>
@@ -1174,8 +1174,8 @@ export default function AdminFleetPage() {
   if (!allowed) {
     return (
       <main className="mx-auto w-full max-w-5xl flex-1 p-8">
-        <h1 className="text-2xl font-bold text-[#25314c]">Fleet Administration</h1>
-        <p role="status" className="mt-4 text-sm text-[#57657e]">
+        <h1 className="text-2xl font-bold text-foreground">Fleet Administration</h1>
+        <p role="status" className="mt-4 text-sm text-muted-foreground">
           {message || "Checking admin access…"}
         </p>
       </main>
@@ -1215,15 +1215,15 @@ export default function AdminFleetPage() {
       }
     >
       {message && (
-        <div role="status" className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]">
+        <div role="status" className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-secondary text-foreground border border-border-subtle">
           {message}
         </div>
       )}
 
       {/* Branch Filter & Station Switcher Bar */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[14px] border border-border bg-white p-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-bold text-[#57657e] uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
             <MapPinIcon size={15} className="text-primary" />
             Branch Station:
           </span>
@@ -1231,7 +1231,7 @@ export default function AdminFleetPage() {
           <select
             value={activeBranch?.id || ""}
             onChange={(e) => setSelectedBranchId(e.target.value)}
-            className="rounded-[8px] border border-[#e0e6f1] bg-[#f8faff] px-3 py-1.5 text-xs font-bold text-[#25314c] outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
+            className="rounded-[8px] border border-border bg-surface-subtle px-3 py-1.5 text-xs font-bold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
           >
             {branches.map((b) => (
               <option key={b.id} value={b.id}>
@@ -1242,14 +1242,14 @@ export default function AdminFleetPage() {
         </div>
 
         {/* Fleet Summary for Active Branch */}
-        <div className="flex items-center gap-4 text-xs font-medium text-[#57657e]">
+        <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
           <span>
-            Models in Branch: <strong className="text-[#25314c]">{branchOffers.length}</strong>
+            Models in Branch: <strong className="text-foreground">{branchOffers.length}</strong>
           </span>
-          <span className="text-[#e0e6f1]">|</span>
+          <span className="text-border">|</span>
           <span>
             Total Physical Cars:{" "}
-            <strong className="text-[#25314c]">
+            <strong className="text-foreground">
               {cars.filter((c) => branchOffers.some((o) => o.id === c.carTypeBranchId)).length}
             </strong>
           </span>
@@ -1259,10 +1259,10 @@ export default function AdminFleetPage() {
       {/* Main Big Boxes: One per CarTypeBranch in the active branch */}
       <div className="space-y-8">
         {branchOffers.length === 0 ? (
-          <div className="rounded-[16px] border border-dashed border-[#e0e6f1] bg-white p-12 text-center">
+          <div className="rounded-[16px] border border-dashed border-border bg-white p-12 text-center">
             <CarIcon size={48} className="mx-auto text-primary/40 mb-3" />
-            <h3 className="text-base font-bold text-[#25314c]">No car models assigned to {activeBranch?.name || "this branch"} yet</h3>
-            <p className="mt-1 text-xs text-[#57657e]">
+            <h3 className="text-base font-bold text-foreground">No car models assigned to {activeBranch?.name || "this branch"} yet</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
               Assign an existing model catalog entry or create a new vehicle model to start adding vehicles.
             </p>
             <div className="mt-5 flex items-center justify-center gap-3">
@@ -1290,7 +1290,7 @@ export default function AdminFleetPage() {
             return (
               <div
                 key={offer.id}
-                className="rounded-[18px] border border-[#e0e6f1] bg-white shadow-sm overflow-hidden p-6 transition-all hover:shadow-md"
+                className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden p-6 transition-all hover:shadow-md"
               >
                 {/* 2-Column Responsive Segmented Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -1305,7 +1305,7 @@ export default function AdminFleetPage() {
                             openGalleryLightbox(carType.id, 0);
                           }
                         }}
-                        className={`group relative w-36 sm:w-44 flex-shrink-0 self-stretch min-h-[148px] overflow-hidden rounded-[14px] border border-[#e0e6f1] bg-[#f0f5ff] transition-all ${
+                        className={`group relative w-36 sm:w-44 flex-shrink-0 self-stretch min-h-[148px] overflow-hidden rounded-[14px] border border-border bg-secondary transition-all ${
                           imageIds.length > 0 ? "cursor-pointer hover:border-primary hover:shadow-md" : ""
                         }`}
                         title={imageIds.length > 0 ? "Click to view full photo" : undefined}
@@ -1325,7 +1325,7 @@ export default function AdminFleetPage() {
                         ) : (
                           <div className="flex h-full w-full flex-col items-center justify-center text-primary/40 p-3 text-center">
                             <CarIcon size={36} />
-                            <span className="text-[10px] text-[#57657e] mt-1 font-medium">No cover image</span>
+                            <span className="text-[10px] text-muted-foreground mt-1 font-medium">No cover image</span>
                           </div>
                         )}
                         <span className="absolute top-2 left-2 rounded-sm bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-xs">
@@ -1338,7 +1338,7 @@ export default function AdminFleetPage() {
                         {/* Specs & Header Info */}
                         <div>
                           <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base font-bold text-[#25314c] truncate">
+                            <h3 className="text-base font-bold text-foreground truncate">
                               {carType.brand} {carType.model}
                             </h3>
                             <Badge variant={offer.isActive ? "approved" : "rejected"} className="text-[10px]">
@@ -1348,13 +1348,13 @@ export default function AdminFleetPage() {
 
                           {/* Specs Pills */}
                           <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
-                            <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 font-semibold text-primary">
+                            <span className="rounded-[4px] bg-secondary px-2 py-0.5 font-semibold text-primary">
                               {carType.seats} Seats
                             </span>
-                            <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 font-medium text-[#57657e]">
+                            <span className="rounded-[4px] bg-secondary px-2 py-0.5 font-medium text-muted-foreground">
                               {carType.transmission}
                             </span>
-                            <span className="rounded-[4px] bg-[#f0f5ff] px-2 py-0.5 font-medium text-[#57657e]">
+                            <span className="rounded-[4px] bg-secondary px-2 py-0.5 font-medium text-muted-foreground">
                               {carType.fuelType}
                             </span>
                           </div>
@@ -1372,11 +1372,11 @@ export default function AdminFleetPage() {
                         </div>
 
                         {/* Rental Rates Bar (Reduced width, aligned to bottom of cover image) */}
-                        <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-2.5">
+                        <div className="rounded-[10px] border border-border bg-surface-subtle p-2.5">
                           {editingRatesId === offer.id ? (
                             <div className="space-y-2">
                               <div className="grid grid-cols-2 gap-2">
-                                <label className="text-[10px] font-bold text-[#57657e]">
+                                <label className="text-[10px] font-bold text-muted-foreground">
                                   Daily ({offer.currencyCode} · {getCurrencyMinorUnits(offer.currencyCode)} {getCurrencyMinorUnits(offer.currencyCode) === 1 ? "dec" : "decs"})
                                   <input
                                     type="text"
@@ -1389,10 +1389,10 @@ export default function AdminFleetPage() {
                                         setRateDaily(normalizeCurrencyAmount(rateDaily, offer.currencyCode));
                                       }
                                     }}
-                                    className="mt-0.5 h-7 w-full rounded border border-[#e0e6f1] bg-white px-2 font-mono text-xs font-semibold text-[#25314c] outline-none focus:border-primary"
+                                    className="mt-0.5 h-7 w-full rounded border border-border bg-white px-2 font-mono text-xs font-semibold text-foreground outline-none focus:border-primary"
                                   />
                                 </label>
-                                <label className="text-[10px] font-bold text-[#57657e]">
+                                <label className="text-[10px] font-bold text-muted-foreground">
                                   Hourly ({offer.currencyCode} · {getCurrencyMinorUnits(offer.currencyCode)} {getCurrencyMinorUnits(offer.currencyCode) === 1 ? "dec" : "decs"})
                                   <input
                                     type="text"
@@ -1405,7 +1405,7 @@ export default function AdminFleetPage() {
                                         setRateHourly(normalizeCurrencyAmount(rateHourly, offer.currencyCode));
                                       }
                                     }}
-                                    className="mt-0.5 h-7 w-full rounded border border-[#e0e6f1] bg-white px-2 font-mono text-xs font-semibold text-[#25314c] outline-none focus:border-primary"
+                                    className="mt-0.5 h-7 w-full rounded border border-border bg-white px-2 font-mono text-xs font-semibold text-foreground outline-none focus:border-primary"
                                   />
                                 </label>
                               </div>
@@ -1432,13 +1432,13 @@ export default function AdminFleetPage() {
                           ) : (
                             <div className="flex items-center justify-between gap-2">
                               <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-[#57657e] uppercase tracking-wider block">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                                   Rental Rates
                                 </span>
-                                <div className="flex items-baseline gap-1 text-xs font-bold text-[#25314c] truncate">
-                                  <span>{formatCurrency(offer.baseDailyRate, offer.currencyCode)}<span className="text-[10px] font-normal text-[#57657e]">/d</span></span>
-                                  <span className="text-[#57657e] font-normal">·</span>
-                                  <span>{formatCurrency(offer.baseHourlyRate, offer.currencyCode)}<span className="text-[10px] font-normal text-[#57657e]">/h</span></span>
+                                <div className="flex items-baseline gap-1 text-xs font-bold text-foreground truncate">
+                                  <span>{formatCurrency(offer.baseDailyRate, offer.currencyCode)}<span className="text-[10px] font-normal text-muted-foreground">/d</span></span>
+                                  <span className="text-muted-foreground font-normal">·</span>
+                                  <span>{formatCurrency(offer.baseHourlyRate, offer.currencyCode)}<span className="text-[10px] font-normal text-muted-foreground">/h</span></span>
                                 </div>
                               </div>
                               <button
@@ -1449,7 +1449,7 @@ export default function AdminFleetPage() {
                                   setRateDaily(normalizeCurrencyAmount(offer.baseDailyRate, cur));
                                   setRateHourly(normalizeCurrencyAmount(offer.baseHourlyRate, cur));
                                 }}
-                                className="flex-shrink-0 rounded border border-[#e0e6f1] bg-white px-2 py-1 text-[10px] font-semibold text-primary hover:bg-[#f0f5ff] transition-colors"
+                                className="flex-shrink-0 rounded border border-border bg-white px-2 py-1 text-[10px] font-semibold text-primary hover:bg-secondary transition-colors"
                               >
                                 Edit Rates
                               </button>
@@ -1461,9 +1461,9 @@ export default function AdminFleetPage() {
 
                     {/* Photo Gallery Section (Scaled 1.25x to h-20 w-20) */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold text-[#57657e]">
+                      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
                         <span>Photo Gallery (1:1 Aspect Ratio)</span>
-                        <span className="text-[10px] text-[#57657e]">{imageIds.length} / 8 photos</span>
+                        <span className="text-[10px] text-muted-foreground">{imageIds.length} / 8 photos</span>
                       </div>
 
                       {/* 1:1 Thumbnails Grid (1.25x scale: 80x80px / h-20 w-20) */}
@@ -1474,7 +1474,7 @@ export default function AdminFleetPage() {
                             <div
                               key={fileId}
                               onClick={() => openGalleryLightbox(carType.id, idx)}
-                              className="group relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[10px] border border-[#e0e6f1] bg-white shadow-2xs cursor-pointer hover:border-primary transition-all"
+                              className="group relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[10px] border border-border bg-white shadow-2xs cursor-pointer hover:border-primary transition-all"
                               title="Click to view fullscreen photo"
                             >
                               {file?.url ? (
@@ -1484,7 +1484,7 @@ export default function AdminFleetPage() {
                                   className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                                 />
                               ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs text-[#57657e]">
+                                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                                   #{idx + 1}
                                 </div>
                               )}
@@ -1536,7 +1536,7 @@ export default function AdminFleetPage() {
                                     e.stopPropagation();
                                     void handleRemoveImage(carType.id, fileId);
                                   }}
-                                  className="rounded p-1 text-red-400 hover:bg-white/20"
+                                  className="rounded p-1 text-destructive hover:bg-white/20"
                                   title="Delete photo"
                                 >
                                   <TrashIcon size={12} />
@@ -1563,7 +1563,7 @@ export default function AdminFleetPage() {
                         {/* Dashed Square Upload Tile (1.25x: h-20 w-20) */}
                         {imageIds.length < 8 && (
                           <label
-                            className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-[#b0c4de] bg-[#f8faff] hover:border-primary hover:bg-[#f0f5ff] cursor-pointer transition-colors text-primary"
+                            className="flex h-20 w-20 flex-shrink-0 flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-border-hover bg-surface-subtle hover:border-primary hover:bg-secondary cursor-pointer transition-colors text-primary"
                             title="Upload new vehicle photo"
                           >
                             <PlusIcon size={20} />
@@ -1589,12 +1589,12 @@ export default function AdminFleetPage() {
                     />
 
                     {/* Supported Options Section */}
-                    <div className="space-y-2 rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3">
+                    <div className="space-y-2 rounded-[10px] border border-border bg-surface-subtle p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <ShieldCheckIcon size={14} className="text-primary" />
-                          <span className="text-xs font-bold text-[#25314c]">Supported Options</span>
-                          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-[#57657e] border border-[#e0e6f1]">
+                          <span className="text-xs font-bold text-foreground">Supported Options</span>
+                          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-muted-foreground border border-border">
                             {offer.supportedOptionIds.length} of {branchOptions.length} supported
                           </span>
                         </div>
@@ -1608,11 +1608,11 @@ export default function AdminFleetPage() {
                       </div>
 
                       {branchOptions.length === 0 ? (
-                        <p className="text-[10px] text-[#57657e] italic">
+                        <p className="text-[10px] text-muted-foreground italic">
                           No options configured for this branch yet. Create options in the Options tab.
                         </p>
                       ) : offer.supportedOptionIds.length === 0 ? (
-                        <div className="flex items-center justify-between rounded-[6px] border border-dashed border-[#e0e6f1] bg-white p-2 text-xs text-[#57657e]">
+                        <div className="flex items-center justify-between rounded-[6px] border border-dashed border-border bg-white p-2 text-xs text-muted-foreground">
                           <span className="text-[10px]">No options enabled for this vehicle model.</span>
                           <button
                             type="button"
@@ -1631,10 +1631,10 @@ export default function AdminFleetPage() {
                                 key={opt.id}
                                 className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${
                                   opt.category === "EQUIPMENT"
-                                    ? "bg-[#e8f0fe] border-[#c2d7fe] text-primary"
+                                    ? "bg-surface-tint border-status-in-use-border text-primary"
                                     : opt.category === "PROTECTION"
-                                    ? "bg-[#e3f3eb] border-[#b5e3ce] text-[#17604a]"
-                                    : "bg-[#fff0ce] border-[#fde199] text-[#815110]"
+                                    ? "bg-status-approved-bg border-status-approved-border text-status-approved-text"
+                                    : "bg-status-pending-bg border-status-pending-border text-status-pending-text"
                                 }`}
                                 title={`${opt.code} · ${opt.description || opt.name} (${formatCurrency(opt.price, offer.currencyCode)})`}
                               >
@@ -1651,24 +1651,24 @@ export default function AdminFleetPage() {
                   </div>
 
                   {/* RIGHT COLUMN: Physical Vehicles Table */}
-                  <div className="lg:col-span-6 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-[#e0e6f1] pt-6 lg:pt-0 lg:pl-8">
+                  <div className="lg:col-span-6 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-border pt-6 lg:pt-0 lg:pl-8">
                     <div>
                       {/* Vehicles Table Header */}
-                      <div className="flex items-center justify-between pb-3 border-b border-[#e0e6f1]">
+                      <div className="flex items-center justify-between pb-3 border-b border-border">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-[#25314c]">Physical Vehicles</h4>
-                          <span className="rounded-full bg-[#f0f5ff] px-2 py-0.5 text-xs font-bold text-primary">
+                          <h4 className="text-sm font-bold text-foreground">Physical Vehicles</h4>
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-primary">
                             {carList.length} Cars
                           </span>
-                          <span className="rounded-full bg-[#f0f4fa] px-2 py-0.5 text-[10px] font-bold text-[#57657e] border border-[#e0e6f1]">
+                          <span className="rounded-full bg-surface-alt px-2 py-0.5 text-[10px] font-bold text-muted-foreground border border-border">
                             Page {validCarPage} of {totalCarPages} (6/page)
                           </span>
                           {carList.some((c) => c.inUse) && (
-                            <span className="rounded-full bg-[#f0f5ff] px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
+                            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
                               {carList.filter((c) => c.inUse).length} In Use
                             </span>
                           )}
-                          <span className="rounded-full bg-[#e3f3eb] px-2 py-0.5 text-[10px] font-bold text-[#17604a]">
+                          <span className="rounded-full bg-status-approved-bg px-2 py-0.5 text-[10px] font-bold text-status-approved-text">
                             {carList.filter((c) => !c.inUse && c.status === "ACTIVE").length} Available
                           </span>
                         </div>
@@ -1684,10 +1684,10 @@ export default function AdminFleetPage() {
 
                       {/* Cars Table */}
                       {carList.length === 0 ? (
-                        <div className="rounded-[10px] border border-dashed border-[#e0e6f1] bg-[#f8faff] p-8 text-center my-4">
+                        <div className="rounded-[10px] border border-dashed border-border bg-surface-subtle p-8 text-center my-4">
                           <CarIcon size={32} className="mx-auto text-primary/30 mb-2" />
-                          <p className="text-xs font-semibold text-[#25314c]">No cars registered for this model</p>
-                          <p className="text-[10px] text-[#57657e] mt-0.5">
+                          <p className="text-xs font-semibold text-foreground">No cars registered for this model</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
                             Register individual physical vehicles by VIN and license plate.
                           </p>
                           <Button
@@ -1704,7 +1704,7 @@ export default function AdminFleetPage() {
                           <div className="overflow-x-auto my-3">
                             <table className="w-full text-left text-xs">
                               <thead>
-                                <tr className="border-b border-[#f0f4fa] text-[10px] uppercase font-bold text-[#57657e]">
+                                <tr className="border-b border-surface-alt text-[10px] uppercase font-bold text-muted-foreground">
                                   <th className="pb-2">Plate</th>
                                   <th className="pb-2">VIN</th>
                                   <th className="pb-2">Year</th>
@@ -1713,34 +1713,34 @@ export default function AdminFleetPage() {
                                   <th className="pb-2 text-right">Actions</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-[#f0f4fa]">
+                              <tbody className="divide-y divide-surface-alt">
                                 {pagedCars.map((car) => (
-                                  <tr key={car.id} className="hover:bg-[#f8faff] transition-colors">
-                                    <td className="py-2.5 font-mono font-bold text-[#25314c]">
+                                  <tr key={car.id} className="hover:bg-surface-subtle transition-colors">
+                                    <td className="py-2.5 font-mono font-bold text-foreground">
                                       {car.licensePlate}
                                     </td>
-                                    <td className="py-2.5 font-mono text-[10px] text-[#57657e] truncate max-w-[95px]" title={car.vin}>
+                                    <td className="py-2.5 font-mono text-[10px] text-muted-foreground truncate max-w-[95px]" title={car.vin}>
                                       {car.vin}
                                     </td>
-                                    <td className="py-2.5 text-[#25314c]">
+                                    <td className="py-2.5 text-foreground">
                                       {car.year}
                                     </td>
                                     <td className="py-2.5">
                                       {car.inUse ? (
                                         <div>
-                                          <span className="inline-flex items-center gap-1 rounded-full bg-[#f0f5ff] px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20">
                                             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                                             In Use
                                           </span>
                                           {car.activeBookingNumber && (
-                                            <span className="block text-[10px] font-mono text-[#57657e] mt-0.5 truncate max-w-[85px]" title={`Booking #${car.activeBookingNumber}`}>
+                                            <span className="block text-[10px] font-mono text-muted-foreground mt-0.5 truncate max-w-[85px]" title={`Booking #${car.activeBookingNumber}`}>
                                               #{car.activeBookingNumber}
                                             </span>
                                           )}
                                         </div>
                                       ) : (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f3eb] px-2 py-0.5 text-[10px] font-bold text-[#17604a]">
-                                          <span className="h-1.5 w-1.5 rounded-full bg-[#17604a]" />
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-status-approved-bg px-2 py-0.5 text-[10px] font-bold text-status-approved-text">
+                                          <span className="h-1.5 w-1.5 rounded-full bg-status-approved-text" />
                                           Available
                                         </span>
                                       )}
@@ -1751,10 +1751,10 @@ export default function AdminFleetPage() {
                                         onChange={(e) => void handleCarStatusChange(car.id, e.target.value)}
                                         className={`rounded-[5px] px-2 py-0.5 text-[10px] font-bold border-0 cursor-pointer outline-none ${
                                           car.status === "ACTIVE"
-                                            ? "bg-[#e3f3eb] text-[#17604a]"
+                                            ? "bg-status-approved-bg text-status-approved-text"
                                             : car.status === "MAINTENANCE"
-                                            ? "bg-[#fff0ce] text-[#815110]"
-                                            : "bg-[#fce8e8] text-[#a22f2f]"
+                                            ? "bg-status-pending-bg text-status-pending-text"
+                                            : "bg-status-rejected-bg text-status-rejected-text"
                                         }`}
                                       >
                                         <option value="ACTIVE">ACTIVE</option>
@@ -1767,7 +1767,7 @@ export default function AdminFleetPage() {
                                         <button
                                           type="button"
                                           onClick={() => setHistoryCar(car)}
-                                          className="inline-flex items-center gap-1 rounded-[6px] border border-[#e0e6f1] bg-white px-2 py-1 text-[10px] font-bold text-[#25314c] hover:border-primary hover:text-primary hover:bg-[#f0f5ff] transition-colors"
+                                          className="inline-flex items-center gap-1 rounded-[6px] border border-border bg-white px-2 py-1 text-[10px] font-bold text-foreground hover:border-primary hover:text-primary hover:bg-secondary transition-colors"
                                           title="View usage and rental history"
                                         >
                                           <EyeIcon size={12} />
@@ -1776,7 +1776,7 @@ export default function AdminFleetPage() {
                                         <button
                                           type="button"
                                           onClick={() => setEditingCar(car)}
-                                          className="rounded p-1 text-[#57657e] hover:text-primary hover:bg-[#f0f5ff] transition-colors"
+                                          className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
                                           title="Edit car details"
                                         >
                                           <EditIcon size={13} />
@@ -1784,7 +1784,7 @@ export default function AdminFleetPage() {
                                         <button
                                           type="button"
                                           onClick={() => setCarToDelete(car)}
-                                          className="rounded p-1 text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                          className="rounded p-1 text-destructive hover:text-destructive hover:bg-status-rejected-bg transition-colors"
                                           title="Delete physical vehicle"
                                         >
                                           <TrashIcon size={13} />
@@ -1798,8 +1798,8 @@ export default function AdminFleetPage() {
                           </div>
 
                           {/* Pagination Controls (Always visible when cars exist, 6 per page) */}
-                          <div className="flex items-center justify-between border-t border-[#f0f4fa] pt-3 mt-1 text-xs">
-                            <span className="text-[10px] text-[#57657e]">
+                          <div className="flex items-center justify-between border-t border-surface-alt pt-3 mt-1 text-xs">
+                            <span className="text-[10px] text-muted-foreground">
                               Showing {(validCarPage - 1) * CARS_PER_PAGE + 1}–{Math.min(validCarPage * CARS_PER_PAGE, carList.length)} of {carList.length} cars
                             </span>
                             <div className="flex items-center gap-1">
@@ -1807,7 +1807,7 @@ export default function AdminFleetPage() {
                                 type="button"
                                 disabled={validCarPage <= 1}
                                 onClick={() => setCarPages((prev) => ({ ...prev, [offer.id]: validCarPage - 1 }))}
-                                className="rounded-[6px] border border-[#e0e6f1] p-1 text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                className="rounded-[6px] border border-border p-1 text-muted-foreground hover:bg-secondary hover:text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
                                 title="Previous page"
                               >
                                 <ChevronLeftIcon size={14} />
@@ -1821,7 +1821,7 @@ export default function AdminFleetPage() {
                                   className={`h-6 w-6 rounded-[6px] text-[10px] font-bold transition-colors ${
                                     p === validCarPage
                                       ? "bg-primary text-white"
-                                      : "border border-[#e0e6f1] text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary"
+                                      : "border border-border text-muted-foreground hover:bg-secondary hover:text-primary"
                                   }`}
                                 >
                                   {p}
@@ -1832,7 +1832,7 @@ export default function AdminFleetPage() {
                                 type="button"
                                 disabled={validCarPage >= totalCarPages}
                                 onClick={() => setCarPages((prev) => ({ ...prev, [offer.id]: validCarPage + 1 }))}
-                                className="rounded-[6px] border border-[#e0e6f1] p-1 text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                className="rounded-[6px] border border-border p-1 text-muted-foreground hover:bg-secondary hover:text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
                                 title="Next page"
                               >
                                 <ChevronRightIcon size={14} />
@@ -1843,7 +1843,7 @@ export default function AdminFleetPage() {
                       )}
                     </div>
 
-                    <div className="pt-2 text-[10px] text-[#57657e]">
+                    <div className="pt-2 text-[10px] text-muted-foreground">
                       Branch: <span className="font-semibold">{activeBranch.name}</span>
                     </div>
                   </div>
@@ -1861,13 +1861,13 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
-              <h3 className="text-base font-bold text-[#25314c]">Register New Vehicle Model</h3>
+          <div className="w-full max-w-lg rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-bold text-foreground">Register New Vehicle Model</h3>
               <button
                 type="button"
                 onClick={() => setIsNewCarTypeOpen(false)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -1901,52 +1901,52 @@ export default function AdminFleetPage() {
               className="space-y-4 text-xs"
             >
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Brand
                   <input
                     name="brand"
                     required
                     placeholder="e.g. Toyota"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Model
                   <input
                     name="model"
                     required
                     placeholder="e.g. Camry 2.5G"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Seats
                   <input
                     name="seats"
                     type="number"
                     defaultValue={5}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Transmission
                   <select
                     name="transmission"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                   >
                     <option value="AUTO">Automatic</option>
                     <option value="MANUAL">Manual</option>
                   </select>
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Fuel Type
                   <select
                     name="fuelType"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                   >
                     <option value="GASOLINE">Gasoline</option>
                     <option value="DIESEL">Diesel</option>
@@ -1956,16 +1956,16 @@ export default function AdminFleetPage() {
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Features (comma-separated initial list)
                 <input
                   name="features"
                   placeholder="e.g. Apple CarPlay, Sunroof, Leather Seats"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                 />
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button type="button" variant="outline" size="sm" onClick={() => setIsNewCarTypeOpen(false)}>
                   Cancel
                 </Button>
@@ -1985,16 +1985,16 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Add Car Model to Branch</h3>
-                <p className="text-[10px] text-[#57657e]">Branch: {activeBranch.name}</p>
+                <h3 className="text-base font-bold text-foreground">Add Car Model to Branch</h3>
+                <p className="text-[10px] text-muted-foreground">Branch: {activeBranch.name}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsNewOfferOpen(false)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -2042,12 +2042,12 @@ export default function AdminFleetPage() {
               }}
               className="space-y-4 text-xs"
             >
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Catalog Vehicle Model
                 <select
                   name="carTypeId"
                   required
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                 >
                   {types.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -2058,7 +2058,7 @@ export default function AdminFleetPage() {
               </label>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Base Daily Rate ({newOfferCurrencyCode} · {getCurrencyMinorUnits(newOfferCurrencyCode)} {getCurrencyMinorUnits(newOfferCurrencyCode) === 1 ? "dec" : "decs"})
                   <input
                     name="baseDailyRate"
@@ -2074,10 +2074,10 @@ export default function AdminFleetPage() {
                         setNewOfferDailyRate(normalizeCurrencyAmount(newOfferDailyRate, newOfferCurrencyCode));
                       }
                     }}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-semibold text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-semibold text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Base Hourly Rate ({newOfferCurrencyCode} · {getCurrencyMinorUnits(newOfferCurrencyCode)} {getCurrencyMinorUnits(newOfferCurrencyCode) === 1 ? "dec" : "decs"})
                   <input
                     name="baseHourlyRate"
@@ -2093,12 +2093,12 @@ export default function AdminFleetPage() {
                         setNewOfferHourlyRate(normalizeCurrencyAmount(newOfferHourlyRate, newOfferCurrencyCode));
                       }
                     }}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-semibold text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-semibold text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Currency Code
                 <input
                   name="currencyCode"
@@ -2114,14 +2114,14 @@ export default function AdminFleetPage() {
                     }
                   }}
                   required
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs uppercase text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs uppercase text-foreground outline-none focus:border-primary"
                 />
               </label>
 
               {/* Branch Options Checklist for New Vehicle Model */}
               {branchOptions.length > 0 && (
                 <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#25314c]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-foreground">
                     <span>
                       Supported Options ({newOfferSupportedOptionIds.length} of {branchOptions.length})
                     </span>
@@ -2133,23 +2133,23 @@ export default function AdminFleetPage() {
                       >
                         Select All
                       </button>
-                      <span className="text-[#e0e6f1]">|</span>
+                      <span className="text-border">|</span>
                       <button
                         type="button"
                         onClick={() => setNewOfferSupportedOptionIds([])}
-                        className="text-[#57657e] hover:underline"
+                        className="text-muted-foreground hover:underline"
                       >
                         Clear
                       </button>
                     </div>
                   </div>
-                  <div className="max-h-36 overflow-y-auto space-y-1 rounded-[8px] border border-[#e0e6f1] p-2 bg-[#f8faff]">
+                  <div className="max-h-36 overflow-y-auto space-y-1 rounded-[8px] border border-border p-2 bg-surface-subtle">
                     {branchOptions.map((opt) => {
                       const checked = newOfferSupportedOptionIds.includes(opt.id);
                       return (
                         <label
                           key={opt.id}
-                          className="flex items-center gap-2 text-[11px] text-[#25314c] cursor-pointer hover:bg-white p-1 rounded transition-colors"
+                          className="flex items-center gap-2 text-[11px] text-foreground cursor-pointer hover:bg-white p-1 rounded transition-colors"
                         >
                           <input
                             type="checkbox"
@@ -2159,11 +2159,11 @@ export default function AdminFleetPage() {
                                 e.target.checked ? [...prev, opt.id] : prev.filter((id) => id !== opt.id)
                               );
                             }}
-                            className="rounded border-[#e0e6f1] text-primary focus:ring-primary accent-[#2747b7]"
+                            className="rounded border-border text-primary focus:ring-primary accent-primary"
                           />
                           <span className="font-semibold truncate">{opt.name}</span>
-                          <span className="text-[9px] text-[#57657e] font-mono">({opt.code})</span>
-                          <span className="ml-auto text-[10px] text-[#57657e] font-medium">
+                          <span className="text-[9px] text-muted-foreground font-mono">({opt.code})</span>
+                          <span className="ml-auto text-[10px] text-muted-foreground font-medium">
                             {formatCurrency(opt.price, newOfferCurrencyCode)}
                           </span>
                         </label>
@@ -2173,7 +2173,7 @@ export default function AdminFleetPage() {
                 </div>
               )}
 
-              <div className="flex justify-between items-center pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-between items-center pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => {
@@ -2205,18 +2205,18 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Register Physical Vehicle</h3>
-                <p className="text-[10px] text-[#57657e]">
+                <h3 className="text-base font-bold text-foreground">Register Physical Vehicle</h3>
+                <p className="text-[10px] text-muted-foreground">
                   {addCarOffer.brand} {addCarOffer.model} · {activeBranch.name}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setAddCarOffer(null)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -2255,52 +2255,52 @@ export default function AdminFleetPage() {
               className="space-y-4 text-xs"
             >
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   License Plate
                   <input
                     name="licensePlate"
                     required
                     placeholder="e.g. 1กข 9999"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   VIN Number
                   <input
                     name="vin"
                     required
                     placeholder="e.g. 17-digit VIN"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Manufacture Year
                   <input
                     name="year"
                     type="number"
                     defaultValue={2024}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Buy Date
                   <input
                     name="buyDate"
                     type="date"
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Initial Status
                 <select
                   name="status"
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                 >
                   <option value="ACTIVE">Active (Available)</option>
                   <option value="MAINTENANCE">Maintenance</option>
@@ -2308,7 +2308,7 @@ export default function AdminFleetPage() {
                 </select>
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button type="button" variant="outline" size="sm" onClick={() => setAddCarOffer(null)}>
                   Cancel
                 </Button>
@@ -2328,16 +2328,16 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Edit Vehicle Details</h3>
-                <p className="text-[10px] text-[#57657e] font-mono">{editingCar.licensePlate}</p>
+                <h3 className="text-base font-bold text-foreground">Edit Vehicle Details</h3>
+                <p className="text-[10px] text-muted-foreground font-mono">{editingCar.licensePlate}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingCar(null)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -2376,54 +2376,54 @@ export default function AdminFleetPage() {
               className="space-y-4 text-xs"
             >
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   License Plate
                   <input
                     name="licensePlate"
                     defaultValue={editingCar.licensePlate}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   VIN Number
                   <input
                     name="vin"
                     defaultValue={editingCar.vin}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-mono text-xs font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-mono text-xs font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Manufacture Year
                   <input
                     name="year"
                     type="number"
                     defaultValue={editingCar.year}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Buy Date
                   <input
                     name="buyDate"
                     type="date"
                     defaultValue={editingCar.buyDate || ""}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Status
                 <select
                   name="status"
                   defaultValue={editingCar.status}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                 >
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="MAINTENANCE">MAINTENANCE</option>
@@ -2431,7 +2431,7 @@ export default function AdminFleetPage() {
                 </select>
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button type="button" variant="outline" size="sm" onClick={() => setEditingCar(null)}>
                   Cancel
                 </Button>
@@ -2451,18 +2451,18 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-lg rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Edit Model Specifications</h3>
-                <p className="text-[10px] text-[#57657e]">
+                <h3 className="text-base font-bold text-foreground">Edit Model Specifications</h3>
+                <p className="text-[10px] text-muted-foreground">
                   Updates apply to all branches offering {editingSpecs.brand} {editingSpecs.model}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingSpecs(null)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
@@ -2495,54 +2495,54 @@ export default function AdminFleetPage() {
               className="space-y-4 text-xs"
             >
               <div className="grid grid-cols-2 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Brand
                   <input
                     name="brand"
                     defaultValue={editingSpecs.brand}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Model
                   <input
                     name="model"
                     defaultValue={editingSpecs.model}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Seats
                   <input
                     name="seats"
                     type="number"
                     defaultValue={editingSpecs.seats}
                     required
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-3 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-3 font-normal text-foreground outline-none focus:border-primary"
                   />
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Transmission
                   <select
                     name="transmission"
                     defaultValue={editingSpecs.transmission}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                   >
                     <option value="AUTO">Automatic</option>
                     <option value="MANUAL">Manual</option>
                   </select>
                 </label>
-                <label className="font-semibold text-[#25314c]">
+                <label className="font-semibold text-foreground">
                   Fuel Type
                   <select
                     name="fuelType"
                     defaultValue={editingSpecs.fuelType}
-                    className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                    className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                   >
                     <option value="GASOLINE">Gasoline</option>
                     <option value="DIESEL">Diesel</option>
@@ -2552,19 +2552,19 @@ export default function AdminFleetPage() {
                 </label>
               </div>
 
-              <label className="font-semibold text-[#25314c] block">
+              <label className="font-semibold text-foreground block">
                 Model Catalog Status
                 <select
                   name="isActive"
                   defaultValue={String(editingSpecs.isActive)}
-                  className="mt-1 h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2 font-normal text-[#25314c] outline-none focus:border-primary"
+                  className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2 font-normal text-foreground outline-none focus:border-primary"
                 >
                   <option value="true">Active in Catalog</option>
                   <option value="false">Inactive in Catalog</option>
                 </select>
               </label>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e6f1]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button type="button" variant="outline" size="sm" onClick={() => setEditingSpecs(null)}>
                   Cancel
                 </Button>
@@ -2584,28 +2584,28 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#e0e6f1] pb-3">
+          <div className="w-full max-w-lg rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">
+                <h3 className="text-base font-bold text-foreground">
                   Supported Options · {managingOptionsOffer.brand} {managingOptionsOffer.model}
                 </h3>
-                <p className="text-[10px] text-[#57657e]">
+                <p className="text-[10px] text-muted-foreground">
                   Branch: {activeBranch.name} · Select which add-ons & options this vehicle model supports
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setManagingOptionsOffer(null)}
-                className="text-[#57657e] hover:text-[#25314c]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <XIcon size={18} />
               </button>
             </div>
 
             {/* Quick Actions & Counter Bar */}
-            <div className="flex items-center justify-between text-xs bg-[#f8faff] rounded-[8px] p-2.5 border border-[#e0e6f1]">
-              <span className="font-semibold text-[#25314c]">
+            <div className="flex items-center justify-between text-xs bg-surface-subtle rounded-[8px] p-2.5 border border-border">
+              <span className="font-semibold text-foreground">
                 {selectedOptionIds.length} of {branchOptions.length} options selected
               </span>
               <div className="flex items-center gap-2">
@@ -2616,11 +2616,11 @@ export default function AdminFleetPage() {
                 >
                   Select All
                 </button>
-                <span className="text-[#e0e6f1]">|</span>
+                <span className="text-border">|</span>
                 <button
                   type="button"
                   onClick={() => setSelectedOptionIds([])}
-                  className="text-xs font-medium text-[#57657e] hover:underline"
+                  className="text-xs font-medium text-muted-foreground hover:underline"
                 >
                   Clear All
                 </button>
@@ -2629,7 +2629,7 @@ export default function AdminFleetPage() {
 
             {/* Scrollable Options List */}
             {branchOptions.length === 0 ? (
-              <div className="rounded-[10px] border border-dashed border-[#e0e6f1] p-8 text-center text-xs text-[#57657e]">
+              <div className="rounded-[10px] border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
                 No options currently exist for this branch. Create options in the Options management tab.
               </div>
             ) : (
@@ -2646,8 +2646,8 @@ export default function AdminFleetPage() {
                       }}
                       className={`flex items-center justify-between gap-3 p-3 rounded-[10px] border transition-all cursor-pointer ${
                         isChecked
-                          ? "border-primary bg-[#f0f5ff]/60 shadow-xs"
-                          : "border-[#e0e6f1] bg-white hover:border-[#b0c0de] hover:bg-[#fafcff]"
+                          ? "border-primary bg-secondary/60 shadow-xs"
+                          : "border-border bg-white hover:border-border-hover hover:bg-surface-hover"
                       }`}
                     >
                       <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -2655,30 +2655,30 @@ export default function AdminFleetPage() {
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}} // handled by parent div onClick
-                          className="mt-0.5 h-4 w-4 rounded border-[#e0e6f1] text-primary focus:ring-primary accent-[#2747b7] cursor-pointer"
+                          className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary cursor-pointer"
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono text-[10px] font-bold text-primary bg-white px-1.5 py-0.5 rounded border border-[#e0e6f1]">
+                            <span className="font-mono text-[10px] font-bold text-primary bg-white px-1.5 py-0.5 rounded border border-border">
                               {opt.code}
                             </span>
-                            <span className="text-xs font-bold text-[#25314c] truncate">
+                            <span className="text-xs font-bold text-foreground truncate">
                               {opt.name}
                             </span>
                             <span
                               className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
                                 opt.category === "EQUIPMENT"
-                                  ? "bg-[#e8f0fe] text-primary"
+                                  ? "bg-surface-tint text-primary"
                                   : opt.category === "PROTECTION"
-                                  ? "bg-[#e3f3eb] text-[#17604a]"
-                                  : "bg-[#fff0ce] text-[#815110]"
+                                  ? "bg-status-approved-bg text-status-approved-text"
+                                  : "bg-status-pending-bg text-status-pending-text"
                               }`}
                             >
                               {opt.category}
                             </span>
                           </div>
                           {opt.description && (
-                            <p className="mt-1 text-[11px] text-[#57657e] line-clamp-1">
+                            <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1">
                               {opt.description}
                             </p>
                           )}
@@ -2686,10 +2686,10 @@ export default function AdminFleetPage() {
                       </div>
 
                       <div className="text-right flex-shrink-0">
-                        <span className="text-xs font-bold text-[#25314c] block">
+                        <span className="text-xs font-bold text-foreground block">
                           {formatCurrency(opt.price, managingOptionsOffer.currencyCode)}
                         </span>
-                        <span className="text-[10px] text-[#57657e]">
+                        <span className="text-[10px] text-muted-foreground">
                           {opt.pricingType === "PER_DAY"
                             ? "/ day"
                             : opt.pricingType === "PER_UNIT_PER_DAY"
@@ -2704,8 +2704,8 @@ export default function AdminFleetPage() {
             )}
 
             {/* Modal Footer */}
-            <div className="flex justify-between items-center pt-3 border-t border-[#e0e6f1]">
-              <span className="text-[11px] text-[#57657e]">
+            <div className="flex justify-between items-center pt-3 border-t border-border">
+              <span className="text-[11px] text-muted-foreground">
                 {selectedOptionIds.length} options will be bookable with this vehicle
               </span>
               <div className="flex gap-2">
@@ -2740,42 +2740,42 @@ export default function AdminFleetPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-md rounded-[16px] border border-[#e0e6f1] bg-white p-6 shadow-xl space-y-4">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-status-rejected-bg text-destructive">
                 <TrashIcon size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#25314c]">Delete Physical Vehicle</h3>
-                <p className="text-xs text-[#57657e]">This action cannot be undone.</p>
+                <h3 className="text-base font-bold text-foreground">Delete Physical Vehicle</h3>
+                <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
               </div>
             </div>
 
-            <div className="rounded-[10px] border border-[#e0e6f1] bg-[#f8faff] p-3 text-xs space-y-1.5">
+            <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-xs space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-[#57657e]">License Plate:</span>
-                <span className="font-mono font-bold text-[#25314c]">{carToDelete.licensePlate}</span>
+                <span className="text-muted-foreground">License Plate:</span>
+                <span className="font-mono font-bold text-foreground">{carToDelete.licensePlate}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">VIN:</span>
-                <span className="font-mono text-[#25314c]">{carToDelete.vin}</span>
+                <span className="text-muted-foreground">VIN:</span>
+                <span className="font-mono text-foreground">{carToDelete.vin}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#57657e]">Model:</span>
-                <span className="font-medium text-[#25314c]">{carToDelete.brand} {carToDelete.model}</span>
+                <span className="text-muted-foreground">Model:</span>
+                <span className="font-medium text-foreground">{carToDelete.brand} {carToDelete.model}</span>
               </div>
               {carToDelete.inUse && (
-                <div className="pt-2 border-t border-[#e0e6f1] text-red-600 font-bold text-[10px]">
+                <div className="pt-2 border-t border-border text-destructive font-bold text-[10px]">
                   ⚠️ Warning: Vehicle is currently marked as IN USE in an active rental.
                 </div>
               )}
             </div>
 
-            <p className="text-xs text-[#57657e]">
+            <p className="text-xs text-muted-foreground">
               Are you sure you want to permanently remove this vehicle from your fleet catalog?
             </p>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#e0e6f1]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
               <Button
                 type="button"
                 variant="outline"
@@ -2791,7 +2791,7 @@ export default function AdminFleetPage() {
                 variant="destructive"
                 disabled={deletingCar}
                 onClick={() => void handleConfirmDeleteCar()}
-                className="font-bold bg-red-600 hover:bg-red-700 text-white"
+                className="font-bold bg-destructive hover:bg-destructive-hover text-white"
               >
                 {deletingCar ? "Deleting…" : "Confirm Delete"}
               </Button>

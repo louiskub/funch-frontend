@@ -4,32 +4,32 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-normal transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-[#1c358d] active:bg-[#1c358d] active:scale-[0.98] rounded-[10px]",
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover hover:shadow-md hover:shadow-primary/20 hover:-translate-y-[1px] active:bg-primary-hover active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         secondary:
-          "bg-[#f0f5ff] text-primary hover:bg-primary hover:text-white rounded-[8px] border border-[#e0e6f1] active:scale-[0.98]",
+          "bg-secondary text-primary hover:bg-primary hover:text-white hover:shadow-xs hover:-translate-y-[0.5px] rounded-[8px] border border-border active:scale-[0.98] active:translate-y-0",
         outline:
-          "border border-[#e0e6f1] bg-white hover:bg-[#f0f5ff] hover:text-primary rounded-[10px] active:scale-[0.98]",
+          "border border-border bg-card hover:bg-secondary hover:text-primary hover:border-primary/40 hover:shadow-xs hover:-translate-y-[0.5px] rounded-[10px] active:scale-[0.98] active:translate-y-0",
         ghost:
-          "hover:bg-[#f0f5ff] hover:text-primary rounded-[8px]",
+          "hover:bg-secondary hover:text-primary rounded-[8px] active:scale-[0.98]",
         success:
-          "bg-[#16a34a] text-white shadow-xs hover:bg-[#15803d] active:bg-[#15803d] active:scale-[0.98] rounded-[10px]",
+          "bg-success text-white shadow-xs hover:bg-success-hover hover:shadow-md hover:shadow-success/20 hover:-translate-y-[1px] active:bg-success-hover active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         warning:
-          "bg-[#f59e0b] text-[#25314c] font-bold shadow-xs hover:bg-[#d97706] active:bg-[#d97706] active:scale-[0.98] rounded-[10px]",
+          "bg-warning text-foreground font-bold shadow-xs hover:bg-warning-hover hover:shadow-md hover:shadow-warning/20 hover:-translate-y-[1px] active:bg-warning-hover active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         destructive:
-          "bg-[#a22f2f] text-white shadow-xs hover:bg-[#842323] active:bg-[#842323] active:scale-[0.98] rounded-[10px]",
+          "bg-destructive text-white shadow-xs hover:bg-destructive-hover hover:shadow-md hover:shadow-destructive/20 hover:-translate-y-[1px] active:bg-destructive-hover active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         successOutline:
-          "border border-[#86efac] bg-[#f0fdf4] text-[#15803d] hover:bg-[#dcfce7] active:scale-[0.98] rounded-[10px]",
+          "border border-status-approved-border bg-status-approved-bg text-status-approved-text hover:bg-status-approved-bg/80 hover:shadow-xs hover:-translate-y-[0.5px] active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         warningOutline:
-          "border border-[#fde047] bg-[#fefce8] text-[#854d0e] hover:bg-[#fef9c3] active:scale-[0.98] rounded-[10px]",
+          "border border-status-pending-border bg-status-pending-bg text-status-pending-text hover:bg-status-pending-bg/80 hover:shadow-xs hover:-translate-y-[0.5px] active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         destructiveOutline:
-          "border border-[#fecaca] bg-[#fce8e8] text-[#a22f2f] hover:bg-[#fad2d2] active:scale-[0.98] rounded-[10px]",
+          "border border-status-rejected-border bg-status-rejected-bg text-status-rejected-text hover:bg-status-rejected-bg/80 hover:shadow-xs hover:-translate-y-[0.5px] active:scale-[0.98] active:translate-y-0 rounded-[10px]",
         pill:
-          "rounded-full border border-[#e0e6f1] bg-white text-[#57657e] hover:border-primary hover:text-primary",
+          "rounded-full border border-border bg-card text-muted-foreground hover:border-primary hover:text-primary hover:shadow-xs hover:-translate-y-[0.5px] active:scale-[0.98] active:translate-y-0",
         link:
           "text-primary underline-offset-4 hover:underline p-0 h-auto",
       },

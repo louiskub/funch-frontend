@@ -23,7 +23,7 @@ export function CustomerGuard({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <p className="text-sm font-medium text-[#57657e]">Loading your account…</p>
+        <p className="text-sm font-medium text-muted-foreground">Loading your account…</p>
       </div>
     );
   }
@@ -31,8 +31,8 @@ export function CustomerGuard({ children }: { children: ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center justify-center py-20 text-center px-4">
-        <h1 className="text-2xl font-bold text-[#25314c]">Sign in required</h1>
-        <p className="mt-2 text-sm text-[#57657e]">
+        <h1 className="text-2xl font-bold text-foreground">Sign in required</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           You need to be signed in to view this page.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">

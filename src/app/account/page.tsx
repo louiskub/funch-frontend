@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth, useAuthModalStore } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,6 +11,10 @@ import { Input } from "@/components/ui/input";
 import { UserIcon, AlertCircleIcon, ChevronRightIcon } from "@/components/ui/icons";
 
 function AccountContent() {
+  const tAccount = useTranslations("account");
+  const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
+  const tNav = useTranslations("nav");
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
 
@@ -56,26 +61,26 @@ function AccountContent() {
       <div className="mb-6">
         <Link
           href="/"
-          className="text-xs font-semibold text-primary transition-colors hover:text-[#1c358d]"
+          className="text-xs font-semibold text-primary transition-colors hover:text-primary-hover"
         >
-          ← Back to home
+          {tCommon("backToHome")}
         </Link>
       </div>
 
-      <Card className="rounded-[18px] border-[#e0e6f1] bg-white shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-[#e0e6f1] p-6 sm:p-8 bg-[#f0f5ff]/40">
+      <Card className="rounded-[18px] border-border bg-white shadow-sm overflow-hidden">
+        <CardHeader className="border-b border-border p-6 sm:p-8 bg-secondary/40">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-white">
               <UserIcon size={20} />
             </div>
             <div>
               <CardTitle className="text-2xl">
-                {user ? "Your profile & account" : "Sign in to FUNCH"}
+                {user ? tAccount("title") : tAuth("signInTitle")}
               </CardTitle>
               <CardDescription>
                 {user
-                  ? "Manage your personal information and view your booking role."
-                  : "Access your bookings, saved rentals, and fast checkout."}
+                  ? tAccount("subtitle")
+                  : tAuth("signInSubtitle")}
               </CardDescription>
             </div>
           </div>
@@ -85,7 +90,7 @@ function AccountContent() {
           {errorMessage && (
             <div
               role="alert"
-              className="rounded-[10px] p-4 text-xs font-medium flex items-center justify-between bg-[#fce8e8] text-[#a22f2f] border border-[#fecaca]"
+              className="rounded-[10px] p-4 text-xs font-medium flex items-center justify-between bg-status-rejected-bg text-status-rejected-text border border-status-rejected-border"
             >
               <div className="flex items-center gap-2">
                 <AlertCircleIcon size={16} />
@@ -97,13 +102,13 @@ function AccountContent() {
           {isLoading ? (
             <div className="flex min-h-[160px] flex-col items-center justify-center gap-3">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-xs text-[#57657e]">Checking your account…</p>
+              <p className="text-xs text-muted-foreground">Checking your account…</p>
             </div>
           ) : user ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between rounded-[12px] bg-[#f0f5ff] p-4 border border-[#d7e2f5]">
+              <div className="flex items-center justify-between rounded-[12px] bg-secondary p-4 border border-border-subtle">
                 <div>
-                  <span className="text-[11px] font-semibold text-[#57657e] block">
+                  <span className="text-[11px] font-semibold text-muted-foreground block">
                     Account Role
                   </span>
                   <span className="text-sm font-bold text-primary">
@@ -122,7 +127,7 @@ function AccountContent() {
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#25314c]">Full name</label>
+                  <label className="text-xs font-bold text-foreground">{tAuth("name")}</label>
                   <Input
                     name="name"
                     required
@@ -133,7 +138,7 @@ function AccountContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#25314c]">Email address</label>
+                  <label className="text-xs font-bold text-foreground">{tAuth("email")}</label>
                   <Input
                     name="email"
                     type="email"
@@ -145,7 +150,7 @@ function AccountContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#25314c]">Phone number</label>
+                  <label className="text-xs font-bold text-foreground">{tAuth("phone")}</label>
                   <Input
                     name="phone"
                     required
@@ -162,7 +167,7 @@ function AccountContent() {
                     disabled={pending}
                     className="h-11 font-semibold"
                   >
-                    {isUpdatingProfile ? "Saving…" : "Save changes"}
+                    {isUpdatingProfile ? tAccount("saving") : tAccount("saveChanges")}
                   </Button>
                   <Button
                     type="button"
@@ -171,15 +176,15 @@ function AccountContent() {
                     onClick={() => logout()}
                     className="h-11 text-xs font-semibold"
                   >
-                    {isLoggingOut ? "Signing out…" : "Sign out"}
+                    {isLoggingOut ? tAuth("signingInButton") : tNav("signOut")}
                   </Button>
                 </div>
               </form>
             </div>
           ) : (
             <div className="py-6 text-center space-y-4">
-              <p className="text-sm text-[#57657e]">
-                Sign in or register to manage your personal profile, vehicle bookings, and rental preferences.
+              <p className="text-sm text-muted-foreground">
+                {tAuth("signInSubtitle")}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <Button
@@ -187,7 +192,7 @@ function AccountContent() {
                   onClick={() => openAuthModal("login", { redirectUrl: redirectUrl || undefined })}
                   className="h-11 w-full sm:w-auto px-6 font-bold"
                 >
-                  Sign in to account
+                  {tAuth("signInButton")}
                 </Button>
                 <Button
                   type="button"
@@ -195,7 +200,7 @@ function AccountContent() {
                   onClick={() => openAuthModal("register", { redirectUrl: redirectUrl || undefined })}
                   className="h-11 w-full sm:w-auto px-6 font-semibold"
                 >
-                  Create new account
+                  {tAuth("registerButton")}
                 </Button>
               </div>
             </div>
@@ -208,7 +213,7 @@ function AccountContent() {
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-[#57657e]">Loading account…</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground">Loading account…</div>}>
       <AccountContent />
     </Suspense>
   );

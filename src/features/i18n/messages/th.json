@@ -32,7 +32,51 @@
     "day": "วัน",
     "hour": "ชม.",
     "viewDetails": "ดูรายละเอียดและจอง",
-    "seats": "ที่นั่ง"
+    "seats": "ที่นั่ง",
+    "sortLabel": "จัดเรียงตาม",
+    "sortRateAsc": "ราคา: ต่ำไปสูง",
+    "sortRateDesc": "ราคา: สูงไปต่ำ",
+    "sortModel": "รุ่นรถยนต์",
+    "allVehicles": "รถทุกประเภท"
+  },
+  "offer": {
+    "backToAll": "← กลับไปยังรถทั้งหมด",
+    "specs": "ข้อมูลจำเพาะของรถ",
+    "seats": "ที่นั่ง",
+    "transmission": "ระบบเกียร์",
+    "fuel": "ประเภทเชื้อเพลิง",
+    "hourlyRate": "อัตราค่าเช่ารายชั่วโมง",
+    "dailyRate": "อัตราค่าเช่ารายวัน",
+    "branchLocation": "ที่ตั้งสาขา",
+    "includedFeatures": "คุณสมบัติที่มีให้",
+    "reserveTitle": "จองรถคันนี้",
+    "calculateQuote": "คำนวณราคา",
+    "calculating": "กำลังคำนวณราคา…",
+    "addOnOptions": "อุปกรณ์เสริมและบริการเพิ่มเติม",
+    "quoteSummary": "สรุปรายละเอียดค่าใช้จ่าย",
+    "carRental": "ค่าเช่ายานพาหนะ",
+    "optionsTotal": "ค่าอุปกรณ์เสริม",
+    "total": "ยอดรวมโดยประมาณ",
+    "checkoutTitle": "ยืนยันการจอง",
+    "submitBooking": "ส่งคำขอจองรถ",
+    "submitting": "กำลังส่งคำขอจอง…"
+  },
+  "bookings": {
+    "title": "การจองของฉัน",
+    "subtitle": "ตรวจสอบคำขอเช่ารถ รถที่ได้รับการยืนยัน และทริปปัจจุบันของคุณ",
+    "findAnotherCar": "ค้นหารถคันอื่น",
+    "reservationDetails": "รายละเอียดการจอง",
+    "cancelBooking": "ยกเลิกการจอง",
+    "cancelling": "กำลังยกเลิก…",
+    "noBookings": "ไม่พบประวัติการจอง",
+    "noBookingsDesc": "คุณยังไม่มีประวัติการทำรายการจองรถในขณะนี้"
+  },
+  "account": {
+    "title": "บัญชีของฉัน",
+    "subtitle": "จัดการข้อมูลโปรไฟล์และตั้งค่าความเป็นส่วนตัวของคุณ",
+    "profile": "ข้อมูลส่วนตัว",
+    "saveChanges": "บันทึกโปรไฟล์",
+    "saving": "กำลังบันทึก…"
   },
   "admin": {
     "navigation": "เมนูผู้ดูแลระบบ",

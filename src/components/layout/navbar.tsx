@@ -63,7 +63,7 @@ function NavbarContent() {
 
   return (
     <header
-      className="sticky top-0 z-40 w-full border-b border-[#e0e6f1]/80 bg-white/85 backdrop-blur-md shadow-[0_1px_3px_0_rgba(37,49,76,0.02),0_4px_16px_-2px_rgba(37,49,76,0.04)] transition-all"
+      className="sticky top-0 z-40 w-full border-b border-border bg-white shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent),0_4px_16px_-2px_color-mix(in_srgb,rgb(var(--shadow-color)) 4%, transparent)] transition-all"
       onKeyDown={(event) => {
         if (event.key === "Escape" && mobileMenuOpen) {
           setMobileMenuOpen(false);
@@ -90,7 +90,7 @@ function NavbarContent() {
             className={cn(
               "shrink-0 font-extrabold tracking-[-0.04em] text-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               isCurrentAdminPath
-                ? "flex h-16 items-center pl-6 text-[32px] lg:w-[185px] lg:border-r lg:border-[#e0e6f1] lg:pl-8"
+                ? "flex h-16 items-center pl-6 text-[32px] lg:w-[185px] lg:border-r lg:border-border lg:pl-8"
                 : "text-[34px]",
             )}
           >
@@ -100,7 +100,7 @@ function NavbarContent() {
           {/* Desktop Navigation */}
           {isCurrentAdminPath ? (
             <nav aria-label="Breadcrumb" className="hidden min-w-0 lg:block">
-              <ol className="flex min-w-0 items-center gap-2 text-xs text-[#57657e]">
+              <ol className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                 <li>
                   <Link
                     href="/admin/bookings"
@@ -111,12 +111,12 @@ function NavbarContent() {
                 </li>
                 {currentAdminPage && (
                   <>
-                    <li aria-hidden="true" className="text-[#57657e]">
+                    <li aria-hidden="true" className="text-muted-foreground">
                       /
                     </li>
                     <li
                       aria-current="page"
-                      className="truncate font-semibold text-[#25314c]"
+                      className="truncate font-semibold text-foreground"
                     >
                       {currentAdminPage.label}
                     </li>
@@ -142,8 +142,8 @@ function NavbarContent() {
                     className={cn(
                       "rounded-full px-3.5 py-1.5 text-[14px] font-medium transition-all duration-150",
                       isActive
-                        ? "bg-[#f0f5ff] text-primary font-semibold shadow-xs"
-                        : "text-[#57657e] hover:bg-[#f0f5ff]/70 hover:text-primary",
+                        ? "bg-secondary text-primary font-semibold shadow-xs"
+                        : "text-muted-foreground hover:bg-secondary/70 hover:text-primary",
                     )}
                   >
                     {link.label}
@@ -159,7 +159,7 @@ function NavbarContent() {
           {isCurrentAdminPath && (
             <Link
               href="/"
-              className="hidden min-h-11 items-center rounded-[8px] px-2 text-xs font-medium text-[#57657e] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary md:inline-flex"
+              className="hidden min-h-11 items-center rounded-[8px] px-2 text-xs font-medium text-muted-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-primary md:inline-flex"
             >
               {t("backToStore")}
             </Link>
@@ -171,12 +171,12 @@ function NavbarContent() {
             <div className="hidden sm:flex items-center gap-3">
               <Link
                 href="/account"
-                className="inline-flex min-h-10 items-center gap-2 rounded-[10px] border border-[#e0e6f1] bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#25314c] shadow-xs transition-all hover:border-primary/50 hover:bg-[#f8faff] hover:text-primary hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="inline-flex min-h-10 items-center gap-2 rounded-[10px] border border-border bg-white px-3.5 py-1.5 text-[13px] font-medium text-foreground shadow-xs transition-all hover:border-primary/50 hover:bg-surface-subtle hover:text-primary hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 {isAdmin ? (
                   <ShieldCheckIcon size={15} className="text-primary" />
                 ) : (
-                  <UserIcon size={15} className="text-[#57657e]" />
+                  <UserIcon size={15} className="text-muted-foreground" />
                 )}
                 <span className="max-w-[140px] truncate">{user.name}</span>
                 {isAdmin && !isCurrentAdminPath && (
@@ -190,7 +190,7 @@ function NavbarContent() {
                 onClick={signOut}
                 disabled={isLoggingOut}
                 aria-label={t("signOut")}
-                className="inline-flex size-10 items-center justify-center rounded-[10px] text-[#57657e] transition-colors hover:bg-[#f0f5ff] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+                className="inline-flex size-10 items-center justify-center rounded-[10px] text-muted-foreground transition-colors hover:bg-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
                 title={t("signOut")}
               >
                 <LogOutIcon size={16} />
@@ -200,7 +200,7 @@ function NavbarContent() {
             <button
               type="button"
               onClick={() => openAuthModal("login")}
-              className="hidden sm:inline-flex items-center gap-2 rounded-[30px] border border-primary bg-primary px-4.5 py-2 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-[#1c358d] hover:shadow-sm hover:shadow-primary/25 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 rounded-[30px] border border-primary bg-primary px-4.5 py-2 text-[13px] font-medium text-white shadow-xs transition-all hover:bg-primary-hover hover:shadow-sm hover:shadow-primary/25 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary cursor-pointer"
             >
               <UserIcon size={15} />
               <span>{t("signIn")}</span>
@@ -211,7 +211,7 @@ function NavbarContent() {
           <button
             ref={menuToggle}
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-[8px] border border-[#e0e6f1] text-[#57657e] hover:bg-[#f0f5ff] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary md:hidden"
+            className="inline-flex size-11 items-center justify-center rounded-[8px] border border-border text-muted-foreground hover:bg-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-controls="navbar-mobile-menu"
@@ -224,76 +224,87 @@ function NavbarContent() {
         </div>
       </div>
 
-      {/* Mobile menu dropdown */}
+      {/* Mobile menu overlay & dropdown */}
       {mobileMenuOpen && (
-        <div
-          id="navbar-mobile-menu"
-          className="border-t border-[#e0e6f1] bg-white px-6 py-4 md:hidden"
-        >
-          <nav
-            className="flex flex-col space-y-3"
-            aria-label={
-              isCurrentAdminPath ? t("accountMenu") : "Main navigation"
-            }
+        <>
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 z-40 bg-foreground/25 backdrop-blur-xs md:hidden animate-fade-in"
+            style={{ top: isCurrentAdminPath ? "64px" : "82px" }}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Floating menu panel */}
+          <div
+            id="navbar-mobile-menu"
+            className="absolute top-full left-0 right-0 z-50 border-b border-border bg-white px-6 py-5 shadow-lg md:hidden animate-slide-down"
           >
-            {links.map((link) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-[#f0f5ff] text-primary font-semibold"
-                      : "text-[#57657e] hover:bg-[#f0f5ff]/60 hover:text-primary",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <div className="pt-2 border-t border-[#e0e6f1]">
-              {isAuthenticated && user ? (
-                <div className="flex items-center justify-between">
+            <nav
+              className="flex flex-col space-y-2.5"
+              aria-label={
+                isCurrentAdminPath ? t("accountMenu") : "Main navigation"
+              }
+            >
+              {links.map((link) => {
+                const isActive =
+                  link.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(link.href);
+                return (
                   <Link
-                    href="/account"
+                    key={link.href}
+                    href={link.href}
+                    aria-current={isActive ? "page" : undefined}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex min-h-11 min-w-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[#25314c] hover:bg-[#f0f5ff] focus-visible:outline-2 focus-visible:outline-primary"
+                    className={cn(
+                      "rounded-[10px] px-3.5 py-2.5 text-sm font-semibold transition-all duration-150",
+                      isActive
+                        ? "bg-secondary text-primary shadow-xs"
+                        : "text-muted-foreground hover:bg-secondary/70 hover:text-primary",
+                    )}
                   >
-                    <UserIcon size={16} className="shrink-0" />
-                    <span className="truncate">{user.name}</span>
+                    {link.label}
                   </Link>
+                );
+              })}
+              <div className="pt-3 border-t border-border">
+                {isAuthenticated && user ? (
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href="/account"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary transition-colors"
+                    >
+                      <UserIcon size={16} className="shrink-0 text-primary" />
+                      <span className="truncate">{user.name}</span>
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={isLoggingOut}
+                      onClick={signOut}
+                      className="min-h-10 shrink-0 rounded-[8px] px-3.5 py-1.5 text-xs font-bold text-destructive hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 transition-colors cursor-pointer"
+                    >
+                      {t("signOut")}
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    disabled={isLoggingOut}
-                    onClick={signOut}
-                    className="min-h-11 shrink-0 rounded-[8px] px-3 py-2 text-xs font-semibold text-[#a22f2f] focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openAuthModal("login");
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-primary py-2.5 text-center text-sm font-bold text-white shadow-xs hover:bg-primary-hover transition-all cursor-pointer active:scale-[0.99]"
                   >
-                    {t("signOut")}
+                    <UserIcon size={16} />
+                    <span>{t("signInOrRegister")}</span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    openAuthModal("login");
-                  }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-primary hover:bg-[#f0f5ff] cursor-pointer"
-                >
-                  <UserIcon size={16} />
-                  <span>{t("signInOrRegister")}</span>
-                </button>
-              )}
-            </div>
-          </nav>
-        </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
@@ -301,7 +312,7 @@ function NavbarContent() {
 
 function NavbarSkeleton() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#e0e6f1] bg-white/95">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-white">
       <div className="mx-auto flex h-[82px] max-w-[1280px] items-center justify-between px-6 sm:px-8">
         <span className="text-[34px] font-extrabold tracking-[-0.04em] text-primary">
           funch.

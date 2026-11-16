@@ -25,7 +25,7 @@ export function LoadingSpinner({
           spinnerSizes[size]
         )}
       />
-      {message && <p className="text-xs font-medium text-[#57657e]">{message}</p>}
+      {message && <p className="text-xs font-medium text-muted-foreground">{message}</p>}
     </div>
   );
 }

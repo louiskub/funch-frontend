@@ -37,6 +37,39 @@
   --input: #e0e6f1;
   --ring: #2747b7;
   --radius: 0.625rem;
+
+  /* Subtle Surface & Dividers */
+  --surface-subtle: #f8faff;
+  --surface-alt: #f0f4fa;
+  --surface-tint: #e8f0fe;
+  --surface-hover: #fafcff;
+  --border-subtle: #d7e2f5;
+  --border-hover: #b0c0de;
+  --overlay: #0f172a;
+  --shadow-color: 37 49 76;
+  --primary-shadow-color: 39 71 183;
+
+  /* Status Colors (Distinct business states per DESIGN.md) */
+  --status-pending-text: #815110;
+  --status-pending-bg: #fff0ce;
+  --status-pending-border: #fde199;
+
+  --status-approved-text: #17604a;
+  --status-approved-bg: #e3f3eb;
+  --status-approved-border: #b5e3ce;
+
+  --status-in-use-text: #28569c;
+  --status-in-use-bg: #e9f0fc;
+  --status-in-use-border: #b8d2fb;
+
+  --status-completed-text: #56615e;
+  --status-completed-bg: #edf0ef;
+  --status-completed-border: #d0dae8;
+
+  --status-rejected-text: #a22f2f;
+  --status-rejected-bg: #fce8e8;
+  --status-rejected-border: #fcd0d0;
+  --status-rejected-hover: #fecaca;
 }
 
 @theme inline {
@@ -48,6 +81,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -56,13 +90,41 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-hover: var(--destructive-hover);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-success-hover: var(--success-hover);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-hover: var(--warning-hover);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-alt: var(--surface-alt);
+  --color-surface-tint: var(--surface-tint);
+  --color-surface-hover: var(--surface-hover);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
+  --color-overlay: var(--overlay);
+  --color-shadow-color: var(--shadow-color);
+  --color-primary-shadow-color: var(--primary-shadow-color);
+  --color-status-pending-text: var(--status-pending-text);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-status-approved-text: var(--status-approved-text);
+  --color-status-approved-bg: var(--status-approved-bg);
+  --color-status-approved-border: var(--status-approved-border);
+  --color-status-in-use-text: var(--status-in-use-text);
+  --color-status-in-use-bg: var(--status-in-use-bg);
+  --color-status-in-use-border: var(--status-in-use-border);
+  --color-status-completed-text: var(--status-completed-text);
+  --color-status-completed-bg: var(--status-completed-bg);
+  --color-status-completed-border: var(--status-completed-border);
+  --color-status-rejected-text: var(--status-rejected-text);
+  --color-status-rejected-bg: var(--status-rejected-bg);
+  --color-status-rejected-border: var(--status-rejected-border);
+  --color-status-rejected-hover: var(--status-rejected-hover);
   --font-sans: 'FunchManrope', sans-serif;
 }
 
@@ -72,6 +134,12 @@
     --background: #ffffff;
     --foreground: #25314c;
   }
+}
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -93,4 +161,132 @@ a svg {
   display: inline-block;
   vertical-align: middle;
   flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Smooth Animations & Transitions (Tailwind CSS v4 Compatible)
+   ========================================================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoomIn95 {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tailwind-animate compatibility classes */
+.animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in,
+.fade-in-0 {
+  animation-name: fadeIn;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn95;
+}
+
+.slide-in-from-right {
+  animation-name: slideInFromRight;
+}
+
+.slide-in-from-top-2,
+.slide-in-from-top {
+  animation-name: slideInFromTop;
+}
+
+.slide-in-from-bottom {
+  animation-name: slideInFromBottom;
+}
+
+/* Explicit Animation Helper Classes */
+.animate-fade-in {
+  animation: fadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-zoom {
+  animation: zoomIn95 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideInFromTop 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-left {
+  animation: slideInFromRight 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   Sonner Toast Styling Customization (Easy Days Theme)
+   ========================================================================== */
+[data-sonner-toaster] {
+  font-family: 'FunchManrope', sans-serif !important;
+}
+
+[data-sonner-toast] {
+  border-radius: 14px !important;
+  border: 1px solid #e0e6f1 !important;
+  box-shadow: 0 12px 32px -4px rgba(37, 49, 76, 0.12), 0 2px 8px rgba(37, 49, 76, 0.04) !important;
+  padding: 14px 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
 }

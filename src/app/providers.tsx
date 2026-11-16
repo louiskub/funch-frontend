@@ -21,7 +21,7 @@ export function Providers({ children }: { children: ReactNode }) {
       >
         {children}
         <AuthModal />
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster position="bottom-right" richColors closeButton />
       </NextIntlClientProvider>
     </QueryClientProvider>
   );

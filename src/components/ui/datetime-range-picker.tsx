@@ -158,14 +158,14 @@ function CustomTimePicker({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1.5 rounded-lg border border-[#e0e6f1] bg-[#f8faff] px-2.5 py-1 text-xs font-semibold text-[#25314c] transition-all hover:border-primary hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-subtle px-2.5 py-1 text-xs font-semibold text-foreground transition-all hover:border-primary hover:bg-card focus:outline-none focus:ring-2 focus:ring-primary/20"
         title={`Change ${label}`}
       >
         <ClockIcon size={13} className="text-primary" />
         <span className="font-mono">{value || "10:00"}</span>
         <ChevronDownIcon
           size={12}
-          className={`text-[#57657e] transition-transform duration-150 ${
+          className={`text-muted-foreground transition-transform duration-150 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -173,8 +173,8 @@ function CustomTimePicker({
 
       {/* Floating Dropdown: Clean list of 15-min intervals */}
       {isOpen && (
-        <div className="absolute right-0 top-[calc(100%+6px)] z-[60] w-44 max-h-64 overflow-y-auto rounded-xl border border-[#e0e6f1] bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#57657e] border-b border-[#f0f4fa] mb-1">
+        <div className="absolute right-0 top-[calc(100%+6px)] z-[60] w-44 max-h-64 overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100">
+          <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border mb-1">
             {label} (24h)
           </div>
 
@@ -199,8 +199,8 @@ function CustomTimePicker({
                     isSelected
                       ? "bg-primary text-white font-bold shadow-xs"
                       : isDisabled
-                      ? "cursor-not-allowed opacity-30 bg-gray-50 text-[#8a98ad] line-through"
-                      : "text-[#25314c] hover:bg-[#f0f5ff]"
+                      ? "cursor-not-allowed opacity-30 bg-muted text-muted-foreground/40 line-through"
+                      : "text-foreground hover:bg-secondary"
                   }`}
                 >
                   <span>{slot}</span>
@@ -507,13 +507,13 @@ export function DateTimeRangePicker({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Pickup Field */}
         <div
-          className={`flex flex-col rounded-[10px] border bg-white p-2.5 transition-all ${
+          className={`flex flex-col rounded-[10px] border bg-card p-2.5 transition-all ${
             isOpen && activeStep === "pickup"
               ? "border-primary ring-2 ring-primary/20"
-              : "border-[#e0e6f1] hover:border-[#b8c6e0]"
+              : "border-border hover:border-border"
           }`}
         >
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
             <CalendarIcon size={14} className="text-primary" />
             Pickup date and time
           </span>
@@ -526,12 +526,12 @@ export function DateTimeRangePicker({
                 setActiveStep("pickup");
                 setIsOpen(true);
               }}
-              className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-[#25314c] hover:bg-[#f0f5ff] transition-colors"
+              className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
             >
               <span className="truncate">{formatDateDisplay(pickupDate)}</span>
             </button>
 
-            <span className="text-[#e0e6f1]">|</span>
+            <span className="text-border">|</span>
 
             {/* Custom Modern Time Picker */}
             <CustomTimePicker
@@ -544,13 +544,13 @@ export function DateTimeRangePicker({
 
         {/* Return Field */}
         <div
-          className={`flex flex-col rounded-[10px] border bg-white p-2.5 transition-all ${
+          className={`flex flex-col rounded-[10px] border bg-card p-2.5 transition-all ${
             isOpen && activeStep === "return"
               ? "border-primary ring-2 ring-primary/20"
-              : "border-[#e0e6f1] hover:border-[#b8c6e0]"
+              : "border-border hover:border-border"
           }`}
         >
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#57657e]">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
             <CalendarIcon size={14} className="text-primary" />
             Return date and time
           </span>
@@ -563,12 +563,12 @@ export function DateTimeRangePicker({
                 setActiveStep("return");
                 setIsOpen(true);
               }}
-              className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-[#25314c] hover:bg-[#f0f5ff] transition-colors"
+              className="flex-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
             >
               <span className="truncate">{formatDateDisplay(returnDate)}</span>
             </button>
 
-            <span className="text-[#e0e6f1]">|</span>
+            <span className="text-border">|</span>
 
             {/* Custom Modern Time Picker with minTime enforcement when on the same day */}
             <CustomTimePicker
@@ -583,20 +583,20 @@ export function DateTimeRangePicker({
 
       {/* Floating Dual-Month Range Calendar Popover */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full max-w-[700px] rounded-2xl border border-[#e0e6f1] bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full max-w-[700px] rounded-2xl border border-border bg-card p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
           {/* Header Navigation */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#eef2f8]">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
             <button
               type="button"
               onClick={handlePrevMonth}
               disabled={isPrevDisabled}
-              className="rounded-lg p-1.5 text-[#57657e] hover:bg-[#f0f5ff] hover:text-[#25314c] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors"
               title="Previous month"
             >
               <ChevronLeftIcon size={18} />
             </button>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#57657e]">
+            <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <span>
                 Selecting:{" "}
                 <span className="font-bold text-primary uppercase tracking-wide">
@@ -604,7 +604,7 @@ export function DateTimeRangePicker({
                 </span>
               </span>
               {durationText && (
-                <span className="rounded-full bg-[#e3f3eb] px-2.5 py-0.5 text-[11px] font-bold text-[#17604a]">
+                <span className="rounded-full bg-status-approved-bg px-2.5 py-0.5 text-[11px] font-bold text-status-approved-text">
                   {durationText}
                 </span>
               )}
@@ -613,7 +613,7 @@ export function DateTimeRangePicker({
             <button
               type="button"
               onClick={handleNextMonth}
-              className="rounded-lg p-1.5 text-[#57657e] hover:bg-[#f0f5ff] hover:text-[#25314c] transition-colors"
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
               title="Next month"
             >
               <ChevronRightIcon size={18} />
@@ -624,12 +624,12 @@ export function DateTimeRangePicker({
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Month */}
             <div>
-              <div className="text-center font-bold text-[#25314c] text-sm mb-3">
+              <div className="text-center font-bold text-foreground text-sm mb-3">
                 {MONTH_NAMES[viewMonth]} {viewYear}
               </div>
 
               {/* Weekday labels */}
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-[#57657e] mb-1">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-muted-foreground mb-1">
                 {WEEKDAYS.map((w) => (
                   <div key={`left-${w}`} className="py-1">
                     {w}
@@ -653,11 +653,11 @@ export function DateTimeRangePicker({
                       key={`d-left-${d.dateStr}`}
                       className={`relative flex items-center justify-center h-9 ${
                         isInRange
-                          ? "bg-[#e3f3eb]"
+                          ? "bg-status-approved-bg"
                           : isStart && returnDate && returnDate !== pickupDate
-                          ? "rounded-l-full bg-[#e3f3eb]"
+                          ? "rounded-l-full bg-status-approved-bg"
                           : isEnd && pickupDate && returnDate !== pickupDate
-                          ? "rounded-r-full bg-[#e3f3eb]"
+                          ? "rounded-r-full bg-status-approved-bg"
                           : ""
                       }`}
                       onMouseEnter={() => {
@@ -672,12 +672,12 @@ export function DateTimeRangePicker({
                         onClick={() => handleDayClick(d.dateStr)}
                         className={`h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                           isStart || isEnd
-                            ? "bg-[#16a34a] text-white font-bold shadow-md scale-105 z-10"
+                            ? "bg-success text-white font-bold shadow-md scale-105 z-10"
                             : isPast
-                            ? "text-[#b0bac9] cursor-not-allowed"
+                            ? "text-muted-foreground/40 cursor-not-allowed"
                             : isInRange
-                            ? "text-[#166534] hover:bg-[#bbf7d0]"
-                            : "text-[#25314c] hover:bg-[#f0f5ff]"
+                            ? "text-status-approved-text hover:bg-status-approved-bg"
+                            : "text-foreground hover:bg-secondary"
                         }`}
                       >
                         {d.dayNum}
@@ -690,12 +690,12 @@ export function DateTimeRangePicker({
 
             {/* Right Month */}
             <div>
-              <div className="text-center font-bold text-[#25314c] text-sm mb-3">
+              <div className="text-center font-bold text-foreground text-sm mb-3">
                 {MONTH_NAMES[rightMonth]} {rightYear}
               </div>
 
               {/* Weekday labels */}
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-[#57657e] mb-1">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-wider text-muted-foreground mb-1">
                 {WEEKDAYS.map((w) => (
                   <div key={`right-${w}`} className="py-1">
                     {w}
@@ -719,11 +719,11 @@ export function DateTimeRangePicker({
                       key={`d-right-${d.dateStr}`}
                       className={`relative flex items-center justify-center h-9 ${
                         isInRange
-                          ? "bg-[#e3f3eb]"
+                          ? "bg-status-approved-bg"
                           : isStart && returnDate && returnDate !== pickupDate
-                          ? "rounded-l-full bg-[#e3f3eb]"
+                          ? "rounded-l-full bg-status-approved-bg"
                           : isEnd && pickupDate && returnDate !== pickupDate
-                          ? "rounded-r-full bg-[#e3f3eb]"
+                          ? "rounded-r-full bg-status-approved-bg"
                           : ""
                       }`}
                       onMouseEnter={() => {
@@ -738,12 +738,12 @@ export function DateTimeRangePicker({
                         onClick={() => handleDayClick(d.dateStr)}
                         className={`h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                           isStart || isEnd
-                            ? "bg-[#16a34a] text-white font-bold shadow-md scale-105 z-10"
+                            ? "bg-success text-white font-bold shadow-md scale-105 z-10"
                             : isPast
-                            ? "text-[#b0bac9] cursor-not-allowed"
+                            ? "text-muted-foreground/40 cursor-not-allowed"
                             : isInRange
-                            ? "text-[#166534] hover:bg-[#bbf7d0]"
-                            : "text-[#25314c] hover:bg-[#f0f5ff]"
+                            ? "text-status-approved-text hover:bg-status-approved-bg"
+                            : "text-foreground hover:bg-secondary"
                         }`}
                       >
                         {d.dayNum}
@@ -756,11 +756,11 @@ export function DateTimeRangePicker({
           </div>
 
           {/* Popover Footer */}
-          <div className="mt-5 pt-3 border-t border-[#eef2f8] flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-[#57657e]">
-              <span className="inline-block h-3 w-3 rounded-full bg-[#16a34a]" />
+          <div className="mt-5 pt-3 border-t border-border flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="inline-block h-3 w-3 rounded-full bg-success" />
               <span>Selected Dates</span>
-              <span className="inline-block h-3 w-3 rounded bg-[#e3f3eb] ml-2" />
+              <span className="inline-block h-3 w-3 rounded bg-status-approved-bg ml-2" />
               <span>Rental Range</span>
             </div>
 

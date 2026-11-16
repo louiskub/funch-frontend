@@ -515,8 +515,8 @@ export default function ReportsPage() {
   if (!allowed) {
     return (
       <main className="mx-auto max-w-5xl flex-1 p-8">
-        <h1 className="text-2xl font-bold text-[#25314c]">Operational Reports & Analytics</h1>
-        <p role="status" className="mt-4 text-sm text-[#57657e]">
+        <h1 className="text-2xl font-bold text-foreground">Operational Reports & Analytics</h1>
+        <p role="status" className="mt-4 text-sm text-muted-foreground">
           {message}
         </p>
       </main>
@@ -566,18 +566,18 @@ export default function ReportsPage() {
       {message && (
         <div
           role="alert"
-          className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-[#f0f5ff] text-[#25314c] border border-[#d7e2f5]"
+          className="mb-6 rounded-[10px] p-4 text-xs font-medium bg-secondary text-foreground border border-border-subtle"
         >
           {message}
         </div>
       )}
 
       {/* Filter & Date Presets Bar (Fleet Admin Style) */}
-      <div className="mb-6 rounded-[18px] border border-[#e0e6f1] bg-white p-5 shadow-xs space-y-4">
+      <div className="mb-6 rounded-[18px] border border-border bg-white p-5 shadow-xs space-y-4">
         {/* Quick Date Range Preset Pills */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e0e6f1] pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
           <div className="flex items-center gap-1.5">
-            <span className="flex items-center gap-1 text-xs font-bold text-[#57657e] mr-2">
+            <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground mr-2">
               <CalendarIcon size={14} className="text-primary" />
               Time Range:
             </span>
@@ -597,7 +597,7 @@ export default function ReportsPage() {
                 className={`rounded-[8px] px-3 py-1 text-xs font-semibold transition-all ${
                   activePreset === key
                     ? "bg-primary text-white shadow-xs"
-                    : "bg-[#f0f5ff] text-[#57657e] hover:text-[#25314c]"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {label}
@@ -605,7 +605,7 @@ export default function ReportsPage() {
             ))}
           </div>
 
-          <span className="text-xs text-[#57657e]">
+          <span className="text-xs text-muted-foreground">
             Values reflect approved rental contracts, not cash collections.
           </span>
         </div>
@@ -621,7 +621,7 @@ export default function ReportsPage() {
         >
           {/* Created From */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[#57657e]">Created From</label>
+            <label className="text-xs font-semibold text-muted-foreground">Created From</label>
             <input
               type="datetime-local"
               required
@@ -630,13 +630,13 @@ export default function ReportsPage() {
                 setFrom(e.target.value);
                 setActivePreset("CUSTOM");
               }}
-              className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none focus:border-primary"
+              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none focus:border-primary"
             />
           </div>
 
           {/* Created To */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[#57657e]">Created To (Exclusive)</label>
+            <label className="text-xs font-semibold text-muted-foreground">Created To (Exclusive)</label>
             <input
               type="datetime-local"
               required
@@ -645,20 +645,20 @@ export default function ReportsPage() {
                 setTo(e.target.value);
                 setActivePreset("CUSTOM");
               }}
-              className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs text-[#25314c] outline-none focus:border-primary"
+              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none focus:border-primary"
             />
           </div>
 
           {/* Country Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[#57657e]">Country Station</label>
+            <label className="text-xs font-semibold text-muted-foreground">Country Station</label>
             <select
               value={country}
               onChange={(e) => {
                 setCountry(e.target.value);
                 setBranch("");
               }}
-              className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs font-medium text-[#25314c] outline-none focus:border-primary cursor-pointer"
+              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer"
             >
               <option value="">All Countries</option>
               {[...new Set(branches.map((b) => b.countryCode))]
@@ -674,11 +674,11 @@ export default function ReportsPage() {
 
           {/* Branch Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[#57657e]">Branch Station</label>
+            <label className="text-xs font-semibold text-muted-foreground">Branch Station</label>
             <select
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
-              className="h-9 w-full rounded-[8px] border border-[#e0e6f1] bg-white px-2.5 text-xs font-medium text-[#25314c] outline-none focus:border-primary cursor-pointer"
+              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer"
             >
               <option value="">All Branches</option>
               {branches
@@ -702,43 +702,43 @@ export default function ReportsPage() {
       {summaryMetrics && (
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {/* Card 1: Total Booking Value */}
-          <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+          <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#57657e]">Total Booking Value</span>
-              <div className="rounded-full bg-[#f0f5ff] p-1.5 text-primary">
+              <span className="text-xs font-medium text-muted-foreground">Total Booking Value</span>
+              <div className="rounded-full bg-secondary p-1.5 text-primary">
                 <DollarSignIcon size={16} />
               </div>
             </div>
             <div className="mt-2 space-y-0.5">
               {summaryMetrics.valueByCurrency.length === 0 ? (
-                <p className="text-2xl font-bold tracking-tight text-[#25314c] tabular-nums">0</p>
+                <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">0</p>
               ) : (
                 summaryMetrics.valueByCurrency.map(([curr, val]) => (
                   <p
                     key={curr}
-                    className="text-2xl font-bold tracking-tight text-[#25314c] tabular-nums"
+                    className="text-2xl font-bold tracking-tight text-foreground tabular-nums"
                   >
                     {formatCurrency(val, curr)}
                   </p>
                 ))
               )}
             </div>
-            <span className="text-xs text-[#57657e] mt-1 block">Approved rental contracts</span>
+            <span className="text-xs text-muted-foreground mt-1 block">Approved rental contracts</span>
           </div>
 
           {/* Card 2: Total Bookings Volume */}
-          <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+          <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#57657e]">Total Rental Volume</span>
-              <div className="rounded-full bg-[#e3f3eb] p-1.5 text-[#17604a]">
+              <span className="text-xs font-medium text-muted-foreground">Total Rental Volume</span>
+              <div className="rounded-full bg-status-approved-bg p-1.5 text-status-approved-text">
                 <TrendingUpIcon size={16} />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-bold tracking-tight text-[#17604a] tabular-nums">
+            <p className="mt-2 text-2xl font-bold tracking-tight text-status-approved-text tabular-nums">
               {summaryMetrics.totalVolume}{" "}
-              <span className="text-sm font-semibold text-[#57657e]">trips</span>
+              <span className="text-sm font-semibold text-muted-foreground">trips</span>
             </p>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-[#57657e]">
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
               <span>{summaryMetrics.completedVolume} completed</span>
               <span>•</span>
               <span>{summaryMetrics.approvedVolume + summaryMetrics.inUseVolume} active</span>
@@ -746,46 +746,46 @@ export default function ReportsPage() {
           </div>
 
           {/* Card 3: Confirmed Extra Charges */}
-          <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+          <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#57657e]">Confirmed Extra Charges</span>
-              <div className="rounded-full bg-[#fff0ce] p-1.5 text-[#815110]">
+              <span className="text-xs font-medium text-muted-foreground">Confirmed Extra Charges</span>
+              <div className="rounded-full bg-status-pending-bg p-1.5 text-status-pending-text">
                 <ClockIcon size={16} />
               </div>
             </div>
             <div className="mt-2 space-y-0.5">
               {summaryMetrics.chargeByCurrency.length === 0 ? (
-                <p className="text-2xl font-bold tracking-tight text-[#815110] tabular-nums">
+                <p className="text-2xl font-bold tracking-tight text-status-pending-text tabular-nums">
                   0.00
                 </p>
               ) : (
                 summaryMetrics.chargeByCurrency.map(([curr, val]) => (
                   <p
                     key={curr}
-                    className="text-2xl font-bold tracking-tight text-[#815110] tabular-nums"
+                    className="text-2xl font-bold tracking-tight text-status-pending-text tabular-nums"
                   >
                     {formatCurrency(val, curr)}
                   </p>
                 ))
               )}
             </div>
-            <span className="text-xs text-[#57657e] mt-1 block">Late returns & supplements</span>
+            <span className="text-xs text-muted-foreground mt-1 block">Late returns & supplements</span>
           </div>
 
           {/* Card 4: Top Model Performer */}
-          <div className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-xs">
+          <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#57657e]">Top Performing Model</span>
-              <div className="rounded-full bg-[#e9f0fc] p-1.5 text-[#28569c]">
+              <span className="text-xs font-medium text-muted-foreground">Top Performing Model</span>
+              <div className="rounded-full bg-status-in-use-bg p-1.5 text-status-in-use-text">
                 <CarIcon size={16} />
               </div>
             </div>
-            <p className="mt-2 text-lg font-bold tracking-tight text-[#25314c] truncate">
+            <p className="mt-2 text-lg font-bold tracking-tight text-foreground truncate">
               {summaryMetrics.topCar
                 ? `${summaryMetrics.topCar.brand} ${summaryMetrics.topCar.model}`
                 : "No Rentals"}
             </p>
-            <span className="text-xs text-[#28569c] font-semibold mt-1 block">
+            <span className="text-xs text-status-in-use-text font-semibold mt-1 block">
               {summaryMetrics.topCar
                 ? `${summaryMetrics.topCar.count} trips booked`
                 : "Awaiting bookings"}
@@ -797,11 +797,11 @@ export default function ReportsPage() {
       {/* Main Analytical Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Section 1: Revenue & Extra Charges by Branch */}
-        <div className="rounded-[18px] border border-[#e0e6f1] bg-white shadow-sm overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-[#e0e6f1] bg-[#f0f5ff]/60 px-5 py-3.5">
+        <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-[#25314c]">Branch Value & Revenue Breakdown</h2>
-              <p className="text-xs text-[#57657e] mt-0.5">
+              <h2 className="text-sm font-bold text-foreground">Branch Value & Revenue Breakdown</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Contract values and confirmed extra fees by station
               </p>
             </div>
@@ -812,44 +812,44 @@ export default function ReportsPage() {
 
           <div className="flex-1 overflow-x-auto p-0">
             {branchRevenueList.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#57657e]">
+              <div className="p-8 text-center text-xs text-muted-foreground">
                 No branch revenue data recorded for this period.
               </div>
             ) : (
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[#e0e6f1] bg-[#f0f5ff]/30 text-[#57657e]">
+                  <tr className="border-b border-border bg-secondary/30 text-muted-foreground">
                     <th className="py-2.5 pl-5 font-semibold">Branch Station</th>
                     <th className="py-2.5 font-semibold text-right">Trips</th>
                     <th className="py-2.5 font-semibold text-right">Booking Value</th>
                     <th className="py-2.5 pr-5 font-semibold text-right">Extra Charges</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e0e6f1]">
+                <tbody className="divide-y divide-border">
                   {branchRevenueList.map((item) => {
                     const b = branchMap.get(item.branchId);
                     return (
-                      <tr key={item.branchId} className="hover:bg-[#f0f5ff]/20 transition-colors">
+                      <tr key={item.branchId} className="hover:bg-secondary/20 transition-colors">
                         <td className="py-3 pl-5">
                           <div className="flex items-center gap-2">
                             <MapPinIcon size={14} className="text-primary shrink-0" />
                             <div>
-                              <p className="font-bold text-[#25314c]">
+                              <p className="font-bold text-foreground">
                                 {b?.name || "Unknown Branch"}
                               </p>
-                              <p className="text-[10px] text-[#57657e]">
+                              <p className="text-[10px] text-muted-foreground">
                                 {b?.city} ({b?.countryCode})
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 text-right font-medium text-[#25314c] tabular-nums">
+                        <td className="py-3 text-right font-medium text-foreground tabular-nums">
                           {item.bookingCount}
                         </td>
-                        <td className="py-3 text-right font-bold text-[#25314c] tabular-nums">
+                        <td className="py-3 text-right font-bold text-foreground tabular-nums">
                           {formatCurrency(item.bookingValue, item.currency)}
                         </td>
-                        <td className="py-3 pr-5 text-right font-semibold text-[#815110] tabular-nums">
+                        <td className="py-3 pr-5 text-right font-semibold text-status-pending-text tabular-nums">
                           {formatCurrency(item.extraCharges, item.currency)}
                         </td>
                       </tr>
@@ -862,11 +862,11 @@ export default function ReportsPage() {
         </div>
 
         {/* Section 2: Booking Status Distribution */}
-        <div className="rounded-[18px] border border-[#e0e6f1] bg-white shadow-sm overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-[#e0e6f1] bg-[#f0f5ff]/60 px-5 py-3.5">
+        <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-[#25314c]">Rental Status Distribution</h2>
-              <p className="text-xs text-[#57657e] mt-0.5">
+              <h2 className="text-sm font-bold text-foreground">Rental Status Distribution</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Breakdown of requests across operational states
               </p>
             </div>
@@ -877,7 +877,7 @@ export default function ReportsPage() {
 
           <div className="flex-1 p-5 space-y-4">
             {statusDistribution.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[#57657e]">
+              <div className="py-8 text-center text-xs text-muted-foreground">
                 No booking status data available in this date range.
               </div>
             ) : (
@@ -886,28 +886,28 @@ export default function ReportsPage() {
                   <div className="flex items-center justify-between text-xs">
                     <StatusBadge status={item.status} />
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#25314c] tabular-nums">
+                      <span className="font-bold text-foreground tabular-nums">
                         {item.count} {item.count === 1 ? "booking" : "bookings"}
                       </span>
-                      <span className="text-xs text-[#57657e] tabular-nums">
+                      <span className="text-xs text-muted-foreground tabular-nums">
                         ({item.pct.toFixed(1)}%)
                       </span>
                     </div>
                   </div>
 
                   {/* Distribution Progress Bar */}
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#f0f5ff]">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
                         item.status === "APPROVED"
-                          ? "bg-[#17604a]"
+                          ? "bg-status-approved-text"
                           : item.status === "IN_USE"
-                            ? "bg-[#28569c]"
+                            ? "bg-status-in-use-text"
                             : item.status === "COMPLETED"
-                              ? "bg-[#56615e]"
+                              ? "bg-status-completed-text"
                               : item.status === "PENDING"
-                                ? "bg-[#815110]"
-                                : "bg-[#a22f2f]"
+                                ? "bg-status-pending-text"
+                                : "bg-status-rejected-text"
                       }`}
                       style={{ width: `${Math.max(item.pct, 4)}%` }}
                     />
@@ -919,13 +919,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Section 3: Popular Vehicle Models Leaderboard */}
-        <div className="rounded-[18px] border border-[#e0e6f1] bg-white shadow-sm overflow-hidden flex flex-col lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-[#e0e6f1] bg-[#f0f5ff]/60 px-5 py-3.5">
+        <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden flex flex-col lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-[#25314c]">
+              <h2 className="text-sm font-bold text-foreground">
                 Fleet Model Utilization & Popularity
               </h2>
-              <p className="text-xs text-[#57657e] mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Vehicles ranked by customer booking volume
               </p>
             </div>
@@ -936,7 +936,7 @@ export default function ReportsPage() {
 
           <div className="flex-1 p-5">
             {aggregatedPopularCars.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[#57657e]">
+              <div className="py-8 text-center text-xs text-muted-foreground">
                 No vehicle model data available for this range.
               </div>
             ) : (
@@ -944,10 +944,10 @@ export default function ReportsPage() {
                 {aggregatedPopularCars.map((car, index) => (
                   <div
                     key={car.carTypeId}
-                    className="rounded-[14px] border border-[#e0e6f1] bg-white p-4 shadow-2xs hover:shadow-xs transition-shadow flex items-center gap-3.5"
+                    className="rounded-[14px] border border-border bg-white p-4 shadow-2xs hover:shadow-xs transition-shadow flex items-center gap-3.5"
                   >
                     {/* Rank Badge / Photo */}
-                    <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-[10px] border border-[#e0e6f1] bg-[#f0f5ff] flex items-center justify-center">
+                    <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-[10px] border border-border bg-secondary flex items-center justify-center">
                       {car.coverUrl ? (
                         <img
                           src={car.coverUrl}
@@ -965,18 +965,18 @@ export default function ReportsPage() {
                     {/* Model Details & Bar */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-1">
-                        <p className="text-xs font-bold text-[#25314c] truncate">
+                        <p className="text-xs font-bold text-foreground truncate">
                           {car.brand} {car.model}
                         </p>
                         <span className="text-xs font-bold text-primary tabular-nums shrink-0">
                           {car.count} trips
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#57657e] mt-0.5">
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
                         {car.seats} seats • {car.transmission} • {car.branchesCount} stations
                       </p>
 
-                      <div className="mt-2 h-1.5 w-full rounded-full bg-[#f0f5ff] overflow-hidden">
+                      <div className="mt-2 h-1.5 w-full rounded-full bg-secondary overflow-hidden">
                         <div
                           className="h-full rounded-full bg-primary transition-all duration-300"
                           style={{ width: `${Math.max(car.percentage, 6)}%` }}
