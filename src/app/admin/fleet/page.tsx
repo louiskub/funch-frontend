@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { z } from "zod";
 import { currentUser } from "../../auth";
@@ -1246,6 +1247,14 @@ export default function AdminFleetPage() {
     (timelineCompletedKey !== timelineRequestKey || !timelineMatchesSelection) &&
     !timelineErrorMessage;
 
+  const moveFleetTab = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const nextTab = activeTab === "manage" ? "timeline" : "manage";
+    setActiveTab(nextTab);
+    document.getElementById(`fleet-${nextTab}-tab`)?.focus();
+  };
+
   useEffect(() => {
     if (activeTab !== "timeline" || !activeBranch || !selectedTimelineMonth) return;
     let current = true;
@@ -1332,14 +1341,16 @@ export default function AdminFleetPage() {
         </div>
       )}
 
-      <div className="mb-6 flex gap-2 border-b border-border" role="tablist" aria-label={tTimeline("views")}>
+      <div className="mb-6 flex gap-2 border-b border-border" role="tablist" aria-label={tTimeline("views")} aria-orientation="horizontal">
         <button
           id="fleet-manage-tab"
           type="button"
           role="tab"
           aria-selected={activeTab === "manage"}
           aria-controls="fleet-manage-panel"
+          tabIndex={activeTab === "manage" ? 0 : -1}
           onClick={() => setActiveTab("manage")}
+          onKeyDown={moveFleetTab}
           className={`border-b-2 px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeTab === "manage" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           {tTimeline("manageTab")}
@@ -1350,7 +1361,9 @@ export default function AdminFleetPage() {
           role="tab"
           aria-selected={activeTab === "timeline"}
           aria-controls="fleet-timeline-panel"
+          tabIndex={activeTab === "timeline" ? 0 : -1}
           onClick={() => setActiveTab("timeline")}
+          onKeyDown={moveFleetTab}
           className={`border-b-2 px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeTab === "timeline" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           {tTimeline("timelineTab")}

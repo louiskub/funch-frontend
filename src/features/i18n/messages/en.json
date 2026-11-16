@@ -155,7 +155,7 @@
       "manageTab": "Fleet management",
       "timelineTab": "Fleet timeline",
       "title": "Fleet capacity timeline",
-      "subtitle": "Daily peak capacity · {timezone}. Pending requests count as reserved.",
+      "subtitle": "Daily peak capacity · {timezone}. Pending requests count as reserved. Future months assume today's fleet stays active.",
       "previousMonth": "Previous month",
       "nextMonth": "Next month",
       "refresh": "Refresh timeline",
