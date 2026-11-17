@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/footer";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "FUNCH Car Rental — Easy Days",
+  title: "Calrentar Car Rental — Easy Days",
   description: "Browse and rent quality vehicles with transparent pricing.",
 };
 

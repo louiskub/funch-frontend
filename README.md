@@ -1,4 +1,4 @@
-# FUNCH frontend
+# Calrentar frontend
 
 Next.js catalog UI. Run the backend and seed its demo catalog first, then:
 

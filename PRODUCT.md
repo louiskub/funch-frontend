@@ -1,4 +1,4 @@
-# FUNCH Car Rental
+# Calrentar Car Rental
 
 <!-- impeccable:product-schema 1 -->
 
@@ -31,7 +31,7 @@ Multi-country, multi-branch rental service, including airport branches. A branch
 
 ## Brand Commitments
 
-Selected on 2026-11-16: Easy Days · Original, using blue/light blue, white HTML body (#FFFFFF) including dark system preference, Manrope, a booking-first homepage, and a friendly, comfortable interface with rounded forms and generous space. Component library and styling stack decision: **shadcn/ui + Tailwind CSS**. DESIGN.md is the selected design authority. Hertz informed search initiation; Europcar informed vehicle and location presentation. Neither reference changes FUNCH business rules.
+Selected on 2026-11-16: Easy Days · Original, using blue/light blue, white HTML body (#FFFFFF) including dark system preference, Manrope, a booking-first homepage, and a friendly, comfortable interface with rounded forms and generous space. Component library and styling stack decision: **shadcn/ui + Tailwind CSS**. DESIGN.md is the selected design authority. Hertz informed search initiation; Europcar informed vehicle and location presentation. Neither reference changes Calrentar business rules.
 
 ## Evidence on Hand
 

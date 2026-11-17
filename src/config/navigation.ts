@@ -14,6 +14,7 @@ export const customerNavItems: NavItem[] = [
 
 export const adminNavItems: NavItem[] = [
   { label: "Bookings", href: "/admin/bookings", requiresAdmin: true },
+  { label: "Timeline", href: "/admin/timeline", requiresAdmin: true },
   { label: "Fleet", href: "/admin/fleet", requiresAdmin: true },
   { label: "Options", href: "/admin/options", requiresAdmin: true },
   { label: "Members", href: "/admin/members", requiresAdmin: true },

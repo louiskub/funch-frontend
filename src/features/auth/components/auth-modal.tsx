@@ -139,7 +139,7 @@ export function AuthModal() {
                 <UserIcon size={18} />
               </div>
               <span className="text-xs font-bold tracking-tight text-primary">
-                FUNCH Car Rental
+                Calrentar Car Rental
               </span>
             </div>
             <button

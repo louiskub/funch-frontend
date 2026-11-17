@@ -13,7 +13,7 @@ export function Footer() {
       <div className="mx-auto max-w-[1280px] px-6 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span className="text-[26px] font-extrabold tracking-[-0.04em] text-muted-foreground">
-            funch.
+            Calrentar
           </span>
           <span className="text-xs text-muted-foreground/70">
             · Car rental, made simple
@@ -39,7 +39,7 @@ export function Footer() {
           )}
         </div>
         <p className="text-xs text-muted-foreground/60">
-          © 2026 FUNCH Car Rental. All rights reserved.
+          © 2026 Calrentar Car Rental. All rights reserved.
         </p>
       </div>
     </footer>

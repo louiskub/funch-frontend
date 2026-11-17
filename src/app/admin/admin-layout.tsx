@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { BarChart3, Package, Users } from "lucide-react";
-import { CalendarIcon, CarIcon, UserIcon } from "@/components/ui/icons";
+import { CalendarIcon, CarIcon, ClockIcon, UserIcon } from "@/components/ui/icons";
 import { AdminGuard } from "@/components/layout/admin-guard";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ function AdminLayoutContent({
 
   const navItems = [
     { label: t("bookings"), href: "/admin/bookings", icon: CalendarIcon },
+    { label: t("timeline"), href: "/admin/timeline", icon: ClockIcon },
     { label: t("fleet"), href: "/admin/fleet", icon: CarIcon },
     { label: t("options"), href: "/admin/options", icon: Package },
     { label: t("members"), href: "/admin/members", icon: Users },
@@ -40,7 +41,7 @@ function AdminLayoutContent({
     <div className="flex min-h-[calc(100vh-65px)] bg-card text-foreground">
       <aside
         aria-label={t("branchAdmin")}
-        className="sticky top-[65px] hidden h-[calc(100dvh-65px)] w-[185px] shrink-0 flex-col border-r border-border bg-card p-3 lg:flex"
+        className="fixed bottom-0 left-0 top-[65px] z-20 hidden w-[185px] shrink-0 flex-col border-r border-border bg-card p-3 lg:flex"
       >
         <p className="shrink-0 px-3 pb-5 pt-4 text-sm font-semibold leading-6">
           {t("branchAdmin")}
@@ -98,25 +99,11 @@ function AdminLayoutContent({
       </aside>
 
       {/* Main admin body */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Admin Topbar */}
-        <header className="flex min-h-[64px] flex-wrap items-center justify-between gap-4 border-b border-border px-6 sm:px-8 py-3 bg-secondary/30">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              {title}
-            </h1>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-          </div>
-
-          {actions && (
-            <div className="flex items-center gap-2.5">{actions}</div>
-          )}
-        </header>
-
-        {/* Mobile secondary tabs */}
+      <div className="ml-0 flex min-w-0 flex-1 flex-col lg:ml-[185px]">
+        {/* Mobile navigation stays below the fixed global navbar. */}
         <nav
           aria-label={t("navigation")}
-          className="flex border-b border-border px-4 py-2 bg-card lg:hidden overflow-x-auto gap-2"
+          className="fixed inset-x-0 top-[65px] z-30 flex gap-2 overflow-x-auto border-b border-border bg-card px-4 py-2 lg:hidden"
         >
           {navItems.map((item) => {
             const active =
@@ -138,6 +125,21 @@ function AdminLayoutContent({
             );
           })}
         </nav>
+        <div aria-hidden="true" className="h-[61px] shrink-0 lg:hidden" />
+
+        {/* Admin Topbar */}
+        <header className="flex min-h-[64px] flex-wrap items-center justify-between gap-4 border-b border-border px-6 sm:px-8 py-3 bg-secondary/30">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              {title}
+            </h1>
+            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+          </div>
+
+          {actions && (
+            <div className="flex items-center gap-2.5">{actions}</div>
+          )}
+        </header>
 
         {/* Content area */}
         <div className="flex-1 p-6 sm:p-8">{children}</div>

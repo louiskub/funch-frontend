@@ -37,6 +37,7 @@ function NavbarContent() {
 
   const adminNavLinks = [
     { label: t("bookings"), href: "/admin/bookings" },
+    { label: tAdmin("timeline"), href: "/admin/timeline" },
     { label: t("fleet"), href: "/admin/fleet" },
     { label: t("options"), href: "/admin/options" },
     { label: t("members"), href: "/admin/members" },
@@ -62,15 +63,16 @@ function NavbarContent() {
   };
 
   return (
-    <header
-      className="sticky top-0 z-40 w-full border-b border-border bg-white shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent),0_4px_16px_-2px_color-mix(in_srgb,rgb(var(--shadow-color)) 4%, transparent)] transition-all"
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && mobileMenuOpen) {
-          setMobileMenuOpen(false);
-          menuToggle.current?.focus();
-        }
-      }}
-    >
+    <>
+      <header
+        className="fixed inset-x-0 top-0 z-40 w-full border-b border-border bg-white shadow-[0_1px_3px_0_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent),0_4px_16px_-2px_color-mix(in_srgb,rgb(var(--shadow-color)) 4%, transparent)] transition-all"
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && mobileMenuOpen) {
+            setMobileMenuOpen(false);
+            menuToggle.current?.focus();
+          }
+        }}
+      >
       <div
         className={cn(
           "mx-auto flex items-center justify-between",
@@ -94,7 +96,7 @@ function NavbarContent() {
                 : "text-[34px]",
             )}
           >
-            funch<span className="text-primary">.</span>
+            Calrentar
           </Link>
 
           {/* Desktop Navigation */}
@@ -230,7 +232,7 @@ function NavbarContent() {
           {/* Backdrop overlay */}
           <div
             className="fixed inset-0 z-40 bg-foreground/25 backdrop-blur-xs md:hidden animate-fade-in"
-            style={{ top: isCurrentAdminPath ? "64px" : "82px" }}
+            style={{ top: isCurrentAdminPath ? "65px" : "83px" }}
             onClick={() => setMobileMenuOpen(false)}
             aria-hidden="true"
           />
@@ -306,19 +308,27 @@ function NavbarContent() {
           </div>
         </>
       )}
-    </header>
+      </header>
+      <div
+        aria-hidden="true"
+        className={isCurrentAdminPath ? "h-[65px]" : "h-[83px]"}
+      />
+    </>
   );
 }
 
 function NavbarSkeleton() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-white">
-      <div className="mx-auto flex h-[82px] max-w-[1280px] items-center justify-between px-6 sm:px-8">
-        <span className="text-[34px] font-extrabold tracking-[-0.04em] text-primary">
-          funch.
-        </span>
-      </div>
-    </header>
+    <>
+      <header className="fixed inset-x-0 top-0 z-40 w-full border-b border-border bg-white">
+        <div className="mx-auto flex h-[82px] max-w-[1280px] items-center justify-between px-6 sm:px-8">
+          <span className="text-[34px] font-extrabold tracking-[-0.04em] text-primary">
+            Calrentar
+          </span>
+        </div>
+      </header>
+      <div aria-hidden="true" className="h-[83px]" />
+    </>
   );
 }
 

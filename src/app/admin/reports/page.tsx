@@ -470,7 +470,7 @@ export default function ReportsPage() {
     const lines: string[] = [];
 
     // Header info
-    lines.push(`FUNCH Operational Report`);
+    lines.push(`Calrentar Operational Report`);
     lines.push(`Date Range,${from} to ${to}`);
     lines.push(`Country Filter,${country || "All"}`);
     lines.push(`Branch Filter,${branch ? branchMap.get(branch)?.name : "All"}`);
@@ -508,7 +508,7 @@ export default function ReportsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `funch-report-${from.slice(0, 10)}-to-${to.slice(0, 10)}.csv`;
+    a.download = `calrentar-report-${from.slice(0, 10)}-to-${to.slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

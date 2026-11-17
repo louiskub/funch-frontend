@@ -1,5 +1,5 @@
 ---
-name: "FUNCH — Easy Days · Original"
+name: "Calrentar — Easy Days · Original"
 description: "Selected on 2026-11-16. White canvas, blue actions, light-blue surfaces, Manrope, and the Easy Days customer/admin composition."
 colors:
   canvas: "#ffffff"
@@ -121,7 +121,7 @@ components:
     padding: "20px"
 ---
 
-# FUNCH — Easy Days · Original
+# Calrentar — Easy Days · Original
 
 ## Overview
 
@@ -271,7 +271,7 @@ components:
 | Category filter | 12px | 11px | 650 / 1.55 |
 | Field label | 10px | 10px | 650 / 1.55 |
 | Datetime value | 12px | 10px | 700 / 1.55 |
-| Header wordmark `funch.` | 35px | 32px | 800 / 1; tracking `-.04em` |
+| Header wordmark `Calrentar` | 35px | 32px | 800 / 1; tracking `-.04em` |
 | Admin h1 | 29px | ใช้ responsive ตาม scope | 750 / 1.2 |
 | Admin queue h2 | 18px | ตาม scope | 750 / 1.2 |
 | Admin table header | 11px | ตาม scope | 600 / 1.55 |
@@ -290,7 +290,7 @@ components:
 ### Customer desktop: 1440px reference
 
 ```text
-Header: funch.        Find a car / Our branches / My bookings        My account
+Header: Calrentar        Find a car / Our branches / My bookings        My account
 ────────────────────────────────────────────────────────────────────────────
 Heading + supporting copy       │ Airport photograph
 Country       Branch            │
@@ -416,7 +416,7 @@ Staff profile │        value, status, open details    │ Review / next action
 
 ### Header, wordmark และ footer
 
-Header ใช้ `funch.` เป็น wordmark ตัวอักษรน้ำเงิน ตัวหนา 800 ไม่มีสัญลักษณ์ประกอบที่สร้างเพิ่ม Navigation เรียบและมี active state ที่อ่านได้ Account action มี outline บางและไอคอนคน
+Header ใช้ `Calrentar` เป็น wordmark ตัวอักษรน้ำเงิน ตัวหนา 800 ไม่มีสัญลักษณ์ประกอบที่สร้างเพิ่ม Navigation เรียบและมี active state ที่อ่านได้ Account action มี outline บางและไอคอนคน
 
 Footer ใช้ wordmark ที่ขนาด 29px พร้อม muted supporting copy และเส้นแบ่งด้านบน ต้นแบบ footer wordmark เป็นสี muted ตาม cascade ภายใน footer ส่วน header ใช้ primary รักษาบทบาทนี้เมื่อเทียบภาพ
 

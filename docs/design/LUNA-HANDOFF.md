@@ -1,11 +1,11 @@
-# Prompt สำหรับ Luna — FUNCH Easy Days · Original
+# Prompt สำหรับ Luna — Calrentar Easy Days · Original
 
 คัดลอกข้อความด้านล่าง แล้วแทนบรรทัดงานด้วยหน้าหรือ feature ที่ต้องการให้ทำ:
 
 ```text
 งาน: <ระบุหน้า/feature ที่ต้องการ implement>
 
-โปรเจกต์ FUNCH Car Rental เลือกดีไซน์ Easy Days · Original และตัดสินใจใช้ shadcn/ui + Tailwind CSS
+โปรเจกต์ Calrentar Car Rental เลือกดีไซน์ Easy Days · Original และตัดสินใจใช้ shadcn/ui + Tailwind CSS
 ใช้ frontend/DESIGN.md และ frontend/app/globals.css เป็นแหล่งอ้างอิงดีไซน์หลัก ห้ามเริ่มเลือก theme ใหม่
 
 ก่อนแก้โค้ด:
