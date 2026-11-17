@@ -32,6 +32,31 @@ const chargeSchema = z.object({
   amount: z.string(),
   status: z.enum(["PENDING", "CONFIRMED", "WAIVED"]),
 });
+const revisionOptionSchema = z.object({
+  carOptionId: z.string(),
+  name: z.string(),
+  quantity: z.number().int(),
+  unitPriceAtBooking: z.string(),
+  chargedUnits: z.number().int(),
+  totalAmount: z.string(),
+});
+const revisionStateSchema = z.object({
+  status: bookingStatusSchema,
+  pickupAt: instant,
+  returnAt: instant,
+  currencyCode: z.string(),
+  dailyRateAtBooking: z.string(),
+  hourlyRateAtBooking: z.string(),
+  chargedDays: z.number().int(),
+  chargedHours: z.number().int(),
+  rentalSubtotal: z.string(),
+  optionsSubtotal: z.string(),
+  totalAmount: z.string(),
+  paidAmount: z.string(),
+  approvedBy: z.string().nullable(),
+  approvedAt: instant.nullable(),
+  options: z.array(revisionOptionSchema),
+});
 
 export const bookingQueueSchema = z.array(
   z.object({
@@ -70,6 +95,7 @@ export const bookingDetailSchema = z.object({
   rentalSubtotal: z.string(),
   optionsSubtotal: z.string(),
   totalAmount: z.string(),
+  paidAmount: z.string(),
   finalAmount: z.string(),
   rejectionReason: z.string().nullable(),
   cancellationReason: z.string().nullable(),
@@ -84,6 +110,18 @@ export const bookingDetailSchema = z.object({
     }),
   ),
   charges: z.array(chargeSchema),
+  revisions: z.array(
+    z.object({
+      id: z.string(),
+      revisionNumber: z.number().int(),
+      changedBy: z.string(),
+      changedByName: z.string().nullable(),
+      beforeState: revisionStateSchema,
+      afterState: revisionStateSchema,
+      amountDelta: z.string(),
+      createdAt: instant,
+    }),
+  ),
 });
 
 export const pickupCarsSchema = z.array(

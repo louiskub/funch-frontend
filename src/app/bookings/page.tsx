@@ -7,8 +7,12 @@ import { apiRecord, apiRequest } from "../catalog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
 import { StatusBadge } from "@/components/ui/badge";
 import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
+import { instantInZone, localDateTimeInZone } from "@/features/bookings/time";
+import { bookingsApi } from "@/features/bookings/api/bookings.api";
+import type { BookingEditQuoteResponse } from "@/features/bookings/types";
 import {
   AlertCircleIcon,
   CalendarIcon,
@@ -37,6 +41,16 @@ type CancelState =
   | { kind: "confirming"; bookingId: string }
   | { kind: "submitting"; bookingId: string };
 
+type EditOption = {
+  id: string;
+  name: string;
+  description: string;
+  pricingType: "FIXED" | "PER_DAY" | "PER_UNIT_PER_DAY";
+  price: string;
+  quantityStock: number | null;
+  isActive: boolean;
+};
+
 function rows(value: unknown): Booking[] {
   if (!Array.isArray(value)) throw new Error("Unexpected booking response.");
   return value.map((raw) => {
@@ -57,6 +71,41 @@ function rows(value: unknown): Booking[] {
   });
 }
 
+function parseEditOption(value: unknown): EditOption {
+  const option = apiRecord(value);
+  const pricingType = String(option.pricingType);
+  if (
+    pricingType !== "FIXED" &&
+    pricingType !== "PER_DAY" &&
+    pricingType !== "PER_UNIT_PER_DAY"
+  )
+    throw new Error("Unexpected option pricing type.");
+  const quantityStock =
+    option.quantityStock === null ? null : Number(option.quantityStock);
+  if (
+    quantityStock !== null &&
+    (!Number.isSafeInteger(quantityStock) || quantityStock < 0)
+  )
+    throw new Error("Unexpected option stock value.");
+  if (typeof option.isActive !== "boolean")
+    throw new Error("Unexpected option status.");
+  return {
+    id: String(option.id),
+    name: String(option.name),
+    description: String(option.description ?? ""),
+    pricingType,
+    price: String(option.price),
+    quantityStock,
+    isActive: option.isActive,
+  };
+}
+
+function signedCurrency(amount: string, currency: string) {
+  if (amount.startsWith("-"))
+    return `−${formatCurrency(amount.slice(1), currency)}`;
+  return `+${formatCurrency(amount, currency)}`;
+}
+
 import { CustomerGuard } from "@/components/layout/customer-guard";
 
 export default function BookingsPage() {
@@ -74,6 +123,14 @@ function BookingsContent() {
   const [message, setMessage] = useState("");
   const [cancelError, setCancelError] = useState("");
   const [cancelState, setCancelState] = useState<CancelState>({ kind: "idle" });
+  const [editing, setEditing] = useState(false);
+  const [editPickup, setEditPickup] = useState("");
+  const [editReturn, setEditReturn] = useState("");
+  const [editOptions, setEditOptions] = useState<EditOption[]>([]);
+  const [editQuantities, setEditQuantities] = useState<Record<string, number>>({});
+  const [editQuote, setEditQuote] = useState<BookingEditQuoteResponse | null>(null);
+  const [editError, setEditError] = useState("");
+  const [editBusy, setEditBusy] = useState(false);
   const batchSize = useResponsiveBatchSize(250, 320, 24);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -162,6 +219,9 @@ function BookingsContent() {
     setMessage("");
     setCancelError("");
     setCancelState({ kind: "idle" });
+    setEditing(false);
+    setEditQuote(null);
+    setEditError("");
     try {
       setSelected(
         apiRecord(await apiRequest(`/bookings/${encodeURIComponent(id)}`)),
@@ -170,6 +230,15 @@ function BookingsContent() {
       setMessage(e instanceof Error ? e.message : "Could not load booking.");
     }
   }
+
+function bookingEditError(error: unknown, fallback: string, t: ReturnType<typeof useTranslations>) {
+  const message = error instanceof Error ? error.message : "";
+  if (message.includes("PRICE_CHANGED")) return t("priceChanged");
+  if (message.includes("AVAILABILITY_CHANGED")) return t("availabilityChanged");
+  if (message.includes("BOOKING_CHANGED")) return t("bookingChanged");
+  if (message.includes("QUOTE_CHANGED")) return t("quoteChanged");
+  return message || fallback;
+}
 
   async function cancel(id: string) {
     if (cancelState.kind !== "confirming" || cancelState.bookingId !== id) return;
@@ -188,6 +257,160 @@ function BookingsContent() {
       setCancelState({ kind: "confirming", bookingId: id });
     }
   }
+
+  async function startEdit() {
+    if (!selected) return;
+    const branchId = String(selected.pickupBranchId ?? "");
+    const timezone = String(selected.timezone ?? "");
+    if (!branchId || !timezone) {
+      setEditError(t("editError"));
+      return;
+    }
+    setEditBusy(true);
+    setEditError("");
+    try {
+      const currentOptions = Array.isArray(selected.options)
+        ? selected.options.map(apiRecord)
+        : [];
+      const activeResponse = await apiRequest(
+        `/branches/${encodeURIComponent(branchId)}/options`,
+      );
+      if (!Array.isArray(activeResponse)) throw new Error(t("editError"));
+      const activeOptions = activeResponse.map(parseEditOption);
+      const activeIds = new Set(activeOptions.map(({ id }) => id));
+      const inactiveSelected = currentOptions
+        .filter((option) => !activeIds.has(String(option.carOptionId)))
+        .map((option) =>
+          parseEditOption({
+            id: option.carOptionId,
+            name: option.name,
+            description: option.description ?? "",
+            pricingType: option.pricingType,
+            price: option.unitPriceAtBooking,
+            quantityStock: option.quantityStock ?? null,
+            isActive: false,
+          }),
+        );
+      setEditOptions([...activeOptions, ...inactiveSelected]);
+      setEditQuantities(
+        Object.fromEntries(
+          currentOptions
+            .filter((option) => activeIds.has(String(option.carOptionId)))
+            .map((option) => [
+              String(option.carOptionId),
+              Number(option.quantity),
+            ]),
+        ),
+      );
+      setEditPickup(localDateTimeInZone(String(selected.pickupAt), timezone));
+      setEditReturn(localDateTimeInZone(String(selected.returnAt), timezone));
+      setEditQuote(null);
+      setEditing(true);
+    } catch (error) {
+      setEditError(bookingEditError(error, t("editError"), t));
+    } finally {
+      setEditBusy(false);
+    }
+  }
+
+  function selectedEditOptions() {
+    return Object.entries(editQuantities).map(([carOptionId, quantity]) => ({
+      carOptionId,
+      quantity,
+    }));
+  }
+
+  function updateEditOption(carOptionId: string, quantity: number | null) {
+    setEditQuote(null);
+    setEditQuantities((current) => {
+      const next = { ...current };
+      if (quantity === null) delete next[carOptionId];
+      else next[carOptionId] = quantity;
+      return next;
+    });
+  }
+
+  function editRequest() {
+    if (!selected) throw new Error(t("editError"));
+    return {
+      pickupAt: instantInZone(editPickup, String(selected.timezone)),
+      returnAt: instantInZone(editReturn, String(selected.timezone)),
+      options: selectedEditOptions(),
+    };
+  }
+
+  async function previewEdit() {
+    if (!selected) return;
+    setEditBusy(true);
+    setEditError("");
+    try {
+      const result = await bookingsApi.previewEdit(
+        String(selected.id),
+        editRequest(),
+      );
+      const removedIds = new Set(
+        result.removedOptions.map(({ carOptionId }) => carOptionId),
+      );
+      if (removedIds.size > 0) {
+        setEditOptions((current) =>
+          current.map((option) =>
+            removedIds.has(option.id) ? { ...option, isActive: false } : option,
+          ),
+        );
+        setEditQuantities((current) =>
+          Object.fromEntries(
+            Object.entries(current).filter(([id]) => !removedIds.has(id)),
+          ),
+        );
+      }
+      setEditQuote(result);
+    } catch (error) {
+      setEditQuote(null);
+      setEditError(bookingEditError(error, t("previewError"), t));
+    } finally {
+      setEditBusy(false);
+    }
+  }
+
+  async function confirmEdit() {
+    if (!selected || !editQuote) return;
+    setEditBusy(true);
+    setEditError("");
+    try {
+      await bookingsApi.confirmEdit(String(selected.id), {
+        ...editRequest(),
+        expectedRevisionNumber: editQuote.revisionNumber,
+        expectedTotalAmount: editQuote.totalAmount,
+        expectedOptions: editQuote.options.map(({ carOptionId, quantity }) => ({
+          carOptionId,
+          quantity,
+        })),
+      });
+      setEditing(false);
+      setEditQuote(null);
+      await detail(String(selected.id));
+      await refresh();
+    } catch (error) {
+      setEditQuote(null);
+      setEditError(bookingEditError(error, t("editError"), t));
+    } finally {
+      setEditBusy(false);
+    }
+  }
+
+  const editAvailabilityOk = Boolean(
+    editQuote &&
+      editQuote.availableVehicles > 0 &&
+      editQuote.options.every(
+        (option) =>
+          option.availableQuantity === null ||
+          option.availableQuantity >= option.quantity,
+      ),
+  );
+  const canEditSelected = Boolean(
+    selected &&
+      ["PENDING", "APPROVED"].includes(String(selected.status)),
+  );
 
   return (
     <main className="mx-auto w-full max-w-[1212px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -365,6 +588,211 @@ function BookingsContent() {
                   </div>
                 </div>
 
+                {canEditSelected && !editing && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={editBusy}
+                    onClick={() => void startEdit()}
+                  >
+                    {t("editBooking")}
+                  </Button>
+                )}
+
+                {editing && (
+                  <section className="space-y-4 rounded-[14px] border border-border bg-surface-subtle p-4" aria-labelledby="edit-booking-title">
+                    <div>
+                      <h3 id="edit-booking-title" className="text-sm font-bold text-foreground">
+                        {t("editTitle")}
+                      </h3>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        {t("editDescription")}
+                      </p>
+                    </div>
+
+                    <DateTimeRangePicker
+                      pickupDateTime={editPickup}
+                      returnDateTime={editReturn}
+                      onPickupChange={(value) => {
+                        setEditPickup(value);
+                        setEditQuote(null);
+                      }}
+                      onReturnChange={(value) => {
+                        setEditReturn(value);
+                        setEditQuote(null);
+                      }}
+                    />
+
+                    <fieldset className="space-y-2">
+                      <legend className="text-xs font-bold text-foreground">
+                        {t("editOptions")}
+                      </legend>
+                      {editOptions.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">{t("noOptions")}</p>
+                      ) : (
+                        editOptions.map((option) => {
+                          const quantity = editQuantities[option.id];
+                          const isSelected = quantity !== undefined;
+                          const previewOption = editQuote?.options.find(
+                            (line) => line.carOptionId === option.id,
+                          );
+                          const stockShort = Boolean(
+                            previewOption &&
+                              previewOption.availableQuantity !== null &&
+                              previewOption.availableQuantity < previewOption.quantity,
+                          );
+                          return (
+                            <div key={option.id} className="rounded-[10px] border border-border bg-white p-3">
+                              <div className="flex items-start gap-3">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  disabled={!option.isActive && !isSelected}
+                                  onChange={(event) =>
+                                    updateEditOption(
+                                      option.id,
+                                      event.target.checked ? 1 : null,
+                                    )
+                                  }
+                                  aria-label={t("selectOption", { name: option.name })}
+                                  className="mt-1 size-4 accent-primary"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-foreground">{option.name}</span>
+                                    {option.isActive && (
+                                      <span className="text-xs font-mono tabular-nums text-foreground">
+                                        {formatCurrency(option.price, String(selected.currencyCode))}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {option.description && (
+                                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                                      {option.description}
+                                    </p>
+                                  )}
+                                  {!option.isActive && !editQuote && (
+                                    <p className="mt-1 text-[11px] text-status-pending-text">
+                                      {t("inactiveOption")}
+                                    </p>
+                                  )}
+                                  {isSelected && option.isActive && option.pricingType === "PER_UNIT_PER_DAY" && (
+                                    <label className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                                      {t("optionQuantity")}
+                                      <input
+                                        type="number"
+                                        min={1}
+                                        max={99}
+                                        value={quantity}
+                                        onChange={(event) => {
+                                          const value = Number(event.target.value);
+                                          if (Number.isInteger(value) && value >= 1 && value <= 99)
+                                            updateEditOption(option.id, value);
+                                        }}
+                                        className="h-9 w-20 rounded-[8px] border border-border bg-white px-2 text-center text-foreground"
+                                      />
+                                    </label>
+                                  )}
+                                  {stockShort && (
+                                    <p className="mt-2 text-[11px] text-status-rejected-text">
+                                      {t("optionUnavailable")}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </fieldset>
+
+                    {selected.status === "APPROVED" && (
+                      <div className="rounded-[10px] border border-status-pending-border bg-status-pending-bg p-3 text-xs leading-relaxed text-status-pending-text">
+                        {t("approvedEditWarning")}
+                      </div>
+                    )}
+
+                    {editQuote && (
+                      <div className="rounded-[10px] border border-border bg-white p-3 text-xs">
+                        {editQuote.removedOptions.length > 0 && (
+                          <div className="mb-2 rounded-[8px] bg-status-pending-bg p-2 text-status-pending-text">
+                            {t("inactiveOptionsRemoved", {
+                              names: editQuote.removedOptions
+                                .map(({ name }) => name)
+                                .join(", "),
+                            })}
+                          </div>
+                        )}
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("currentTotal")}</span>
+                          <span className="font-mono tabular-nums">{formatCurrency(editQuote.currentTotalAmount, editQuote.currencyCode)}</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("newTotal")}</span>
+                          <span className="font-mono font-semibold tabular-nums">{formatCurrency(editQuote.totalAmount, editQuote.currencyCode)}</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("amountDelta")}</span>
+                          <span className="font-mono font-semibold tabular-nums">{signedCurrency(editQuote.amountDelta, editQuote.currencyCode)}</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="text-muted-foreground">{t("creditUsed")}</span>
+                          <span className="font-mono tabular-nums">{formatCurrency(editQuote.creditUsed, editQuote.currencyCode)}</span>
+                        </div>
+                        <div className="flex justify-between border-t border-border pt-2 mt-1 font-bold text-foreground">
+                          <span>{t("amountDue")}</span>
+                          <span className="font-mono text-primary tabular-nums">{formatCurrency(editQuote.amountDue, editQuote.currencyCode)}</span>
+                        </div>
+                        {editQuote.remainingCredit !== "0" && (
+                          <div className="flex justify-between pt-1 text-status-approved-text">
+                            <span>{t("remainingCredit")}</span>
+                            <span className="font-mono tabular-nums">{formatCurrency(editQuote.remainingCredit, editQuote.currencyCode)}</span>
+                          </div>
+                        )}
+                        <p className="mt-2 border-t border-border pt-2 text-[11px] leading-relaxed text-muted-foreground">
+                          {t("mockPaymentNote")}
+                        </p>
+                        {editQuote.availableVehicles < 1 && (
+                          <p className="mt-2 text-status-rejected-text">{t("vehicleUnavailable")}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {editError && <p role="alert" className="text-xs text-status-rejected-text">{editError}</p>}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={editBusy}
+                        onClick={() => {
+                          setEditing(false);
+                          setEditQuote(null);
+                          setEditError("");
+                        }}
+                      >
+                        {t("cancelEdit")}
+                      </Button>
+                      {editQuote ? (
+                        <Button
+                          type="button"
+                          disabled={editBusy || !editAvailabilityOk}
+                          onClick={() => void confirmEdit()}
+                        >
+                          {editBusy ? t("savingEdit") : t("confirmEdit")}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          disabled={editBusy || !editPickup || !editReturn}
+                          onClick={() => void previewEdit()}
+                        >
+                          {editBusy ? t("previewingEdit") : t("previewEdit")}
+                        </Button>
+                      )}
+                    </div>
+                  </section>
+                )}
+
                 {/* Additional charges if any */}
                 {Array.isArray(selected.charges) && selected.charges.length > 0 && (
                   <div className="space-y-2">
@@ -390,14 +818,14 @@ function BookingsContent() {
                 )}
 
                 {/* Notice */}
-                {selected.status === "PENDING" && (
+                {!editing && selected.status === "PENDING" && (
                   <div className="rounded-[8px] bg-status-pending-bg p-3 text-xs text-status-pending-text leading-relaxed">
-                    A PENDING booking is currently awaiting staff confirmation and does not guarantee vehicle availability until approved.
+                    {t("pendingNotice")}
                   </div>
                 )}
 
                 {/* Cancel Action */}
-                {["PENDING", "APPROVED"].includes(String(selected.status)) && (
+                {!editing && ["PENDING", "APPROVED"].includes(String(selected.status)) && (
                   <div className="pt-2">
                     <Button
                       variant="destructive"

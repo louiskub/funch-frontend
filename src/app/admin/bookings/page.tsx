@@ -946,6 +946,10 @@ function BookingDetailsDrawer({
                 <span className="text-muted-foreground">Add-on Options Subtotal</span>
                 <span className="font-mono tabular-nums">{money(data?.optionsSubtotal || "0")}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{tAdmin("mockPaidAmount")}</span>
+                <span className="font-mono tabular-nums">{money(data?.paidAmount || "0")}</span>
+              </div>
               <div className="flex justify-between pt-1 border-t border-border font-bold text-sm text-foreground">
                 <span>Final Balance</span>
                 <span className="font-mono text-primary tabular-nums">
@@ -954,6 +958,75 @@ function BookingDetailsDrawer({
               </div>
             </div>
           </div>
+
+          {data?.revisions.length ? (
+            <section className="rounded-[12px] border border-border p-3.5 space-y-3">
+              <h4 className="text-xs font-bold text-foreground">
+                {tAdmin("bookingRevisionHistory")}
+              </h4>
+              <div className="space-y-3">
+                {data.revisions.map((revision) => {
+                  const states = [
+                    { label: tAdmin("beforeEdit"), state: revision.beforeState },
+                    { label: tAdmin("afterEdit"), state: revision.afterState },
+                  ];
+                  return (
+                  <article key={revision.id} className="rounded-[10px] border border-border bg-surface-subtle p-3 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-foreground">
+                        {tAdmin("bookingRevisionNumber", { number: revision.revisionNumber })}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">
+                        {branchTime(revision.createdAt, booking.timezone)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      {tAdmin("bookingRevisionActor", { name: revision.changedByName ?? revision.changedBy })}
+                    </p>
+                    <div className="flex justify-between border-t border-border pt-2 text-xs">
+                      <span className="text-muted-foreground">{tAdmin("bookingRevisionStatus")}</span>
+                      <span className="font-semibold text-foreground">
+                        {revision.beforeState.status} → {revision.afterState.status}
+                      </span>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {states.map(({ label, state }) => (
+                        <div key={label} className="rounded-[8px] bg-white p-2 text-[10px] space-y-1">
+                          <strong className="block text-foreground">{label}</strong>
+                          <p className="text-muted-foreground tabular-nums">
+                            {branchTime(state.pickupAt, booking.timezone)} → {branchTime(state.returnAt, booking.timezone)}
+                          </p>
+                          <p className="font-mono font-semibold text-foreground tabular-nums">
+                            {money(state.totalAmount)}
+                          </p>
+                          {state.options.length > 0 && (
+                            <ul className="list-disc pl-4 text-muted-foreground">
+                              {state.options.map((option) => (
+                                <li key={option.carOptionId}>
+                                  {option.name} × {option.quantity}: {money(option.totalAmount)}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between border-t border-border pt-2 text-xs">
+                      <span className="text-muted-foreground">{tAdmin("bookingRevisionDelta")}</span>
+                      <span className="font-mono font-semibold text-foreground tabular-nums">
+                        {revision.amountDelta.startsWith("-")
+                          ? `−${money(revision.amountDelta.slice(1))}`
+                          : revision.amountDelta === "0"
+                            ? money("0")
+                            : `+${money(revision.amountDelta)}`}
+                      </span>
+                    </div>
+                  </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
 
           {/* Rejection / Cancellation Reason */}
           {(data?.rejectionReason || data?.cancellationReason) && (

@@ -1,5 +1,14 @@
 import { apiClient } from "@/lib/api-client";
-import type { Booking, CheckoutRequest, QuoteRequest, QuoteResponse } from "../types";
+import type {
+  Booking,
+  BookingEditConfirmationResponse,
+  BookingEditQuoteRequest,
+  BookingEditQuoteResponse,
+  CheckoutRequest,
+  ConfirmBookingEditRequest,
+  QuoteRequest,
+  QuoteResponse,
+} from "../types";
 
 export const bookingsApi = {
   getMyBookings: async (): Promise<Booking[]> => {
@@ -15,6 +24,26 @@ export const bookingsApi = {
       method: "POST",
       body: JSON.stringify(request),
     });
+  },
+
+  previewEdit: async (
+    bookingId: string,
+    request: BookingEditQuoteRequest,
+  ): Promise<BookingEditQuoteResponse> => {
+    return apiClient<BookingEditQuoteResponse>(
+      `/bookings/${encodeURIComponent(bookingId)}/edit-quote`,
+      { method: "POST", body: JSON.stringify(request) },
+    );
+  },
+
+  confirmEdit: async (
+    bookingId: string,
+    request: ConfirmBookingEditRequest,
+  ): Promise<BookingEditConfirmationResponse> => {
+    return apiClient<BookingEditConfirmationResponse>(
+      `/bookings/${encodeURIComponent(bookingId)}/edit`,
+      { method: "POST", body: JSON.stringify(request) },
+    );
   },
 
   createBooking: async (request: CheckoutRequest): Promise<Booking> => {

@@ -51,3 +51,53 @@ export interface CheckoutRequest {
     password?: string;
   };
 }
+
+export interface BookingOptionSelection {
+  carOptionId: string;
+  quantity: number;
+}
+
+export interface BookingEditQuoteRequest {
+  pickupAt: string;
+  returnAt: string;
+  options: BookingOptionSelection[];
+}
+
+export interface BookingEditQuoteResponse {
+  bookingId: string;
+  bookingNumber: string;
+  status: BookingStatus;
+  revisionNumber: number;
+  currentTotalAmount: string;
+  totalAmount: string;
+  currencyCode: string;
+  amountDelta: string;
+  paidAmount: string;
+  amountDue: string;
+  creditUsed: string;
+  remainingCredit: string;
+  removedOptions: Array<{ carOptionId: string; name: string }>;
+  availableVehicles: number;
+  options: Array<BookingOptionSelection & { availableQuantity: number | null }>;
+}
+
+export interface ConfirmBookingEditRequest extends BookingEditQuoteRequest {
+  expectedRevisionNumber: number;
+  expectedTotalAmount: string;
+  expectedOptions: BookingOptionSelection[];
+}
+
+export interface BookingEditConfirmationResponse {
+  id: string;
+  bookingNumber: string;
+  status: BookingStatus;
+  revisionNumber: number;
+  totalAmount: string;
+  paidAmount: string;
+  currencyCode: string;
+  amountDelta: string;
+  amountDue: string;
+  creditUsed: string;
+  nextPaidAmount: string;
+  remainingCredit: string;
+}
