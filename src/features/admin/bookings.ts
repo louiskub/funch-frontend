@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { formatDateTimeInZone } from "../bookings/time";
+import { formatDateTimeInZone } from "../bookings/time.ts";
 
 export const bookingStatusSchema = z.enum([
   "PENDING",
