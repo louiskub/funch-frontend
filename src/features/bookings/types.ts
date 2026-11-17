@@ -69,16 +69,34 @@ export interface BookingEditQuoteResponse {
   status: BookingStatus;
   revisionNumber: number;
   currentTotalAmount: string;
+  rentalSubtotal: string;
+  optionsSubtotal: string;
   totalAmount: string;
   currencyCode: string;
+  dailyRateAtBooking: string;
+  hourlyRateAtBooking: string;
+  availableVehicles: number;
+  optionAvailability: Array<{
+    carOptionId: string;
+    pricingType: "FIXED" | "PER_DAY" | "PER_UNIT_PER_DAY";
+    unitPrice: string;
+    quantityStock: number | null;
+    availableQuantity: number | null;
+  }>;
   amountDelta: string;
   paidAmount: string;
   amountDue: string;
   creditUsed: string;
   remainingCredit: string;
   removedOptions: Array<{ carOptionId: string; name: string }>;
-  availableVehicles: number;
-  options: Array<BookingOptionSelection & { availableQuantity: number | null }>;
+  options: Array<
+    BookingOptionSelection & {
+      name: string;
+      unitPrice: string;
+      totalAmount: string;
+      availableQuantity: number | null;
+    }
+  >;
 }
 
 export interface ConfirmBookingEditRequest extends BookingEditQuoteRequest {
