@@ -9,6 +9,9 @@ import { apiRecord, apiRequest, apiString, CarOption, parseOptions } from "../..
 import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { getRememberedAdminBranch, rememberAdminBranch } from "../admin-branch";
 import {
   CarIcon,
   PlusIcon,
@@ -236,6 +239,7 @@ function FeaturesTagInput({
   features: string[];
   onSave: (updated: string[]) => Promise<void>;
 }) {
+  const tAdmin = useTranslations("admin.workspacePages");
   const [inputValue, setInputValue] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [savedTick, setSavedTick] = useState(false);
@@ -264,9 +268,9 @@ function FeaturesTagInput({
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-        <span>Features</span>
+        <span>{tAdmin("features")}</span>
         {isSaving ? (
-          <span className="text-[10px] text-primary">Saving…</span>
+          <span className="text-[10px] text-primary">{tAdmin("saving")}</span>
         ) : savedTick ? (
           <span className="flex items-center gap-1 text-[10px] text-status-approved-text">
             <CheckIcon size={12} /> Saved
@@ -310,308 +314,6 @@ function FeaturesTagInput({
           placeholder={features.length === 0 ? "Type feature and press Enter…" : "Add more…"}
           className="min-w-[120px] flex-1 bg-transparent px-1 py-0.5 text-xs text-foreground outline-none placeholder:text-muted-foreground"
         />
-      </div>
-    </div>
-  );
-}
-
-/**
- * Lightbox Overlay for Image Gallery:
- * Fullscreen overlay with Zoom In, Zoom Out, Reset, Download, and Prev/Next.
- */
-function ImageLightbox({
-  isOpen,
-  onClose,
-  images,
-  currentIndex,
-  onIndexChange,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  images: FileAsset[];
-  currentIndex: number;
-  onIndexChange: (index: number) => void;
-}) {
-  const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef<{ startX: number; startY: number; posX: number; posY: number }>({
-    startX: 0,
-    startY: 0,
-    posX: 0,
-    posY: 0,
-  });
-
-  const handleReset = useCallback(() => {
-    setZoom(1);
-    setPosition({ x: 0, y: 0 });
-  }, []);
-
-  const handleNavigate = useCallback(
-    (newIndex: number) => {
-      handleReset();
-      onIndexChange(newIndex);
-    },
-    [handleReset, onIndexChange]
-  );
-
-  const handleClose = useCallback(() => {
-    handleReset();
-    onClose();
-  }, [handleReset, onClose]);
-
-  const handleZoomChange = useCallback((newZoom: number) => {
-    const clamped = Math.max(0.5, Math.min(4, Math.round(newZoom * 100) / 100));
-    if (clamped <= 1) {
-      setPosition({ x: 0, y: 0 });
-    }
-    setZoom(clamped);
-  }, []);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (zoom <= 1) return;
-    e.preventDefault();
-    setIsDragging(true);
-    dragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStartRef.current.startX;
-    const dy = e.clientY - dragStartRef.current.startY;
-    setPosition({
-      x: dragStartRef.current.posX + dx,
-      y: dragStartRef.current.posY + dy,
-    });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (isDragging) {
-      setIsDragging(false);
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch {
-        // pointer capture release fallback
-      }
-    }
-  };
-
-  const handleDoubleClick = () => {
-    if (zoom > 1) {
-      handleReset();
-    } else {
-      setZoom(2);
-      setPosition({ x: 0, y: 0 });
-    }
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY < 0 ? 0.25 : -0.25;
-    handleZoomChange(zoom + delta);
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (!isOpen) return;
-      if (e.key === "Escape") handleClose();
-      if (e.key === "ArrowLeft" && currentIndex > 0) handleNavigate(currentIndex - 1);
-      if (e.key === "ArrowRight" && currentIndex < images.length - 1) handleNavigate(currentIndex + 1);
-      if (e.key === "+" || e.key === "=") handleZoomChange(zoom + 0.25);
-      if (e.key === "-") handleZoomChange(zoom - 0.25);
-      if (e.key === "0") handleReset();
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, currentIndex, images.length, handleClose, handleNavigate, handleZoomChange, handleReset, zoom]);
-
-  if (!isOpen || !images.length) return null;
-
-  const current = images[currentIndex];
-  if (!current) return null;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !isDragging) handleClose();
-      }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-black/92 p-4 sm:p-6 backdrop-blur-md animate-in fade-in duration-200"
-    >
-      {/* Top Bar */}
-      <div className="flex w-full max-w-6xl items-center justify-between text-white">
-        <div className="text-xs font-semibold">
-          <span>
-            {current.originalName || "Vehicle photo"} · {currentIndex + 1} of {images.length}
-          </span>
-        </div>
-
-        {/* Toolbar */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => handleZoomChange(zoom - 0.25)}
-            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            title="Zoom out"
-          >
-            <ZoomOutIcon size={18} />
-          </button>
-          <span className="text-xs font-mono w-12 text-center text-white/70">
-            {Math.round(zoom * 100)}%
-          </span>
-          <button
-            type="button"
-            onClick={() => handleZoomChange(zoom + 0.25)}
-            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            title="Zoom in"
-          >
-            <ZoomInIcon size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="rounded-lg px-2 py-1 text-xs text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            title="Reset zoom & position"
-          >
-            Reset
-          </button>
-
-          <span className="h-4 w-px bg-white/20 mx-1" />
-
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                const res = await fetch(current.url);
-                const blob = await res.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = blobUrl;
-                a.download = current.originalName || "vehicle-photo.jpg";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(blobUrl);
-              } catch {
-                window.open(current.url, "_blank");
-              }
-            }}
-            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            title="Download original photo"
-          >
-            <DownloadIcon size={18} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleClose}
-            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            title="Close viewer"
-          >
-            <XIcon size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Main Image Canvas with Navigation Arrows and Pan/Drag */}
-      <div
-        onWheel={handleWheel}
-        className="relative flex flex-1 w-full max-w-6xl items-center justify-center overflow-hidden my-2 select-none"
-      >
-        {currentIndex > 0 && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleNavigate(currentIndex - 1);
-            }}
-            className="absolute left-2 z-20 rounded-full bg-black/60 p-3 text-white hover:bg-black/90 transition-colors"
-            title="Previous image"
-          >
-            <ChevronLeftIcon size={24} />
-          </button>
-        )}
-
-        <div
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onDoubleClick={handleDoubleClick}
-          className="relative flex items-center justify-center h-[72vh] w-full overflow-hidden"
-          style={{
-            cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "zoom-in",
-            touchAction: "none",
-          }}
-          title={zoom > 1 ? "Click and drag to pan · Double click to reset" : "Double click to zoom in"}
-        >
-          <img
-            src={current.url}
-            alt={current.originalName}
-            draggable={false}
-            style={{
-              transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
-              transformOrigin: "center center",
-              transition: isDragging ? "none" : "transform 0.12s ease-out",
-            }}
-            className="max-h-full max-w-full rounded-lg object-contain select-none pointer-events-none"
-          />
-        </div>
-
-        {/* Pan helper hint badge when zoomed in */}
-        {zoom > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 rounded-full bg-black/75 px-3 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-xs pointer-events-none shadow-md">
-            Drag to pan around · Double click to reset
-          </div>
-        )}
-
-        {currentIndex < images.length - 1 && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleNavigate(currentIndex + 1);
-            }}
-            className="absolute right-2 z-20 rounded-full bg-black/60 p-3 text-white hover:bg-black/90 transition-colors"
-            title="Next image"
-          >
-            <ChevronRightIcon size={24} />
-          </button>
-        )}
-      </div>
-
-      {/* Bottom Thumbnail Strip */}
-      <div className="flex max-w-5xl gap-2 overflow-x-auto p-2">
-        {images.map((img, idx) => (
-          <button
-            key={img.id}
-            type="button"
-            onClick={() => handleNavigate(idx)}
-            className={`h-12 w-12 flex-shrink-0 overflow-hidden rounded-[6px] border-2 transition-all ${
-              idx === currentIndex ? "border-primary scale-105" : "border-transparent opacity-60 hover:opacity-100"
-            }`}
-          >
-            <img src={img.url} alt="" className="h-full w-full object-cover" />
-          </button>
-        ))}
       </div>
     </div>
   );
@@ -663,6 +365,7 @@ function CarHistoryModal({
   car: Car;
   onClose: () => void;
 }) {
+  const tAdmin = useTranslations("admin.workspacePages");
   const [records, setRecords] = useState<CarUsageRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -684,7 +387,7 @@ function CarHistoryModal({
             actualReturnAt: typeof rec.actualReturnAt === "string" ? rec.actualReturnAt : null,
             totalAmount: apiString(rec.totalAmount),
             currencyCode: apiString(rec.currencyCode),
-            customerName: typeof rec.customerName === "string" ? rec.customerName : "Customer",
+            customerName: typeof rec.customerName === "string" ? rec.customerName : tAdmin("customer"),
             customerEmail: typeof rec.customerEmail === "string" ? rec.customerEmail : "",
             customerPhone: typeof rec.customerPhone === "string" ? rec.customerPhone : "",
             pickupBranchName: typeof rec.pickupBranchName === "string" ? rec.pickupBranchName : "",
@@ -782,7 +485,7 @@ function CarHistoryModal({
                 Operational Status
               </span>
               <span className="text-sm font-bold text-primary mt-0.5 block">
-                {car.inUse ? "In Use" : car.status === "ACTIVE" ? "Available" : car.status}
+                {car.inUse ? tAdmin("inUse") : car.status === "ACTIVE" ? tAdmin("available") : car.status}
               </span>
             </div>
             <div className="rounded-[10px] border border-border bg-surface-subtle p-3 text-center">
@@ -809,17 +512,17 @@ function CarHistoryModal({
               </div>
               <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
                 <div>
-                  <span className="font-medium text-foreground">Renter:</span> {activeRecord.customerName}
+                  <span className="font-medium text-foreground">{tAdmin("renter")}</span> {activeRecord.customerName}
                   {activeRecord.customerPhone ? ` (${activeRecord.customerPhone})` : ""}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">Pickup:</span> {formatDateTime(activeRecord.pickupAt)}
+                  <span className="font-medium text-foreground">{tAdmin("pickup")}</span> {formatDateTime(activeRecord.pickupAt)}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">Scheduled Return:</span> {formatDateTime(activeRecord.returnAt)}
+                  <span className="font-medium text-foreground">{tAdmin("scheduledReturn")}</span> {formatDateTime(activeRecord.returnAt)}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">Return Branch:</span> {activeRecord.returnBranchName || activeRecord.pickupBranchName}
+                  <span className="font-medium text-foreground">{tAdmin("returnBranch")}</span> {activeRecord.returnBranchName || activeRecord.pickupBranchName}
                 </div>
               </div>
             </div>
@@ -834,7 +537,7 @@ function CarHistoryModal({
             {loading ? (
               <div className="py-12 text-center text-xs text-muted-foreground">
                 <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
-                <p>Loading rental records…</p>
+                <p>{tAdmin("loading")}</p>
               </div>
             ) : error ? (
               <div className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-4 text-center text-xs text-destructive">
@@ -843,7 +546,7 @@ function CarHistoryModal({
             ) : records.length === 0 ? (
               <div className="rounded-[10px] border border-dashed border-border bg-surface-subtle p-8 text-center text-xs text-muted-foreground">
                 <ClockIcon size={28} className="mx-auto text-primary/30 mb-2" />
-                <p className="font-semibold text-foreground">No rental history found</p>
+                <p className="font-semibold text-foreground">{tAdmin("noRentalHistory")}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
                   This car has not been assigned to any customer bookings yet.
                 </p>
@@ -854,10 +557,10 @@ function CarHistoryModal({
                   <thead className="bg-surface-subtle border-b border-border text-[10px] uppercase font-bold text-muted-foreground">
                     <tr>
                       <th className="py-2.5 px-3">Booking #</th>
-                      <th className="py-2.5 px-3">Customer</th>
-                      <th className="py-2.5 px-3">Rental Window</th>
+                      <th className="py-2.5 px-3">{tAdmin("customer")}</th>
+                      <th className="py-2.5 px-3">{tAdmin("rentalWindow")}</th>
                       <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3 text-right">Amount</th>
+                      <th className="py-2.5 px-3 text-right">{tAdmin("amount")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-surface-alt">
@@ -914,6 +617,7 @@ function CarHistoryModal({
 
 export default function AdminFleetPage() {
   const tTimeline = useTranslations("admin.fleetTimeline");
+  const tAdmin = useTranslations("admin.workspacePages");
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState<"manage" | "timeline">("manage");
   const [timelineMonth, setTimelineMonth] = useState<string | null>(null);
@@ -1015,6 +719,7 @@ export default function AdminFleetPage() {
   const [lightboxImages, setLightboxImages] = useState<FileAsset[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [imageToRemove, setImageToRemove] = useState<{ carTypeId: string; fileId: string } | null>(null);
 
   // Quick rates editing state per offerId
   const [editingRatesId, setEditingRatesId] = useState<string | null>(null);
@@ -1031,7 +736,10 @@ export default function AdminFleetPage() {
     const parsedBranches = rows(branchRows, branchFrom);
     setBranches(parsedBranches);
     if (!selectedBranchId && parsedBranches.length > 0) {
-      setSelectedBranchId(parsedBranches[0]!.id);
+      const preferred = parsedBranches.find((branch) => branch.id === getRememberedAdminBranch());
+      const initialBranch = preferred ?? parsedBranches[0]!;
+      setSelectedBranchId(initialBranch.id);
+      rememberAdminBranch(initialBranch.id);
     }
     const parsedTypes = rows(typeRows, typeFrom);
     setTypes(parsedTypes);
@@ -1075,7 +783,7 @@ export default function AdminFleetPage() {
     try {
       const currentList = galleries[carTypeId] ?? [];
       if (currentList.length >= 8) {
-        setMessage("Maximum 8 gallery images allowed.");
+        setMessage(tAdmin("maxGalleryImages"));
         return;
       }
       const body = new FormData();
@@ -1100,7 +808,7 @@ export default function AdminFleetPage() {
           url: apiString(item.url),
         }))
       );
-      setMessage("Image uploaded successfully.");
+      setMessage(tAdmin("imageUploaded"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not upload image.");
     }
@@ -1116,7 +824,7 @@ export default function AdminFleetPage() {
         body: JSON.stringify({ imageFileIds: updatedList }),
       });
       setGalleries((current) => ({ ...current, [carTypeId]: updatedList }));
-      setMessage("Image removed from gallery.");
+      setMessage(tAdmin("imageRemoved"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not remove image.");
     }
@@ -1165,7 +873,7 @@ export default function AdminFleetPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       setCars((prev) => prev.map((c) => (c.id === carId ? { ...c, status: newStatus } : c)));
-      setMessage("Car status updated.");
+      setMessage(tAdmin("carStatusUpdated"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not update car status.");
     }
@@ -1198,7 +906,7 @@ export default function AdminFleetPage() {
         prev.map((o) => (o.id === offer.id ? { ...o, baseDailyRate: normDaily, baseHourlyRate: normHourly } : o))
       );
       setEditingRatesId(null);
-      setMessage("Rates updated.");
+      setMessage(tAdmin("ratesUpdated"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not update rates.");
     }
@@ -1284,7 +992,7 @@ export default function AdminFleetPage() {
   if (!allowed) {
     return (
       <main className="mx-auto w-full max-w-5xl flex-1 p-8">
-        <h1 className="text-2xl font-bold text-foreground">Fleet Administration</h1>
+        <h1 className="text-2xl font-bold text-foreground">{tAdmin("fleetTitle")}</h1>
         <p role="status" className="mt-4 text-sm text-muted-foreground">
           {message || "Checking admin access…"}
         </p>
@@ -1294,8 +1002,8 @@ export default function AdminFleetPage() {
 
   return (
     <AdminLayout
-      title="Fleet Administration"
-      subtitle="Manage branch fleet offers, vehicle models, photo galleries, and physical cars."
+      title={tAdmin("fleetTitle")}
+      subtitle={tAdmin("fleetSubtitle")}
       actions={
         activeTab === "manage" ? (
           <div className="flex items-center gap-2">
@@ -1378,20 +1086,20 @@ export default function AdminFleetPage() {
             Branch Station:
           </span>
 
-          <select
+          <SearchableSelect
+            label="Branch Station"
+            icon={<MapPinIcon size={14} className="text-primary" />}
             value={activeBranch?.id || ""}
-            onChange={(e) => {
-              setSelectedBranchId(e.target.value);
+            onChange={(value) => {
+              setSelectedBranchId(value);
+              rememberAdminBranch(value);
               setTimelineMonth(null);
             }}
-            className="rounded-[8px] border border-border bg-surface-subtle px-3 py-1.5 text-xs font-bold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer"
-          >
-            {branches.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name} ({b.city}) {b.isActive ? "" : "— Inactive"}
-              </option>
-            ))}
-          </select>
+            options={branches.map((b) => ({ value: b.id, label: b.name, sublabel: b.city, badge: b.isActive ? undefined : "Inactive" }))}
+            placeholder={tAdmin("selectBranch")}
+            searchPlaceholder={tAdmin("searchBranches")}
+            className="min-w-56"
+          />
         </div>
 
         {/* Fleet Summary for Active Branch */}
@@ -1812,7 +1520,7 @@ export default function AdminFleetPage() {
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    void handleRemoveImage(carType.id, fileId);
+                                    setImageToRemove({ carTypeId: carType.id, fileId });
                                   }}
                                   className="rounded p-1 text-destructive hover:bg-white/20"
                                   title="Delete photo"
@@ -2170,7 +1878,7 @@ export default function AdminFleetPage() {
                     body: JSON.stringify({ brand, model, seats, transmission, fuelType, features: featuresList }),
                   });
                   setIsNewCarTypeOpen(false);
-                  setMessage("New vehicle model registered in catalog.");
+                  setMessage(tAdmin("modelRegistered"));
                   await load();
                 } catch (err) {
                   setMessage(err instanceof Error ? err.message : "Could not create car model.");
@@ -2312,7 +2020,7 @@ export default function AdminFleetPage() {
                     }),
                   });
                   setIsNewOfferOpen(false);
-                  setMessage("Car model successfully added to branch fleet.");
+                  setMessage(tAdmin("modelAdded"));
                   await load();
                 } catch (err) {
                   setMessage(err instanceof Error ? err.message : "Could not add car model to branch.");
@@ -2524,7 +2232,7 @@ export default function AdminFleetPage() {
                     }),
                   });
                   setAddCarOffer(null);
-                  setMessage("Physical vehicle registered successfully.");
+                  setMessage(tAdmin("vehicleRegistered"));
                   await load();
                 } catch (err) {
                   setMessage(err instanceof Error ? err.message : "Could not register vehicle.");
@@ -2645,7 +2353,7 @@ export default function AdminFleetPage() {
                     }),
                   });
                   setEditingCar(null);
-                  setMessage("Vehicle details saved.");
+                  setMessage(tAdmin("vehicleSaved"));
                   await load();
                 } catch (err) {
                   setMessage(err instanceof Error ? err.message : "Could not update vehicle.");
@@ -2764,7 +2472,7 @@ export default function AdminFleetPage() {
                     body: JSON.stringify({ brand, model, seats, transmission, fuelType, isActive }),
                   });
                   setEditingSpecs(null);
-                  setMessage("Model specs updated.");
+                  setMessage(tAdmin("modelSpecsUpdated"));
                   await load();
                 } catch (err) {
                   setMessage(err instanceof Error ? err.message : "Could not update model specs.");
@@ -3035,7 +2743,7 @@ export default function AdminFleetPage() {
                 <span className="font-mono font-bold text-foreground">{carToDelete.licensePlate}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">VIN:</span>
+                <span className="text-muted-foreground">{tAdmin("vin")}</span>
                 <span className="font-mono text-foreground">{carToDelete.vin}</span>
               </div>
               <div className="flex justify-between">
@@ -3078,6 +2786,21 @@ export default function AdminFleetPage() {
         </div>
       )}
 
+      {imageToRemove && (
+        <div role="dialog" aria-modal="true" aria-labelledby="remove-image-title" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <h3 id="remove-image-title" className="text-base font-bold text-foreground">{tAdmin("confirmRemoveImage")}</h3>
+            <p className="text-sm text-muted-foreground">{tAdmin("confirmRemoveImageMessage")}</p>
+            <div className="flex justify-end gap-2 border-t border-border pt-3">
+              <Button type="button" variant="outline" size="sm" onClick={() => setImageToRemove(null)}>{tAdmin("cancel")}</Button>
+              <Button type="button" variant="destructive" size="sm" onClick={() => {
+                void handleRemoveImage(imageToRemove.carTypeId, imageToRemove.fileId).then(() => setImageToRemove(null));
+              }}>{tAdmin("remove")}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CAR USAGE HISTORY MODAL */}
       {historyCar && (
         <CarHistoryModal
@@ -3093,6 +2816,20 @@ export default function AdminFleetPage() {
         images={lightboxImages}
         currentIndex={lightboxIndex}
         onIndexChange={setLightboxIndex}
+        labels={{
+          dialog: "Vehicle image viewer",
+          vehiclePhoto: "Vehicle photo",
+          zoomOut: "Zoom out",
+          zoomIn: "Zoom in",
+          reset: "Reset",
+          download: "Download original photo",
+          close: "Close viewer",
+          previous: "Previous image",
+          next: "Next image",
+          dragToPan: "Drag to pan around · Double click to reset",
+          doubleClickToZoom: "Double click to zoom in",
+          thumbnail: (index) => `View image ${index}`,
+        }}
       />
     </AdminLayout>
   );

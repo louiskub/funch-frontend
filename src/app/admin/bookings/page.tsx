@@ -6,6 +6,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { getRememberedAdminBranch, rememberAdminBranch } from "../admin-branch";
 import { Input } from "@/components/ui/input";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import {
@@ -57,10 +59,11 @@ const selectClass =
   "h-10 w-full min-w-0 rounded-[8px] border border-border bg-card px-3 text-xs text-foreground outline-none transition-colors hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-50";
 
 export default function AdminBookings() {
+  const t = useTranslations("admin");
   return (
     <AdminLayout
-      title="Bookings Administration"
-      subtitle="Review reservation requests, assign ready vehicles at pickup, inspect returns, and settle additional charges."
+      title={t("bookingsTitle")}
+      subtitle={t("bookingsSubtitle")}
     >
       <BookingsWorkspace />
     </AdminLayout>
@@ -69,8 +72,9 @@ export default function AdminBookings() {
 
 function BookingsWorkspace() {
   const t = useTranslations("common");
+  const tAdmin = useTranslations("admin.workspacePages");
   const [stageFilter, setStageFilter] = useState<BookingFilter>("ALL");
-  const [branchId, setBranchId] = useState("");
+  const [branchId, setBranchId] = useState(() => typeof window === "undefined" ? "" : getRememberedAdminBranch());
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
@@ -112,7 +116,6 @@ function BookingsWorkspace() {
     items.find((item) => item.id === selectedBookingId) ?? null;
 
   const branches = (queue.data?.branches ?? []).map(({ branchId, branchName }) => [branchId, branchName] as const);
-
   // Quick KPI workflow metrics
   const pendingCount = Number(queue.data?.counts.pending ?? 0);
   const approvedCount = Number(queue.data?.counts.approved ?? 0);
@@ -164,26 +167,21 @@ function BookingsWorkspace() {
             <MapPinIcon size={20} />
           </div>
           <div>
-            <label htmlFor="branch-filter-select" className="text-xs font-semibold text-muted-foreground block">
-              Filter by branch
-            </label>
-            <div className="flex items-center gap-2 mt-0.5">
-              <select
-                id="branch-filter-select"
+            <div className="mt-0.5 min-w-56">
+              <SearchableSelect
+                label="Filter by branch"
+                icon={<MapPinIcon size={14} className="text-primary" />}
                 value={branchId}
-                onChange={(e) => {
-                  setBranchId(e.target.value);
+                onChange={(value) => {
+                  setBranchId(value);
+                  rememberAdminBranch(value);
                   setCurrentPage(1);
                 }}
-                className="font-bold text-sm text-foreground bg-transparent outline-none cursor-pointer hover:text-primary transition-colors focus-visible:ring-1 focus-visible:ring-primary rounded-[4px]"
-              >
-                <option value="">All Branches ({branches.length} branches)</option>
-                {branches.map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+                options={branches.map(([id, name]) => ({ value: id, label: name }))}
+                allowEmptyOption
+                placeholder={`${tAdmin("allBranches")} (${branches.length})`}
+                searchPlaceholder={tAdmin("searchBranches")}
+              />
             </div>
           </div>
         </div>

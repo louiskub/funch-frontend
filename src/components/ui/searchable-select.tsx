@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { SearchIcon, ChevronDownIcon, CheckIcon, XIcon } from "./icons";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ interface SearchableSelectProps {
   searchPlaceholder?: string;
   disabled?: boolean;
   className?: string;
+  allowEmptyOption?: boolean;
 }
 
 export function SearchableSelect({
@@ -29,11 +31,15 @@ export function SearchableSelect({
   value,
   onChange,
   options,
-  placeholder = "Select...",
-  searchPlaceholder = "Type to search...",
+  placeholder,
+  searchPlaceholder,
   disabled = false,
   className,
+  allowEmptyOption = false,
 }: SearchableSelectProps) {
+  const t = useTranslations("common");
+  const translatedPlaceholder = placeholder ?? t("select");
+  const translatedSearchPlaceholder = searchPlaceholder ?? t("typeToSearch");
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,17 +49,23 @@ export function SearchableSelect({
     () => options.find((opt) => opt.value === value),
     [options, value]
   );
+  const visibleOptions = useMemo(
+    () => (allowEmptyOption && !options.some((option) => option.value === "")
+      ? [{ value: "", label: translatedPlaceholder }, ...options]
+      : options),
+    [allowEmptyOption, options, translatedPlaceholder],
+  );
 
   const filteredOptions = useMemo(() => {
-    if (!search.trim()) return options;
+    if (!search.trim()) return visibleOptions;
     const query = search.toLowerCase();
-    return options.filter(
+    return visibleOptions.filter(
       (opt) =>
         opt.label.toLowerCase().includes(query) ||
         (opt.sublabel && opt.sublabel.toLowerCase().includes(query)) ||
         (opt.badge && opt.badge.toLowerCase().includes(query))
     );
-  }, [options, search]);
+  }, [visibleOptions, search]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -76,7 +88,6 @@ export function SearchableSelect({
   // Focus search input when dropdown opens
   useEffect(() => {
     if (isOpen) {
-      setSearch("");
       const timer = setTimeout(() => {
         searchInputRef.current?.focus();
       }, 50);
@@ -105,7 +116,10 @@ export function SearchableSelect({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) setSearch("");
+          setIsOpen(!isOpen);
+        }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={cn(
@@ -128,7 +142,7 @@ export function SearchableSelect({
               selectedOption ? "text-foreground" : "text-muted-foreground"
             )}
           >
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? selectedOption.label : translatedPlaceholder}
           </span>
           <ChevronDownIcon
             size={16}
@@ -151,7 +165,7 @@ export function SearchableSelect({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={searchPlaceholder}
+              placeholder={translatedSearchPlaceholder}
               className="w-full bg-transparent text-xs font-semibold text-foreground placeholder:text-muted-foreground/60 outline-none py-1"
             />
             {search && (

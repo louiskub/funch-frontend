@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { estimateBooking, type BookingEstimate } from "@/features/bookings/estimate";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Input } from "@/components/ui/input";
 import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
 import {
@@ -31,6 +32,7 @@ import {
   MapPinIcon,
   MinusIcon,
   PlusIcon,
+  ZoomInIcon,
   XIcon,
 } from "@/components/ui/icons";
 
@@ -143,6 +145,7 @@ function OfferDetailsContent({
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityRefreshKey, setAvailabilityRefreshKey] = useState(0);
   const [checkoutModal, setCheckoutModal] = useState<"guest" | "confirm" | "success" | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [guestCheckout, setGuestCheckout] = useState(false);
   const [account, setAccount] = useState({
     name: "",
@@ -355,13 +358,9 @@ function OfferDetailsContent({
       controller.signal,
     )
       .then((allOptions) => {
-        const supported =
-          Array.isArray(offer.supportedOptionIds) &&
-          offer.supportedOptionIds.length > 0
-            ? allOptions.filter((opt) =>
-                offer.supportedOptionIds!.includes(opt.id),
-              )
-            : allOptions;
+        const supported = allOptions.filter((opt) =>
+          offer.supportedOptionIds?.includes(opt.id),
+        );
         setOptions(supported);
         setOptionsLoaded(true);
       })
@@ -585,26 +584,38 @@ function OfferDetailsContent({
             <div className="mt-6">
               {offer.images.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="overflow-hidden rounded-[18px] border border-border bg-secondary">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(0)}
+                    aria-label={tOffer("viewImage", { index: 1 })}
+                    className="group relative block w-full overflow-hidden rounded-[18px] border border-border bg-secondary text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
                     <img
                       src={offer.images[0].url}
                       alt={`${offer.brand} ${offer.model}`}
-                      className="aspect-[16/10] w-full object-cover"
+                      className="aspect-[16/10] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     />
-                  </div>
+                    <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-2 text-xs font-semibold text-white transition-colors group-hover:bg-black/85">
+                      <ZoomInIcon size={15} />
+                      {tOffer("viewPhotos")}
+                    </span>
+                  </button>
                   {offer.images.length > 1 && (
                     <div className="grid grid-cols-4 gap-2.5">
                       {offer.images.map((img, idx) => (
-                        <div
+                        <button
+                          type="button"
                           key={img.id}
-                          className="overflow-hidden rounded-[10px] border border-border bg-secondary"
+                          onClick={() => setLightboxIndex(idx)}
+                          aria-label={tOffer("viewImage", { index: idx + 1 })}
+                          className="overflow-hidden rounded-[10px] border border-border bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         >
                           <img
                             src={img.url}
                             alt={`${offer.brand} ${offer.model} preview ${idx + 1}`}
-                            className="aspect-[4/3] w-full object-cover"
+                            className="aspect-[4/3] w-full object-cover transition-transform duration-300 hover:scale-[1.04]"
                           />
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
@@ -1041,6 +1052,29 @@ function OfferDetailsContent({
               </div>
             </section>
           </div>
+        )}
+        {offer && (
+          <ImageLightbox
+            isOpen={lightboxIndex !== null}
+            onClose={() => setLightboxIndex(null)}
+            images={offer.images}
+            currentIndex={lightboxIndex ?? 0}
+            onIndexChange={setLightboxIndex}
+            labels={{
+              dialog: tOffer("imageViewer"),
+              vehiclePhoto: tOffer("vehiclePhoto"),
+              zoomOut: tOffer("zoomOut"),
+              zoomIn: tOffer("zoomIn"),
+              reset: tOffer("resetZoom"),
+              download: tOffer("downloadImage"),
+              close: tOffer("closeViewer"),
+              previous: tOffer("previousImage"),
+              next: tOffer("nextImage"),
+              dragToPan: tOffer("dragToPan"),
+              doubleClickToZoom: tOffer("doubleClickToZoom"),
+              thumbnail: (index) => tOffer("viewImage", { index }),
+            }}
+          />
         )}
         </>
       )}

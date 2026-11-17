@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest } from "../../catalog";
@@ -106,13 +107,14 @@ function getInitials(name: string): string {
 }
 
 export default function MembersPage() {
+  const tAdmin = useTranslations("admin.workspacePages");
   const [allowed, setAllowed] = useState(false);
   const [items, setItems] = useState<Customer[]>([]);
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState({ total: 0, active: 0, suspended: 0, withActiveTrips: 0 });
   const [query, setQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("ALL");
-  const [message, setMessage] = useState("Checking administrator access…");
+  const [message, setMessage] = useState(tAdmin("checkingAccess"));
   const [isLoading, setIsLoading] = useState(false);
 
   // Detail Modal State
@@ -190,7 +192,7 @@ export default function MembersPage() {
     currentUser()
       .then((user) => {
         if (user.role !== "ADMIN") {
-          setMessage("Administrator access is required.");
+          setMessage(tAdmin("accessRequired"));
           return;
         }
         setAllowed(true);
@@ -302,8 +304,8 @@ export default function MembersPage() {
 
   return (
     <AdminLayout
-      title="Customer Accounts & Administration"
-      subtitle="Search customer records, audit rental histories, monitor active trips, and manage account suspensions."
+      title={tAdmin("membersTitle")}
+      subtitle={tAdmin("membersSubtitle")}
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -333,7 +335,7 @@ export default function MembersPage() {
         {/* Total Customers */}
         <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Total Customers</span>
+            <span className="text-xs font-medium text-muted-foreground">{tAdmin("totalCustomers")}</span>
             <div className="rounded-full bg-secondary p-1.5 text-primary">
               <UsersIcon size={16} />
             </div>
@@ -341,13 +343,13 @@ export default function MembersPage() {
           <p className="mt-2 text-2xl font-bold tracking-tight text-foreground tabular-nums">
             {stats.total}
           </p>
-          <span className="text-xs text-muted-foreground">Registered accounts</span>
+          <span className="text-xs text-muted-foreground">{tAdmin("registeredAccounts")}</span>
         </div>
 
         {/* Active Accounts */}
         <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Active Accounts</span>
+            <span className="text-xs font-medium text-muted-foreground">{tAdmin("activeAccounts")}</span>
             <div className="rounded-full bg-status-approved-bg p-1.5 text-status-approved-text">
               <CheckIcon size={16} />
             </div>
@@ -355,13 +357,13 @@ export default function MembersPage() {
           <p className="mt-2 text-2xl font-bold tracking-tight text-status-approved-text tabular-nums">
             {stats.active}
           </p>
-          <span className="text-xs text-muted-foreground">In good standing</span>
+          <span className="text-xs text-muted-foreground">{tAdmin("goodStanding")}</span>
         </div>
 
         {/* Suspended Accounts */}
         <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Suspended Accounts</span>
+            <span className="text-xs font-medium text-muted-foreground">{tAdmin("suspendedAccounts")}</span>
             <div className="rounded-full bg-status-rejected-bg p-1.5 text-status-rejected-text">
               <BanIcon size={16} />
             </div>
@@ -369,13 +371,13 @@ export default function MembersPage() {
           <p className="mt-2 text-2xl font-bold tracking-tight text-status-rejected-text tabular-nums">
             {stats.suspended}
           </p>
-          <span className="text-xs text-muted-foreground">Access suspended</span>
+          <span className="text-xs text-muted-foreground">{tAdmin("accessSuspended")}</span>
         </div>
 
         {/* Active Trips */}
         <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Active Renters</span>
+            <span className="text-xs font-medium text-muted-foreground">{tAdmin("activeRenters")}</span>
             <div className="rounded-full bg-status-in-use-bg p-1.5 text-status-in-use-text">
               <CarIcon size={16} />
             </div>
@@ -383,7 +385,7 @@ export default function MembersPage() {
           <p className="mt-2 text-2xl font-bold tracking-tight text-status-in-use-text tabular-nums">
             {stats.withActiveTrips}
           </p>
-          <span className="text-xs text-muted-foreground">Ongoing or pending trips</span>
+          <span className="text-xs text-muted-foreground">{tAdmin("ongoingTrips")}</span>
         </div>
       </div>
 
@@ -507,7 +509,7 @@ export default function MembersPage() {
                 <TableCell colSpan={5} className="py-14 text-center">
                   <div className="mx-auto max-w-sm space-y-2">
                     <UsersIcon size={36} className="mx-auto text-primary/40 mb-2" />
-                    <h3 className="text-sm font-bold text-foreground">No customers found</h3>
+                    <h3 className="text-sm font-bold text-foreground">{tAdmin("noCustomers")}</h3>
                     <p className="text-xs text-muted-foreground">
                       {query
                         ? `No customer records matched "${query}". Try adjusting your keywords or clearing the filter.`
@@ -618,9 +620,9 @@ export default function MembersPage() {
                               <CarIcon size={11} className="mr-0.5" /> Active Trip
                             </Badge>
                           ) : c.bookingCount > 0 ? (
-                            <span className="text-xs text-muted-foreground">Past renter</span>
+                            <span className="text-xs text-muted-foreground">{tAdmin("pastRenter")}</span>
                           ) : (
-                            <span className="text-xs text-muted-foreground">No bookings yet</span>
+                            <span className="text-xs text-muted-foreground">{tAdmin("noBookingsYet")}</span>
                           )}
                         </div>
                       </div>
@@ -689,7 +691,7 @@ export default function MembersPage() {
                 customers
               </span>
               <div className="flex items-center gap-1.5 border-l border-border-subtle pl-3">
-                <span className="text-xs text-muted-foreground">Per page:</span>
+                <span className="text-xs text-muted-foreground">{tAdmin("perPage")}</span>
                 <select
                   value={itemsPerPage}
                   onChange={(e) => {
@@ -832,7 +834,7 @@ export default function MembersPage() {
                     href="/admin/bookings"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline whitespace-nowrap"
                   >
-                    <span>All Bookings Queue</span>
+                    <span>{tAdmin("allBookingsQueue")}</span>
                     <ExternalLinkIcon size={13} />
                   </Link>
                 </div>

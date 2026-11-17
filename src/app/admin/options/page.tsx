@@ -1,11 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { currentUser } from "../../auth";
 import { apiRequest, CarOption, parseOptions } from "../../catalog";
 import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { getRememberedAdminBranch, rememberAdminBranch } from "../admin-branch";
 import {
   MapPinIcon,
   PlusIcon,
@@ -104,11 +107,12 @@ function formFor(option: CarOption): FormState {
 }
 
 export default function OptionsAdmin() {
+  const tAdmin = useTranslations("admin.workspacePages");
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchId, setBranchId] = useState("");
   const [options, setOptions] = useState<CarOption[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<"ALL" | CarOption["category"]>("ALL");
-  const [status, setStatus] = useState("Checking administrator access…");
+  const [status, setStatus] = useState(tAdmin("checkingAccess"));
 
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,6 +123,7 @@ export default function OptionsAdmin() {
   // Delete modal state
   const [optionToDelete, setOptionToDelete] = useState<CarOption | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [optionToDeactivate, setOptionToDeactivate] = useState<CarOption | null>(null);
 
   const currentBranch = branches.find((b) => b.id === branchId);
   const branchCurrency = currentBranch?.currencyCode ?? "THB";
@@ -132,12 +137,14 @@ export default function OptionsAdmin() {
       .then(([user, items]) => {
         if (!alive) return;
         if (user.role !== "ADMIN") {
-          setStatus("Administrator access is required.");
+          setStatus(tAdmin("accessRequired"));
           return;
         }
         setBranches(items);
-        setBranchId(items[0]?.id ?? "");
-        setStatus(items.length ? "" : "No branches are configured.");
+        const initialBranch = items.find((item) => item.id === getRememberedAdminBranch()) ?? items[0];
+        setBranchId(initialBranch?.id ?? "");
+        if (initialBranch) rememberAdminBranch(initialBranch.id);
+        setStatus(items.length ? "" : tAdmin("noBranches"));
       })
       .catch((error: unknown) => {
         if (alive)
@@ -230,7 +237,7 @@ export default function OptionsAdmin() {
           `/admin/options/branches/${encodeURIComponent(branchId)}`,
         ).then(parseOptions),
       );
-      setStatus(editingOption ? "Option updated successfully." : "New option created successfully.");
+      setStatus(editingOption ? tAdmin("optionUpdated") : tAdmin("optionCreated"));
     } catch (error) {
       setStatus(
         error instanceof Error ? error.message : "Could not save this option.",
@@ -242,6 +249,10 @@ export default function OptionsAdmin() {
 
   // Quick toggle active status
   async function toggleActive(option: CarOption) {
+    if (option.isActive) {
+      setOptionToDeactivate(option);
+      return;
+    }
     setStatus("");
     try {
       await apiRequest(`/admin/options/${encodeURIComponent(option.id)}`, {
@@ -262,6 +273,12 @@ export default function OptionsAdmin() {
     }
   }
 
+  async function confirmDeactivate() {
+    if (!optionToDeactivate) return;
+    await toggleActive(optionToDeactivate);
+    setOptionToDeactivate(null);
+  }
+
   // Confirm delete option
   async function handleConfirmDelete() {
     if (!optionToDelete) return;
@@ -275,7 +292,7 @@ export default function OptionsAdmin() {
       setOptionToDelete(null);
     } catch (error) {
       setStatus(
-        error instanceof Error ? error.message : "Could not delete this option.",
+        error instanceof Error ? error.message : tAdmin("deleteOptionFailed"),
       );
     } finally {
       setDeleting(false);
@@ -289,8 +306,8 @@ export default function OptionsAdmin() {
 
   return (
     <AdminLayout
-      title="Branch Rental Options"
-      subtitle="Manage add-on equipment, coverage packages, and services offered at each branch."
+      title={tAdmin("optionTitle")}
+      subtitle={tAdmin("optionSubtitle")}
       actions={
         <Button
           size="sm"
@@ -320,20 +337,20 @@ export default function OptionsAdmin() {
                 Active Branch
               </label>
               <div className="mt-0.5 flex items-center gap-2">
-                <select
+                <SearchableSelect
+                  label={tAdmin("activeBranch")}
+                  icon={<MapPinIcon size={14} className="text-primary" />}
                   value={branchId}
-                  onChange={(e) => {
-                    setBranchId(e.target.value);
+                  onChange={(value) => {
+                    setBranchId(value);
+                    rememberAdminBranch(value);
                     setSelectedCategory("ALL");
                   }}
-                  className="h-8 rounded-[6px] border border-border bg-white px-2.5 text-xs font-bold text-foreground outline-none hover:border-primary focus:border-primary"
-                >
-                  {branches.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name} ({b.city}) · {b.countryCode}
-                    </option>
-                  ))}
-                </select>
+                  options={branches.map((b) => ({ value: b.id, label: b.name, sublabel: `${b.city} · ${b.countryCode}` }))}
+                  placeholder={tAdmin("selectBranch")}
+                  searchPlaceholder={tAdmin("searchBranches")}
+                  className="min-w-56"
+                />
                 {currentBranch && (
                   <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-primary">
                     Currency: {branchCurrency}
@@ -463,7 +480,7 @@ export default function OptionsAdmin() {
               {/* Card Middle: Pricing & Inventory */}
               <div className="my-4 pt-3 border-t border-surface-alt space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Rental Price</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">{tAdmin("rentalPrice")}</span>
                   <div className="text-right">
                     <span className="text-sm font-bold text-foreground">
                       {formatCurrency(option.price, branchCurrency)}
@@ -479,7 +496,7 @@ export default function OptionsAdmin() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Inventory Stock</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">{tAdmin("inventoryStock")}</span>
                   <span
                     className={`text-[10px] font-semibold ${
                       option.quantityStock === null
@@ -513,7 +530,7 @@ export default function OptionsAdmin() {
                     title="Edit option"
                   >
                     <EditIcon size={12} />
-                    <span>Edit</span>
+                    <span>{tAdmin("edit")}</span>
                   </button>
                   <button
                     type="button"
@@ -594,9 +611,9 @@ export default function OptionsAdmin() {
                     }}
                     className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none hover:border-primary focus:border-primary"
                   >
-                    <option value="EQUIPMENT">Equipment</option>
-                    <option value="PROTECTION">Protection</option>
-                    <option value="SERVICE">Service</option>
+                    <option value="EQUIPMENT">{tAdmin("equipment")}</option>
+                    <option value="PROTECTION">{tAdmin("protection")}</option>
+                    <option value="SERVICE">{tAdmin("service")}</option>
                   </select>
                 </label>
 
@@ -616,9 +633,9 @@ export default function OptionsAdmin() {
                       }}
                       className="mt-1 h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs text-foreground outline-none hover:border-primary focus:border-primary"
                     >
-                      <option value="PER_DAY">Per day</option>
-                      <option value="PER_UNIT_PER_DAY">Per unit per day</option>
-                      <option value="FIXED">One-time flat fee</option>
+                      <option value="PER_DAY">{tAdmin("perDay")}</option>
+                      <option value="PER_UNIT_PER_DAY">{tAdmin("perUnitPerDay")}</option>
+                      <option value="FIXED">{tAdmin("oneTimeFee")}</option>
                     </select>
                   )}
                 </label>
@@ -680,7 +697,7 @@ export default function OptionsAdmin() {
                   onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                   className="h-4 w-4 rounded text-primary focus:ring-primary"
                 />
-                <span>Active in catalog (visible to customers during checkout)</span>
+                <span>{tAdmin("activeInCatalog")}</span>
               </label>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-border">
@@ -714,8 +731,8 @@ export default function OptionsAdmin() {
                 <TrashIcon size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-foreground">Delete Rental Option</h3>
-                <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
+                <h3 className="text-base font-bold text-foreground">{tAdmin("deleteOption")}</h3>
+                <p className="text-xs text-muted-foreground">{tAdmin("cannotUndo")}</p>
               </div>
             </div>
 
@@ -762,6 +779,19 @@ export default function OptionsAdmin() {
               >
                 {deleting ? "Deleting…" : "Confirm Delete"}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {optionToDeactivate && (
+        <div role="dialog" aria-modal="true" aria-labelledby="deactivate-option-title" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-[16px] border border-border bg-white p-6 shadow-xl space-y-4">
+            <h3 id="deactivate-option-title" className="text-base font-bold text-foreground">{tAdmin("confirmDeactivateOption")}</h3>
+            <p className="text-sm text-muted-foreground">{tAdmin("confirmDeactivateOptionMessage", { name: optionToDeactivate.name })}</p>
+            <div className="flex justify-end gap-2 border-t border-border pt-3">
+              <Button type="button" variant="outline" size="sm" onClick={() => setOptionToDeactivate(null)}>{tAdmin("cancel")}</Button>
+              <Button type="button" variant="destructive" size="sm" onClick={() => void confirmDeactivate()}>{tAdmin("deactivate")}</Button>
             </div>
           </div>
         </div>

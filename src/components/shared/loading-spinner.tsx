@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
@@ -7,10 +8,11 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-  message = "Loading…",
+  message,
   className,
   size = "md",
 }: LoadingSpinnerProps) {
+  const t = useTranslations("common");
   const spinnerSizes = {
     sm: "h-4 w-4 border-2",
     md: "h-7 w-7 border-3",
@@ -25,7 +27,7 @@ export function LoadingSpinner({
           spinnerSizes[size]
         )}
       />
-      {message && <p className="text-xs font-medium text-muted-foreground">{message}</p>}
+      {(message ?? t("loading")) && <p className="text-xs font-medium text-muted-foreground">{message ?? t("loading")}</p>}
     </div>
   );
 }

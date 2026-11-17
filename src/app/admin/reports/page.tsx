@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest } from "../../catalog";
 import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { getRememberedAdminBranch, rememberAdminBranch } from "../admin-branch";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/currency";
 import {
@@ -73,8 +76,9 @@ type ReportData = {
 type DatePreset = "TODAY" | "7D" | "30D" | "MONTH" | "YTD" | "CUSTOM";
 
 export default function ReportsPage() {
+  const tAdmin = useTranslations("admin.workspacePages");
   const [allowed, setAllowed] = useState(false);
-  const [message, setMessage] = useState("Checking administrator access…");
+  const [message, setMessage] = useState(tAdmin("checkingAccess"));
   const [busy, setBusy] = useState(false);
 
   // Entities for lookup
@@ -86,7 +90,7 @@ export default function ReportsPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [country, setCountry] = useState("");
-  const [branch, setBranch] = useState("");
+  const [branch, setBranch] = useState(() => typeof window === "undefined" ? "" : getRememberedAdminBranch());
   const [activePreset, setActivePreset] = useState<DatePreset>("30D");
 
   // Report Result
@@ -179,7 +183,7 @@ export default function ReportsPage() {
     ])
       .then(([user, rawBranches, rawCarTypes, rawFiles]) => {
         if (user.role !== "ADMIN") {
-          setMessage("Administrator access is required.");
+          setMessage(tAdmin("accessRequired"));
           return;
         }
 
@@ -227,6 +231,8 @@ export default function ReportsPage() {
           : [];
 
         setBranches(bList);
+        const preferredBranch = bList.find((item) => item.id === getRememberedAdminBranch());
+        if (preferredBranch) setCountry(preferredBranch.countryCode);
         setCarTypes(cList);
         setFiles(fList);
         setAllowed(true);
@@ -240,7 +246,7 @@ export default function ReportsPage() {
         const fromIso = fromDate.toISOString().slice(0, 16);
         setFrom(fromIso);
         setTo(toIso);
-        void loadReport(fromIso, toIso, "", "");
+        void loadReport(fromIso, toIso, preferredBranch?.countryCode ?? "", preferredBranch?.id ?? "");
       })
       .catch((e) => setMessage(e instanceof Error ? e.message : "Could not verify access."));
   }, [loadReport]);
@@ -525,8 +531,8 @@ export default function ReportsPage() {
 
   return (
     <AdminLayout
-      title="Operational Reports & Analytics"
-      subtitle="Summarize rental contract values, status distribution, popular fleet models, and branch performance."
+      title={tAdmin("reportsTitle")}
+      subtitle={tAdmin("reportsSubtitle")}
       actions={
         <div className="flex items-center gap-2">
           <Button
@@ -621,7 +627,7 @@ export default function ReportsPage() {
         >
           {/* Created From */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Created From</label>
+            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("createdFrom")}</label>
             <input
               type="datetime-local"
               required
@@ -636,7 +642,7 @@ export default function ReportsPage() {
 
           {/* Created To */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Created To (Exclusive)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("createdToExclusive")}</label>
             <input
               type="datetime-local"
               required
@@ -651,7 +657,7 @@ export default function ReportsPage() {
 
           {/* Country Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Country Station</label>
+            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("countryStation")}</label>
             <select
               value={country}
               onChange={(e) => {
@@ -660,7 +666,7 @@ export default function ReportsPage() {
               }}
               className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer"
             >
-              <option value="">All Countries</option>
+              <option value="">{tAdmin("allCountries")}</option>
               {[...new Set(branches.map((b) => b.countryCode))]
                 .filter(Boolean)
                 .sort()
@@ -674,21 +680,21 @@ export default function ReportsPage() {
 
           {/* Branch Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Branch Station</label>
-            <select
+            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("branchStation")}</label>
+            <SearchableSelect
+              label={tAdmin("branchStation")}
               value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="">All Branches</option>
-              {branches
+              onChange={(value) => {
+                setBranch(value);
+                rememberAdminBranch(value);
+              }}
+              options={branches
                 .filter((b) => !country || b.countryCode === country)
-                .map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name} ({b.city})
-                  </option>
-                ))}
-            </select>
+                .map((b) => ({ value: b.id, label: b.name, sublabel: b.city }))}
+              allowEmptyOption
+              placeholder={tAdmin("allBranches")}
+              searchPlaceholder={tAdmin("searchBranches")}
+            />
           </div>
 
           {/* Submit Button */}
@@ -704,7 +710,7 @@ export default function ReportsPage() {
           {/* Card 1: Total Booking Value */}
           <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Total Booking Value</span>
+              <span className="text-xs font-medium text-muted-foreground">{tAdmin("totalBookingValue")}</span>
               <div className="rounded-full bg-secondary p-1.5 text-primary">
                 <DollarSignIcon size={16} />
               </div>
@@ -723,20 +729,20 @@ export default function ReportsPage() {
                 ))
               )}
             </div>
-            <span className="text-xs text-muted-foreground mt-1 block">Approved rental contracts</span>
+            <span className="text-xs text-muted-foreground mt-1 block">{tAdmin("approvedContracts")}</span>
           </div>
 
           {/* Card 2: Total Bookings Volume */}
           <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Total Rental Volume</span>
+              <span className="text-xs font-medium text-muted-foreground">{tAdmin("rentalVolume")}</span>
               <div className="rounded-full bg-status-approved-bg p-1.5 text-status-approved-text">
                 <TrendingUpIcon size={16} />
               </div>
             </div>
             <p className="mt-2 text-2xl font-bold tracking-tight text-status-approved-text tabular-nums">
               {summaryMetrics.totalVolume}{" "}
-              <span className="text-sm font-semibold text-muted-foreground">trips</span>
+              <span className="text-sm font-semibold text-muted-foreground">{tAdmin("trips")}</span>
             </p>
             <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
               <span>{summaryMetrics.completedVolume} completed</span>
@@ -748,7 +754,7 @@ export default function ReportsPage() {
           {/* Card 3: Confirmed Extra Charges */}
           <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Confirmed Extra Charges</span>
+              <span className="text-xs font-medium text-muted-foreground">{tAdmin("confirmedCharges")}</span>
               <div className="rounded-full bg-status-pending-bg p-1.5 text-status-pending-text">
                 <ClockIcon size={16} />
               </div>
@@ -769,13 +775,13 @@ export default function ReportsPage() {
                 ))
               )}
             </div>
-            <span className="text-xs text-muted-foreground mt-1 block">Late returns & supplements</span>
+            <span className="text-xs text-muted-foreground mt-1 block">{tAdmin("lateReturns")}</span>
           </div>
 
           {/* Card 4: Top Model Performer */}
           <div className="rounded-[14px] border border-border bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Top Performing Model</span>
+              <span className="text-xs font-medium text-muted-foreground">{tAdmin("topModel")}</span>
               <div className="rounded-full bg-status-in-use-bg p-1.5 text-status-in-use-text">
                 <CarIcon size={16} />
               </div>
@@ -800,7 +806,7 @@ export default function ReportsPage() {
         <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden flex flex-col">
           <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-foreground">Branch Value & Revenue Breakdown</h2>
+              <h2 className="text-sm font-bold text-foreground">{tAdmin("branchBreakdown")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Contract values and confirmed extra fees by station
               </p>
@@ -819,10 +825,10 @@ export default function ReportsPage() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-secondary/30 text-muted-foreground">
-                    <th className="py-2.5 pl-5 font-semibold">Branch Station</th>
-                    <th className="py-2.5 font-semibold text-right">Trips</th>
-                    <th className="py-2.5 font-semibold text-right">Booking Value</th>
-                    <th className="py-2.5 pr-5 font-semibold text-right">Extra Charges</th>
+                    <th className="py-2.5 pl-5 font-semibold">{tAdmin("branchStation")}</th>
+                    <th className="py-2.5 font-semibold text-right">{tAdmin("trips")}</th>
+                    <th className="py-2.5 font-semibold text-right">{tAdmin("bookingValue")}</th>
+                    <th className="py-2.5 pr-5 font-semibold text-right">{tAdmin("extraCharges")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -865,7 +871,7 @@ export default function ReportsPage() {
         <div className="rounded-[18px] border border-border bg-white shadow-sm overflow-hidden flex flex-col">
           <div className="flex items-center justify-between border-b border-border bg-secondary/60 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-foreground">Rental Status Distribution</h2>
+              <h2 className="text-sm font-bold text-foreground">{tAdmin("statusDistribution")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Breakdown of requests across operational states
               </p>

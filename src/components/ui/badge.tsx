@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
@@ -35,25 +36,26 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 }
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  const t = useTranslations("common");
   const norm = status?.toUpperCase() || "";
   let variant: VariantProps<typeof badgeVariants>["variant"] = "secondary";
   let label = status;
 
   if (norm === "PENDING") {
     variant = "pending";
-    label = "Pending approval";
+    label = t("pendingApproval");
   } else if (norm === "APPROVED") {
     variant = "approved";
-    label = "Approved / Awaiting pickup";
+    label = t("approvedAwaitingPickup");
   } else if (norm === "IN_USE") {
     variant = "inUse";
-    label = "On the road";
+    label = t("onTheRoad");
   } else if (norm === "COMPLETED") {
     variant = "completed";
-    label = "Completed";
+    label = t("completedStatus");
   } else if (norm === "REJECTED" || norm === "CANCELLED") {
     variant = "rejected";
-    label = norm === "REJECTED" ? "Rejected" : "Cancelled";
+    label = norm === "REJECTED" ? t("rejectedStatus") : t("cancelledStatus");
   }
 
   return (

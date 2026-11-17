@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
 export function AdminGuard({ children }: { children: ReactNode }) {
   const { isAdmin, isLoading } = useAuth();
+  const t = useTranslations("admin.workspacePages");
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <p className="text-sm font-medium text-muted-foreground">Verifying admin privileges…</p>
+        <p className="text-sm font-medium text-muted-foreground">{t("checkingAccess")}</p>
       </div>
     );
   }

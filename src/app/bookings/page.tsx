@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
 import {
+  AlertCircleIcon,
   CalendarIcon,
   MapPinIcon,
   CarIcon,
@@ -30,6 +31,11 @@ type Booking = {
   branchName: string;
   licensePlate?: string | null;
 };
+
+type CancelState =
+  | { kind: "idle" }
+  | { kind: "confirming"; bookingId: string }
+  | { kind: "submitting"; bookingId: string };
 
 function rows(value: unknown): Booking[] {
   if (!Array.isArray(value)) throw new Error("Unexpected booking response.");
@@ -66,7 +72,8 @@ function BookingsContent() {
   const [items, setItems] = useState<Booking[]>([]);
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelState, setCancelState] = useState<CancelState>({ kind: "idle" });
   const batchSize = useResponsiveBatchSize(250, 320, 24);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -76,6 +83,14 @@ function BookingsContent() {
   const isLoadingMoreRef = useRef(false);
   const isRefreshingRef = useRef(false);
   const refreshRequestId = useRef(0);
+  const cancelDialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = cancelDialogRef.current;
+    if (!dialog) return;
+    if (cancelState.kind === "idle" && dialog.open) dialog.close();
+    if (cancelState.kind !== "idle" && !dialog.open) dialog.showModal();
+  }, [cancelState.kind]);
 
   const refresh = useCallback(
     async () => {
@@ -143,7 +158,10 @@ function BookingsContent() {
   }, [batchSize, hasMore, loadFailed, loadingMore]);
 
   async function detail(id: string) {
+    if (cancelState.kind === "submitting") return;
     setMessage("");
+    setCancelError("");
+    setCancelState({ kind: "idle" });
     try {
       setSelected(
         apiRecord(await apiRequest(`/bookings/${encodeURIComponent(id)}`)),
@@ -154,17 +172,20 @@ function BookingsContent() {
   }
 
   async function cancel(id: string) {
-    setBusy(true);
+    if (cancelState.kind !== "confirming" || cancelState.bookingId !== id) return;
+    setMessage("");
+    setCancelError("");
+    setCancelState({ kind: "submitting", bookingId: id });
     try {
       await apiRequest(`/bookings/${encodeURIComponent(id)}/cancel`, {
         method: "POST",
       });
+      setCancelState({ kind: "idle" });
       setSelected(null);
       await refresh();
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not cancel booking.");
-    } finally {
-      setBusy(false);
+      setCancelError(e instanceof Error ? e.message : t("cancelError"));
+      setCancelState({ kind: "confirming", bookingId: id });
     }
   }
 
@@ -250,6 +271,7 @@ function BookingsContent() {
                 <Button
                   variant="secondary"
                   size="sm"
+                  disabled={cancelState.kind === "submitting"}
                   onClick={() => void detail(b.id)}
                   className="h-8 rounded-[6px] text-xs font-semibold transition-all active:scale-[0.98]"
                 >
@@ -284,9 +306,13 @@ function BookingsContent() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setSelected(null)}
+                  disabled={cancelState.kind === "submitting"}
+                  onClick={() => {
+                    setCancelState({ kind: "idle" });
+                    setSelected(null);
+                  }}
                   className="rounded-[6px] p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                  aria-label="Close details"
+                  aria-label={t("closeDetails")}
                 >
                   <XIcon size={18} />
                 </button>
@@ -294,45 +320,45 @@ function BookingsContent() {
 
               <CardContent className="p-5 space-y-5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Booking status</span>
+                  <span className="text-xs text-muted-foreground">{t("bookingStatus")}</span>
                   <StatusBadge status={String(selected.status)} />
                 </div>
 
                 <div className="rounded-[10px] bg-secondary p-4 text-xs space-y-2 border border-border-subtle">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Vehicle</span>
+                    <span className="text-muted-foreground">{t("vehicle")}</span>
                     <strong className="text-foreground">
                       {String(selected.brand)} {String(selected.model)}
                     </strong>
                   </div>
                   {Boolean(selected.licensePlate) && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Assigned Car Plate</span>
+                      <span className="text-muted-foreground">{t("assignedPlate")}</span>
                       <strong className="text-primary font-mono bg-white px-2 py-0.5 rounded border border-border tabular-nums">
                         {String(selected.licensePlate)}
                       </strong>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Branch</span>
+                    <span className="text-muted-foreground">{t("branch")}</span>
                     <strong className="text-foreground">
                       {String(selected.branchName)}
                     </strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Pickup</span>
+                    <span className="text-muted-foreground">{t("pickup")}</span>
                     <span className="text-foreground tabular-nums">
                       {new Date(String(selected.pickupAt)).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Return</span>
+                    <span className="text-muted-foreground">{t("return")}</span>
                     <span className="text-foreground tabular-nums">
                       {new Date(String(selected.returnAt)).toLocaleString()}
                     </span>
                   </div>
                   <div className="border-t border-border-subtle pt-2 flex justify-between font-bold text-foreground">
-                    <span>Total Rate</span>
+                    <span>{t("totalRate")}</span>
                     <span className="text-primary tabular-nums">
                       {formatCurrency(String(selected.totalAmount), String(selected.currencyCode))}
                     </span>
@@ -375,11 +401,15 @@ function BookingsContent() {
                   <div className="pt-2">
                     <Button
                       variant="destructive"
-                      disabled={busy}
-                      onClick={() => void cancel(String(selected.id))}
-                      className="w-full text-xs font-semibold h-10"
+                      disabled={cancelState.kind === "submitting"}
+                      onClick={() => {
+                        setMessage("");
+                        setCancelError("");
+                        setCancelState({ kind: "confirming", bookingId: String(selected.id) });
+                      }}
+                      className="h-10 w-full text-xs font-semibold"
                     >
-                      {busy ? t("cancelling") : t("cancelBooking")}
+                      {t("cancelBooking")}
                     </Button>
                   </div>
                 )}
@@ -392,6 +422,86 @@ function BookingsContent() {
           )}
         </div>
       </div>
+
+      <dialog
+        ref={cancelDialogRef}
+        aria-labelledby="cancel-confirm-title"
+        aria-describedby="cancel-confirm-message"
+        onCancel={(event) => {
+          if (cancelState.kind === "submitting") {
+            event.preventDefault();
+          } else {
+            setCancelError("");
+            setCancelState({ kind: "idle" });
+          }
+        }}
+        onClick={(event) => {
+          if (event.target === event.currentTarget && cancelState.kind === "confirming") {
+            setCancelError("");
+            setCancelState({ kind: "idle" });
+          }
+        }}
+        className="m-auto w-[calc(100%-2rem)] max-w-[480px] overflow-hidden rounded-[18px] border border-border bg-white p-0 text-foreground shadow-[0_20px_60px_-16px_color-mix(in_srgb,rgb(var(--shadow-color))_40%,transparent)] backdrop:bg-foreground/55"
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
+          <h2 id="cancel-confirm-title" className="text-lg font-bold text-foreground">
+            {t("confirmCancelTitle")}
+          </h2>
+          <button
+            type="button"
+            aria-label={t("closeDetails")}
+            disabled={cancelState.kind === "submitting"}
+            onClick={() => {
+              setCancelError("");
+              setCancelState({ kind: "idle" });
+            }}
+            className="grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+          >
+            <XIcon size={18} aria-hidden="true" />
+          </button>
+        </header>
+
+        <div className="space-y-4 p-5 sm:p-6">
+          <p id="cancel-confirm-message" className="text-sm leading-relaxed text-muted-foreground">
+            {t("confirmCancelMessage", { bookingNumber: String(selected?.bookingNumber ?? "") })}
+          </p>
+          {cancelError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-3 text-xs font-medium text-status-rejected-text"
+            >
+              <AlertCircleIcon size={16} className="mt-0.5 shrink-0" />
+              <span>{cancelError}</span>
+            </div>
+          )}
+          <div className="flex w-full flex-row gap-2 sm:w-auto sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              autoFocus
+              disabled={cancelState.kind === "submitting"}
+              className="min-w-0 w-full flex-1 px-2 text-xs sm:w-auto sm:flex-none sm:px-4 sm:text-sm"
+              onClick={() => {
+                setCancelError("");
+                setCancelState({ kind: "idle" });
+              }}
+            >
+              {t("keepBooking")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={cancelState.kind === "submitting" || cancelState.kind !== "confirming"}
+              className="min-w-0 w-full flex-1 px-2 text-xs sm:w-auto sm:flex-none sm:px-4 sm:text-sm"
+              onClick={() => {
+                if (cancelState.kind === "confirming") void cancel(cancelState.bookingId);
+              }}
+            >
+              {cancelState.kind === "submitting" ? t("cancelling") : t("confirmCancel")}
+            </Button>
+          </div>
+        </div>
+      </dialog>
     </main>
   );
 }

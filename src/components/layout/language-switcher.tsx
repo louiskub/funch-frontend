@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocaleStore } from "@/features/i18n";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface LanguageSwitcherProps {
@@ -9,6 +10,7 @@ interface LanguageSwitcherProps {
 
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const { locale, setLocale } = useLocaleStore();
+  const t = useTranslations("common");
 
   return (
     <div
@@ -17,7 +19,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
         className
       )}
       role="group"
-      aria-label="Language selection"
+      aria-label={t("languageSelection")}
     >
       <button
         type="button"

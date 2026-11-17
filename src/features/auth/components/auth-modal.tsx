@@ -250,7 +250,7 @@ export function AuthModal() {
                 name="password"
                 type="password"
                 required
-                minLength={isLogin ? 1 : 6}
+                minLength={isLogin ? 1 : 12}
                 maxLength={128}
                 placeholder={t("passwordPlaceholder")}
                 value={password}
