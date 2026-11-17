@@ -657,30 +657,25 @@ export default function ReportsPage() {
 
           {/* Country Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("countryStation")}</label>
-            <select
+            <SearchableSelect
+              label={tAdmin("countryStation")}
               value={country}
-              onChange={(e) => {
-                setCountry(e.target.value);
+              onChange={(value) => {
+                setCountry(value);
                 setBranch("");
               }}
-              className="h-9 w-full rounded-[8px] border border-border bg-white px-2.5 text-xs font-medium text-foreground outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="">{tAdmin("allCountries")}</option>
-              {[...new Set(branches.map((b) => b.countryCode))]
+              options={[...new Set(branches.map((b) => b.countryCode))]
                 .filter(Boolean)
                 .sort()
-                .map((code) => (
-                  <option key={code} value={code}>
-                    {code}
-                  </option>
-                ))}
-            </select>
+                .map((code) => ({ value: code, label: code }))}
+              allowEmptyOption
+              placeholder={tAdmin("allCountries")}
+              searchPlaceholder={tAdmin("searchCountries")}
+            />
           </div>
 
           {/* Branch Filter */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">{tAdmin("branchStation")}</label>
             <SearchableSelect
               label={tAdmin("branchStation")}
               value={branch}

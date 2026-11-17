@@ -13,9 +13,9 @@ pipeline {
         CREDENTIAL_ID = "github-pat"
     }
 
-    // parameters {
-    //     string(name: 'NEXT_PUBLIC_API_BASE_URL', defaultValue: '', description: 'Public API URL including /api, for example https://api.example.com/api')
-    // }
+    parameters {
+        string(name: 'NEXT_PUBLIC_API_BASE_URL', defaultValue: '', description: 'Public API URL including /api, for example https://api.example.com/api')
+    }
 
     options {
         disableConcurrentBuilds()
@@ -78,7 +78,7 @@ pipeline {
                         """
                         sh 'kubectl apply -f app-deploy.yml'
                         sh "kubectl set image deployment/${APP_NAME} -n ${NAMESPACE} ${APP_NAME}=${IMAGE_NAME}:1.0.${BUILD_NUMBER}"
-                        sh "kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=5m"
+                        sh "kubectl rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=3m"
                     }
                 }
             }

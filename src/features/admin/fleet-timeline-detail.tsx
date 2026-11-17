@@ -203,8 +203,6 @@ export function FleetTimelineDetail({
 
   useEffect(() => {
     const controller = new AbortController();
-    setDetail(null);
-    setError("");
     apiRequest(
       `/admin/fleet/timeline/details?carTypeBranchId=${encodeURIComponent(carTypeBranchId)}&date=${encodeURIComponent(date)}`,
       { signal: controller.signal },
@@ -259,7 +257,7 @@ export function FleetTimelineDetail({
           {error ? (
             <div role="alert" className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-5 text-center">
               <p className="text-sm text-status-rejected-text">{error || t("detailsFailed")}</p>
-              <button type="button" onClick={() => setRetryKey((value) => value + 1)} className="mt-3 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary">
+              <button type="button" onClick={() => { setDetail(null); setError(""); setRetryKey((value) => value + 1); }} className="mt-3 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary">
                 {t("retry")}
               </button>
             </div>

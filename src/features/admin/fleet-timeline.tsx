@@ -71,11 +71,19 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
   const current = today.slice(0, 7);
   const selectedMonth = month ?? current;
   const visibleDays = timeline?.matrix[0]?.days.filter((day) => day.date >= today) ?? [];
+  const reloadTimeline = () => {
+    setLoading(true);
+    setError("");
+    setRefresh((value) => value + 1);
+  };
+  const changeMonth = (value: string) => {
+    setLoading(true);
+    setError("");
+    setMonth(value);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
-    setError("");
     apiRequest(
       `/admin/fleet/timeline?branchId=${encodeURIComponent(branch.id)}&month=${encodeURIComponent(selectedMonth)}`,
       { signal: controller.signal },
@@ -100,16 +108,16 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
           <p className="mt-1 text-xs text-muted-foreground">{t("subtitle", { timezone: branch.timezone })}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="button" variant="outline" size="sm" aria-label={t("previousMonth")} disabled={selectedMonth <= current} onClick={() => setMonth(shiftMonth(selectedMonth, -1))}>
+          <Button type="button" variant="outline" size="sm" aria-label={t("previousMonth")} disabled={selectedMonth <= current} onClick={() => changeMonth(shiftMonth(selectedMonth, -1))}>
             <ChevronLeftIcon size={16} />
           </Button>
           <span className="min-w-36 text-center text-sm font-bold text-foreground">
             {new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${selectedMonth}-01T00:00:00Z`))}
           </span>
-          <Button type="button" variant="outline" size="sm" aria-label={t("nextMonth")} onClick={() => setMonth(shiftMonth(selectedMonth, 1))}>
+          <Button type="button" variant="outline" size="sm" aria-label={t("nextMonth")} onClick={() => changeMonth(shiftMonth(selectedMonth, 1))}>
             <ChevronRightIcon size={16} />
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setRefresh((value) => value + 1)}>{t("refresh")}</Button>
+          <Button type="button" variant="outline" size="sm" onClick={reloadTimeline}>{t("refresh")}</Button>
         </div>
       </div>
 
@@ -125,7 +133,7 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
       ) : error ? (
         <div className="rounded-[10px] border border-status-rejected-border bg-status-rejected-bg p-5 text-center">
           <p role="alert" className="text-sm text-status-rejected-text">{error}</p>
-          <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setRefresh((value) => value + 1)}>{t("retry")}</Button>
+          <Button type="button" size="sm" variant="outline" className="mt-3" onClick={reloadTimeline}>{t("retry")}</Button>
         </div>
       ) : timeline?.matrix.length === 0 ? (
         <p className="rounded-[10px] border border-dashed border-border p-8 text-center text-sm text-muted-foreground">{t("empty")}</p>
@@ -168,7 +176,7 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
         </div>
       ) : null}
 
-      {selectedDay && <FleetTimelineDetail {...selectedDay} onClose={() => setSelectedDay(null)} />}
+      {selectedDay && <FleetTimelineDetail key={`${selectedDay.carTypeBranchId}:${selectedDay.date}`} {...selectedDay} onClose={() => setSelectedDay(null)} />}
     </section>
   );
 }

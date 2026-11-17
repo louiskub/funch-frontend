@@ -1755,7 +1755,7 @@ function ReturnSettlementModal({
             {/* Add Charge Form */}
             <form onSubmit={(e) => void handleAddCharge(e)} className="rounded-[10px] border border-border bg-surface-subtle p-3.5 space-y-3">
               <h4 className="text-xs font-bold text-foreground">
-                Add surcharge (damage, fuel, cleaning, fines)
+                Add surcharge (damage, fuel, fines)
               </h4>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1768,8 +1768,6 @@ function ReturnSettlementModal({
                   >
                     <option value="DAMAGE">Vehicle Damage</option>
                     <option value="FUEL">Fuel Shortage</option>
-                    <option value="CLEANING">Excess Cleaning</option>
-                    <option value="FINE">Traffic / Parking Fine</option>
                     <option value="OTHER">Other Surcharge</option>
                   </select>
                 </label>
