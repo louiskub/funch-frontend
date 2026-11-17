@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --incremental false",
-    "test": "node --experimental-strip-types --test src/features/admin/bookings.test.mjs"
+    "test": "node --experimental-strip-types --test src/features/admin/bookings.test.mjs",
+    "check:i18n": "node scripts/check-translations.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.6",

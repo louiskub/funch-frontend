@@ -13,41 +13,37 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const t = useTranslations("common");
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => setLocale(locale === "en" ? "th" : "en")}
+      aria-label={t(locale === "en" ? "switchToThai" : "switchToEnglish")}
       className={cn(
-        "inline-flex h-[34px] items-center rounded-full border border-border bg-secondary p-[3px] select-none shadow-[inset_0_1px_2px_color-mix(in_srgb,var(--overlay) 3%, transparent)]",
+        "inline-flex h-11 cursor-pointer items-center rounded-full border border-border bg-surface-soft p-[2px] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         className
       )}
-      role="group"
-      aria-label={t("languageSelection")}
     >
-      <button
-        type="button"
-        onClick={() => setLocale("en")}
-        aria-pressed={locale === "en"}
+      <span
+        aria-hidden="true"
         className={cn(
-          "relative flex h-full items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-all duration-200 ease-out active:scale-95",
+          "flex h-full min-w-12 items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-colors duration-200",
           locale === "en"
-            ? "bg-card text-primary shadow-[0_2px_4px_color-mix(in_srgb,rgb(var(--primary-shadow-color)) 10%, transparent),0_1px_2px_color-mix(in_srgb,var(--overlay) 4%, transparent)] ring-1 ring-border/70"
-            : "text-muted-foreground hover:text-foreground"
+            ? "bg-primary text-white shadow-sm"
+            : "bg-white text-muted-foreground",
         )}
       >
-        En
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setLocale("th")}
-        aria-pressed={locale === "th"}
+        EN
+      </span>
+      <span
+        aria-hidden="true"
         className={cn(
-          "relative flex h-full items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-all duration-200 ease-out active:scale-95",
+          "flex h-full min-w-12 items-center justify-center rounded-full px-3 text-[12px] font-semibold tracking-wide transition-colors duration-200",
           locale === "th"
-            ? "bg-card text-primary shadow-[0_2px_4px_color-mix(in_srgb,rgb(var(--primary-shadow-color)) 10%, transparent),0_1px_2px_color-mix(in_srgb,var(--overlay) 4%, transparent)] ring-1 ring-border/70"
-            : "text-muted-foreground hover:text-foreground"
+            ? "bg-primary text-white shadow-sm"
+            : "bg-white text-muted-foreground",
         )}
       >
-        Th
-      </button>
-    </div>
+        TH
+      </span>
+    </button>
   );
 }
