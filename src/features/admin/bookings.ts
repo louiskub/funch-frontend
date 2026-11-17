@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatDateTimeInZone } from "../bookings/time";
 
 export const bookingStatusSchema = z.enum([
   "PENDING",
@@ -195,9 +196,5 @@ export function isPickupCarReady(car: PickupCar, now: number) {
 }
 
 export function branchTime(value: string, timeZone: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone,
-  }).format(new Date(value));
+  return formatDateTimeInZone(value, timeZone, "en-GB");
 }

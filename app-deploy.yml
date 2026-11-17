@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: funch-frontend
+  namespace: funch-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: funch-frontend
+  template:
+    metadata:
+      labels:
+        app: funch-frontend
+    spec:
+      containers:
+        - name: funch-frontend
+          image: ghcr.io/louiskub/funch-frontend:latest
+          env:
+            - name: NODE_ENV
+              value: production
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+      imagePullSecrets:
+        - name: regcred
+      nodeSelector:
+        kubernetes.io/hostname: louiskub
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: funch-frontend-svc
+  namespace: funch-backend
+spec:
+  selector:
+    app: funch-frontend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30000
+  type: NodePort

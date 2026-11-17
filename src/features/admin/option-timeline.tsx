@@ -85,7 +85,7 @@ function shiftMonth(month: string, offset: number) {
 
 function formatRange(pickupAt: string, returnAt: string, locale: string, timeZone: string) {
   const day = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone });
-  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone });
+  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZoneName: "shortOffset", timeZone });
   return `${day.format(new Date(pickupAt))} ${time.format(new Date(pickupAt))}–${day.format(new Date(returnAt))} ${time.format(new Date(returnAt))}`;
 }
 

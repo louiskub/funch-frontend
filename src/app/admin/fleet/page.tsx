@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest, apiString, CarOption, parseOptions } from "../../catalog";
 import { AdminLayout } from "../admin-layout";
@@ -34,6 +34,8 @@ import {
   filterCurrencyInput,
   normalizeCurrencyAmount,
 } from "@/lib/currency";
+import { formatDateTimeInZone } from "@/features/bookings/time";
+import { BranchTimeZoneNote } from "@/features/bookings/timezone-note";
 
 type Branch = {
   id: string;
@@ -84,6 +86,7 @@ type Car = {
   brand: string;
   model: string;
   branchName: string;
+  timezone: string;
   vin: string;
   licensePlate: string;
   year: number;
@@ -172,6 +175,7 @@ function carFrom(value: Record<string, unknown>): Car {
     brand: apiString(value.brand),
     model: apiString(value.model),
     branchName: apiString(value.branchName),
+    timezone: apiString(value.timezone),
     vin: apiString(value.vin),
     licensePlate: apiString(value.licensePlate),
     year: number(value.year),
@@ -275,24 +279,6 @@ function FeaturesTagInput({
   );
 }
 
-function formatDateTime(isoString: string | null | undefined): string {
-  if (!isoString) return "-";
-  try {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return String(isoString);
-    return d.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  } catch {
-    return String(isoString);
-  }
-}
-
 type CarUsageRecord = {
   id: string;
   bookingNumber: string;
@@ -307,6 +293,8 @@ type CarUsageRecord = {
   customerPhone: string;
   pickupBranchName: string;
   returnBranchName: string;
+  pickupTimezone: string;
+  returnTimezone: string;
   createdAt: string;
 };
 
@@ -322,6 +310,7 @@ function CarHistoryModal({
   onClose: () => void;
 }) {
   const tAdmin = useTranslations("admin.workspacePages");
+  const locale = useLocale();
   const [records, setRecords] = useState<CarUsageRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -348,6 +337,8 @@ function CarHistoryModal({
             customerPhone: typeof rec.customerPhone === "string" ? rec.customerPhone : "",
             pickupBranchName: typeof rec.pickupBranchName === "string" ? rec.pickupBranchName : "",
             returnBranchName: typeof rec.returnBranchName === "string" ? rec.returnBranchName : "",
+            pickupTimezone: apiString(rec.pickupTimezone),
+            returnTimezone: apiString(rec.returnTimezone),
             createdAt: apiString(rec.createdAt),
           };
         });
@@ -472,15 +463,22 @@ function CarHistoryModal({
                   {activeRecord.customerPhone ? ` (${activeRecord.customerPhone})` : ""}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">{tAdmin("pickup")}</span> {formatDateTime(activeRecord.pickupAt)}
+                  <span className="font-medium text-foreground">{tAdmin("pickup")}</span> {formatDateTimeInZone(activeRecord.pickupAt, car.timezone, locale)}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">{tAdmin("scheduledReturn")}</span> {formatDateTime(activeRecord.returnAt)}
+                  <span className="font-medium text-foreground">{tAdmin("scheduledReturn")}</span> {formatDateTimeInZone(activeRecord.returnAt, car.timezone, locale)}
                 </div>
                 <div>
                   <span className="font-medium text-foreground">{tAdmin("returnBranch")}</span> {activeRecord.returnBranchName || activeRecord.pickupBranchName}
                 </div>
               </div>
+              <BranchTimeZoneNote
+                branchName={car.branchName}
+                timeZone={car.timezone}
+                pickupAt={activeRecord.pickupAt}
+                returnAt={activeRecord.returnAt}
+                className="pt-2 text-xs text-muted-foreground"
+              />
             </div>
           )}
 
@@ -530,8 +528,8 @@ function CarHistoryModal({
                           <span className="text-[10px] text-muted-foreground block">{r.customerPhone || r.customerEmail}</span>
                         </td>
                         <td className="py-2.5 px-3 text-muted-foreground text-[10px]">
-                          <div>From: <span className="font-medium text-foreground">{formatDateTime(r.pickupAt)}</span></div>
-                          <div>To: <span className="font-medium text-foreground">{formatDateTime(r.actualReturnAt || r.returnAt)}</span></div>
+                          <div>From: <span className="font-medium text-foreground">{formatDateTimeInZone(r.pickupAt, r.pickupTimezone, locale)}</span></div>
+                          <div>To: <span className="font-medium text-foreground">{formatDateTimeInZone(r.actualReturnAt || r.returnAt, r.returnTimezone, locale)}</span></div>
                         </td>
                         <td className="py-2.5 px-3">
                           <span

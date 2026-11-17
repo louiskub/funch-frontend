@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
+import { BranchTimeZoneNote } from "@/features/bookings/timezone-note";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
 import {
@@ -363,6 +364,15 @@ function CatalogBrowserContent() {
                     syncUrlParams({ return: val });
                   }}
                 />
+                {activeBranch && (
+                  <BranchTimeZoneNote
+                    branchName={activeBranch.name}
+                    timeZone={activeBranch.timezone}
+                    pickupAt={pickupDate}
+                    returnAt={returnDate}
+                    className="sm:col-span-2 -mt-1 text-xs text-muted-foreground"
+                  />
+                )}
 
                 {/* Full-width Search CTA */}
                 <div className="sm:col-span-2">
@@ -394,9 +404,14 @@ function CatalogBrowserContent() {
           {/* Hero Visual on the right */}
           <div className="relative overflow-hidden rounded-[24px] bg-secondary min-h-[300px] sm:min-h-[380px] lg:min-h-[440px] flex items-end p-6 border border-border shadow-[0_12px_36px_-6px_color-mix(in_srgb,rgb(var(--shadow-color)) 6%, transparent),0_2px_8px_color-mix(in_srgb,rgb(var(--shadow-color)) 2%, transparent)]">
             <div className="absolute inset-0 bg-gradient-to-t from-overlay/75 via-overlay/20 to-transparent z-10" />
-            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-              <CarIcon size={120} className="text-primary/25" />
-            </div>
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://upload.wikimedia.org/wikipedia/commons/a/a0/Main_Taxicab_stand_of_Suvarnabhumi_Airport.JPG')",
+              }}
+            />
             
             {/* Subtle caption */}
             <div className="relative z-20 rounded-[12px] bg-white/95 px-4 py-2.5 shadow-md shadow-[var(--color-foreground)]/5 backdrop-blur-md border border-border">

@@ -1,4 +1,8 @@
 {
+  "timezone": {
+    "branchLocalTime": "Times are shown in {branch} local time · {timeZone} · {offset}",
+    "branchLocalTimeZoneOnly": "Times are shown in {branch} local time · {timeZone}"
+  },
   "nav": {
     "findCar": "Find a car",
     "myBookings": "My bookings",
@@ -166,7 +170,6 @@
     "editBooking": "Edit booking",
     "editTitle": "Edit rental details",
     "editDescription": "Update pickup and return times or add-ons. The price updates as you make changes.",
-    "editTimeZone": "Times are shown in the branch time zone: {timezone}.",
     "editPreviewPrompt": "Choose valid pickup and return times to see the updated price.",
     "checkingQuote": "Checking price and availability…",
     "retryQuote": "Try again",

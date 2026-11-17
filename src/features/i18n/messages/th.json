@@ -1,4 +1,8 @@
 {
+  "timezone": {
+    "branchLocalTime": "เวลาที่แสดงเป็นเวลาท้องถิ่นของสาขา {branch} · {timeZone} · {offset}",
+    "branchLocalTimeZoneOnly": "เวลาที่แสดงเป็นเวลาท้องถิ่นของสาขา {branch} · {timeZone}"
+  },
   "nav": {
     "findCar": "ค้นหารถ",
     "myBookings": "การจองของฉัน",
@@ -166,7 +170,6 @@
     "editBooking": "แก้ไขการจอง",
     "editTitle": "แก้ไขรายละเอียดการเช่า",
     "editDescription": "เปลี่ยนเวลารับ–คืนรถหรืออุปกรณ์เสริม ราคาใหม่จะแสดงทันทีที่แก้ไข",
-    "editTimeZone": "เวลาแสดงตามเขตเวลาของสาขา: {timezone}",
     "editPreviewPrompt": "เลือกเวลารับและคืนรถที่ถูกต้องเพื่อดูราคาใหม่",
     "checkingQuote": "กำลังตรวจสอบราคาและความพร้อม…",
     "retryQuote": "ลองอีกครั้ง",

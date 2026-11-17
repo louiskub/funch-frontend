@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { apiRecord, apiRequest } from "../catalog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateTimeRangePicker } from "@/components/ui/datetime-range-picker";
 import { StatusBadge } from "@/components/ui/badge";
 import { useResponsiveBatchSize } from "@/hooks/use-responsive-batch-size";
-import { instantInZone, localDateTimeInZone } from "@/features/bookings/time";
+import { formatDateTimeInZone, instantInZone, localDateTimeInZone } from "@/features/bookings/time";
+import { BranchTimeZoneNote } from "@/features/bookings/timezone-note";
 import { bookingsApi } from "@/features/bookings/api/bookings.api";
 import type { BookingEditQuoteResponse } from "@/features/bookings/types";
 import { estimateBooking } from "@/features/bookings/estimate";
@@ -32,6 +33,7 @@ type Booking = {
   status: string;
   pickupAt: string;
   returnAt: string;
+  timezone: string;
   totalAmount: string;
   currencyCode: string;
   brand: string;
@@ -65,6 +67,7 @@ function rows(value: unknown): Booking[] {
       status: String(x.status),
       pickupAt: String(x.pickupAt),
       returnAt: String(x.returnAt),
+      timezone: String(x.timezone),
       totalAmount: String(x.totalAmount),
       currencyCode: String(x.currencyCode),
       brand: String(x.brand),
@@ -122,6 +125,7 @@ export default function BookingsPage() {
 
 function BookingsContent() {
   const t = useTranslations("bookings");
+  const locale = useLocale();
   const [items, setItems] = useState<Booking[]>([]);
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState("");
@@ -586,15 +590,22 @@ function bookingEditError(error: unknown, fallback: string, t: ReturnType<typeof
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">{t("pickup")}</span>
               <span className="text-right text-foreground tabular-nums">
-                {new Date(String(selected.pickupAt)).toLocaleString()}
+                {formatDateTimeInZone(String(selected.pickupAt), String(selected.timezone), locale)}
               </span>
             </div>
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">{t("return")}</span>
               <span className="text-right text-foreground tabular-nums">
-                {new Date(String(selected.returnAt)).toLocaleString()}
+                {formatDateTimeInZone(String(selected.returnAt), String(selected.timezone), locale)}
               </span>
             </div>
+            <BranchTimeZoneNote
+              branchName={String(selected.branchName)}
+              timeZone={String(selected.timezone)}
+              pickupAt={String(selected.pickupAt)}
+              returnAt={String(selected.returnAt)}
+              className="text-xs text-muted-foreground"
+            />
             <div className="flex justify-between gap-3 border-t border-border-subtle pt-2 font-bold text-foreground">
               <span>{t("totalRate")}</span>
               <span className="text-right text-primary tabular-nums">
@@ -730,9 +741,16 @@ function bookingEditError(error: unknown, fallback: string, t: ReturnType<typeof
                 <p className="flex items-center gap-1.5 tabular-nums">
                   <CalendarIcon size={14} className="text-primary flex-shrink-0" />
                   <span>
-                    {new Date(b.pickupAt).toLocaleString()} → {new Date(b.returnAt).toLocaleString()}
+                    {formatDateTimeInZone(b.pickupAt, b.timezone, locale)} → {formatDateTimeInZone(b.returnAt, b.timezone, locale)}
                   </span>
                 </p>
+                <BranchTimeZoneNote
+                  branchName={b.branchName}
+                  timeZone={b.timezone}
+                  pickupAt={b.pickupAt}
+                  returnAt={b.returnAt}
+                  className="pl-5 text-xs text-muted-foreground"
+                />
               </div>
 
               <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
@@ -847,11 +865,6 @@ function bookingEditError(error: unknown, fallback: string, t: ReturnType<typeof
                     </div>
                   )}
 
-                  <div className="flex items-start gap-2 rounded-[10px] bg-surface-subtle p-3 text-xs text-muted-foreground">
-                    <CalendarIcon size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
-                    <p>{t("editTimeZone", { timezone: String(selected.timezone) })}</p>
-                  </div>
-
                   <fieldset disabled={editBusy} className="min-w-0 space-y-5 disabled:opacity-80">
                     <DateTimeRangePicker
                       pickupDateTime={editPickup}
@@ -866,6 +879,12 @@ function bookingEditError(error: unknown, fallback: string, t: ReturnType<typeof
                         setEditQuoteLoading(true);
                         setEditError("");
                       }}
+                    />
+                    <BranchTimeZoneNote
+                      branchName={String(selected.branchName)}
+                      timeZone={String(selected.timezone)}
+                      pickupAt={editPickup}
+                      returnAt={editReturn}
                     />
 
                     <div className="space-y-2">

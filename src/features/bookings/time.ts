@@ -71,7 +71,47 @@ export function formatDateTimeInZone(
 ): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: zone,
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'shortOffset',
+  })
+    .formatToParts(new Date(value))
+    .map(({ type, value: part }) =>
+      type === 'timeZoneName'
+        ? part.replace(/^GMT/, 'UTC').replace(/:00$/, '')
+        : part,
+    )
+    .join('');
+}
+
+function instantForTimeZone(value: string, zone: string) {
+  return /(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    ? value
+    : instantInZone(value, zone);
+}
+
+export function timeZoneOffsetRange(
+  pickupAt: string,
+  returnAt: string,
+  zone: string,
+): string {
+  const offsetAt = (value: string) => {
+    const part = new Intl.DateTimeFormat('en', {
+      timeZone: zone,
+      timeZoneName: 'longOffset',
+    })
+      .formatToParts(new Date(instantForTimeZone(value, zone)))
+      .find(({ type }) => type === 'timeZoneName')?.value;
+    if (!part) throw new Error('Could not determine the branch timezone offset.');
+    return part.replace(/^GMT/, 'UTC').replace(/:00$/, '');
+  };
+
+  const pickupOffset = offsetAt(pickupAt);
+  const returnOffset = offsetAt(returnAt);
+  return pickupOffset === returnOffset
+    ? pickupOffset
+    : `${pickupOffset} → ${returnOffset}`;
 }

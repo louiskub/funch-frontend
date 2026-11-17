@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { currentUser } from "../../auth";
 import { apiRecord, apiRequest } from "../../catalog";
 import { AdminLayout } from "../admin-layout";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
+import { formatDateTimeInZone } from "@/features/bookings/time";
 import { Input } from "@/components/ui/input";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import {
@@ -56,6 +57,7 @@ type CustomerBooking = {
   brand: string;
   model: string;
   branchName: string;
+  timezone: string;
 };
 
 type CustomerDetail = Customer & {
@@ -63,24 +65,6 @@ type CustomerDetail = Customer & {
 };
 
 type FilterStatus = "ALL" | "ACTIVE" | "SUSPENDED";
-
-function formatDateTime(isoString: string | null | undefined): string {
-  if (!isoString) return "-";
-  try {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return String(isoString);
-    return d.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  } catch {
-    return String(isoString);
-  }
-}
 
 function formatDateOnly(isoString: string | null | undefined): string {
   if (!isoString) return "-";
@@ -108,6 +92,7 @@ function getInitials(name: string): string {
 
 export default function MembersPage() {
   const tAdmin = useTranslations("admin.workspacePages");
+  const locale = useLocale();
   const [allowed, setAllowed] = useState(false);
   const [items, setItems] = useState<Customer[]>([]);
   const [total, setTotal] = useState(0);
@@ -221,6 +206,7 @@ export default function MembersPage() {
           brand: String(b.brand),
           model: String(b.model),
           branchName: String(b.branchName),
+          timezone: String(b.timezone),
         };
       });
 
@@ -905,13 +891,13 @@ export default function MembersPage() {
                                   <span className="text-[10px] uppercase font-bold text-muted-foreground">
                                     Pick:
                                   </span>{" "}
-                                  {formatDateTime(b.pickupAt)}
+                                  {formatDateTimeInZone(b.pickupAt, b.timezone, locale)}
                                 </div>
                                 <div>
                                   <span className="text-[10px] uppercase font-bold text-muted-foreground">
                                     Ret:
                                   </span>{" "}
-                                  {formatDateTime(b.returnAt)}
+                                  {formatDateTimeInZone(b.returnAt, b.timezone, locale)}
                                 </div>
                               </TableCell>
                               <TableCell className="py-2.5 font-semibold text-foreground tabular-nums">

@@ -63,6 +63,7 @@ function formatRange(
   const time = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
+    timeZoneName: "shortOffset",
     timeZone,
   });
   return `${day.format(new Date(pickupAt))} ${time.format(new Date(pickupAt))}–${day.format(new Date(returnAt))} ${time.format(new Date(returnAt))}`;
@@ -74,6 +75,7 @@ function formatDateTime(value: string, locale: string, timeZone: string) {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZoneName: "shortOffset",
     timeZone,
   }).format(new Date(value));
 }

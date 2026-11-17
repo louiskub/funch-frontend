@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { estimateBooking, type BookingEstimate } from "@/features/bookings/estimate";
 import { instantInZone } from "@/features/bookings/time";
+import { BranchTimeZoneNote } from "@/features/bookings/timezone-note";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Input } from "@/components/ui/input";
@@ -501,22 +502,31 @@ function OfferDetailsContent({
             <div className="min-w-0">
               <p className="text-[10px] font-semibold leading-tight text-white/80">{tOffer("pickupReturnBranch")}</p>
               <p className="mt-1 line-clamp-2 text-xs font-bold leading-tight text-white" title={offer.branchName}>{offer.branchName}</p>
-              <p className="mt-1 truncate text-[10px] leading-tight text-white/75" title={`${offer.city} · ${offer.timezone}`}>{offer.city} · {offer.timezone}</p>
+              <p className="mt-1 truncate text-[10px] leading-tight text-white/75" title={offer.city}>{offer.city}</p>
             </div>
           </div>
-          <DateTimeRangePicker
-            pickupDateTime={pickup}
-            returnDateTime={returnAt}
-            compact
-            onPickupChange={(value) => {
-              setPickup(value);
-              clearAvailability();
-            }}
-            onReturnChange={(value) => {
-              setReturnAt(value);
-              clearAvailability();
-            }}
-          />
+          <div className="min-w-0 space-y-1.5">
+            <DateTimeRangePicker
+              pickupDateTime={pickup}
+              returnDateTime={returnAt}
+              compact
+              onPickupChange={(value) => {
+                setPickup(value);
+                clearAvailability();
+              }}
+              onReturnChange={(value) => {
+                setReturnAt(value);
+                clearAvailability();
+              }}
+            />
+            <BranchTimeZoneNote
+              branchName={offer.branchName}
+              timeZone={offer.timezone}
+              pickupAt={pickup}
+              returnAt={returnAt}
+              className="text-xs leading-snug text-white/85"
+            />
+          </div>
         </section>
 
         <article className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -876,6 +886,12 @@ function OfferDetailsContent({
                         return: returnAt.replace("T", " "),
                       })}
                     </p>
+                    <BranchTimeZoneNote
+                      branchName={offer.branchName}
+                      timeZone={offer.timezone}
+                      pickupAt={pickup}
+                      returnAt={returnAt}
+                    />
                     {modalQuoteDetails(quote)}
                   </>
                 )}
