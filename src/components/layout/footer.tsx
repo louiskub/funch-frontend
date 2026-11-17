@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth";
 import { useTranslations } from "next-intl";
 
 export function Footer() {
+  const pathname = usePathname() || "";
   const { isAdmin } = useAuth();
   const t = useTranslations("nav");
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return null;
 
   return (
     <footer className="border-t border-border bg-card py-12 text-muted-foreground">

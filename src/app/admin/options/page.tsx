@@ -308,15 +308,6 @@ export default function OptionsAdmin() {
     <AdminLayout
       title={tAdmin("optionTitle")}
       subtitle={tAdmin("optionSubtitle")}
-      actions={
-        <Button
-          size="sm"
-          onClick={() => openModal()}
-          className="text-xs font-bold shadow-xs"
-        >
-          <PlusIcon size={14} className="mr-1.5" /> New Option
-        </Button>
-      }
     >
       {/* Toast / Status banner */}
       {status && (

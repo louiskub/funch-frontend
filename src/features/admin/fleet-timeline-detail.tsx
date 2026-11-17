@@ -4,6 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { z } from "zod";
 import { XIcon } from "@/components/ui/icons";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { apiRecord, apiRequest } from "@/app/catalog";
 
 const bookingSchema = z.object({
@@ -85,6 +93,11 @@ function BookingRows({
   timeZone,
   statusLabel,
   noReservationsLabel,
+  tableCaptionLabel,
+  bookingNumberLabel,
+  bookingStatusLabel,
+  rentalPeriodLabel,
+  vehicleReadyLabel,
   readyAtLabel,
 }: {
   bookings: FleetTimelineDetail['vehicle']['bookings'];
@@ -92,28 +105,63 @@ function BookingRows({
   timeZone: string;
   statusLabel: (status: BookingStatus) => string;
   noReservationsLabel: string;
-  readyAtLabel?: (value: string) => string;
+  tableCaptionLabel: string;
+  bookingNumberLabel: string;
+  bookingStatusLabel: string;
+  rentalPeriodLabel: string;
+  vehicleReadyLabel: string;
+  readyAtLabel: (value: string) => string;
 }) {
   if (!bookings.length) {
     return <p className="py-3 text-sm text-muted-foreground">{noReservationsLabel}</p>;
   }
 
   return (
-    <ul className="divide-y divide-border">
-      {bookings.map((booking, index) => (
-        <li key={`${booking.bookingNumber}-${index}`} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
-          <span className="font-semibold text-foreground">#{booking.bookingNumber}</span>
-          <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName(booking.status)}`}>
-            {statusLabel(booking.status)}
-          </span>
-          <span className="w-full text-xs text-muted-foreground sm:w-auto">
-            {formatRange(booking.pickupAt, booking.returnAt, locale, timeZone)}
-            {booking.licensePlate && ` · ${booking.licensePlate}`}
-            {booking.blockingUntil && readyAtLabel && ` · ${readyAtLabel(booking.blockingUntil)}`}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <Table className="min-w-[620px]">
+      <caption className="sr-only">{tableCaptionLabel}</caption>
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col">{bookingNumberLabel}</TableHead>
+          <TableHead scope="col">{bookingStatusLabel}</TableHead>
+          <TableHead scope="col">{rentalPeriodLabel}</TableHead>
+          <TableHead scope="col">{vehicleReadyLabel}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {bookings.map((booking) => (
+          <TableRow key={booking.bookingNumber}>
+            <TableCell className="whitespace-nowrap font-semibold">
+              #{booking.bookingNumber}
+            </TableCell>
+            <TableCell className="whitespace-nowrap">
+              <span
+                className={`rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName(booking.status)}`}
+              >
+                {statusLabel(booking.status)}
+              </span>
+            </TableCell>
+            <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+              {formatRange(
+                booking.pickupAt,
+                booking.returnAt,
+                locale,
+                timeZone,
+              )}
+            </TableCell>
+            <TableCell className="text-xs text-muted-foreground">
+              {booking.licensePlate && (
+                <div className="font-medium text-foreground">
+                  {booking.licensePlate}
+                </div>
+              )}
+              {booking.blockingUntil
+                ? readyAtLabel(booking.blockingUntil)
+                : !booking.licensePlate && "—"}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -238,6 +286,11 @@ export function FleetTimelineDetail({
                   timeZone={detail.branch.timezone}
                   statusLabel={(status) => t(statusLabels[status])}
                   noReservationsLabel={t("noReservations")}
+                  tableCaptionLabel={t("vehicleReservations")}
+                  bookingNumberLabel={t("bookingNumber")}
+                  bookingStatusLabel={t("bookingStatus")}
+                  rentalPeriodLabel={t("rentalPeriod")}
+                  vehicleReadyLabel={t("vehicleReady")}
                   readyAtLabel={(value) => t("vehicleReadyAt", { time: formatDateTime(value, locale, detail.branch.timezone) })}
                 />
               </section>

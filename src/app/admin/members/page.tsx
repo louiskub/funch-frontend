@@ -918,7 +918,10 @@ export default function MembersPage() {
                                 {formatCurrency(b.totalAmount, b.currencyCode)}
                               </TableCell>
                               <TableCell className="py-2.5 text-right">
-                                <StatusBadge status={b.status} />
+                                <StatusBadge
+                                  status={b.status}
+                                  className={b.status === "PENDING" ? "w-fit" : undefined}
+                                />
                               </TableCell>
                             </TableRow>
                           ))}

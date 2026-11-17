@@ -63,16 +63,18 @@ const statusLabels = {
   IN_USE: "statusInUse",
 } as const satisfies Record<BookingStatus, string>;
 
-function currentMonth(timeZone: string) {
+function currentDate(timeZone: string) {
   const parts = new Intl.DateTimeFormat("en", {
     timeZone,
     year: "numeric",
     month: "2-digit",
+    day: "2-digit",
   }).formatToParts(new Date());
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
-  if (!year || !month) throw new Error("Could not determine the branch month.");
-  return `${year}-${month}`;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) throw new Error("Could not determine the branch date.");
+  return `${year}-${month}-${day}`;
 }
 
 function shiftMonth(month: string, offset: number) {
@@ -96,8 +98,10 @@ export function OptionTimeline({ branch }: { branch: Branch }) {
   const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [selected, setSelected] = useState<{ optionId: string; name: string; date: string } | null>(null);
-  const current = currentMonth(branch.timezone);
+  const today = currentDate(branch.timezone);
+  const current = today.slice(0, 7);
   const selectedMonth = month ?? current;
+  const visibleDays = timeline?.options[0]?.days.filter((day) => day.date >= today) ?? [];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -163,7 +167,7 @@ export function OptionTimeline({ branch }: { branch: Branch }) {
             <thead>
               <tr className="bg-surface-soft text-muted-foreground">
                 <th scope="col" className="sticky left-0 z-10 min-w-52 border-b border-r border-border bg-surface-soft px-3 py-3 text-left font-bold">{t("option")}</th>
-                {timeline.options[0]?.days.map((day) => <th key={day.date} scope="col" className="min-w-12 border-b border-border px-2 py-3 text-center font-bold tabular-nums">{day.day}</th>)}
+                {visibleDays.map((day) => <th key={day.date} scope="col" className="min-w-12 border-b border-border px-2 py-3 text-center font-bold tabular-nums">{day.day}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -173,7 +177,7 @@ export function OptionTimeline({ branch }: { branch: Branch }) {
                     <span className="block font-bold text-foreground">{option.name}{!option.isActive && <span className="ml-2 rounded-full bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground">{t("inactive")}</span>}</span>
                     <span className="mt-0.5 block font-normal text-muted-foreground">{t("stockCount", { count: option.quantityStock })}</span>
                   </th>
-                  {option.days.map((day) => (
+                  {option.days.filter((day) => day.date >= today).map((day) => (
                     <td key={day.date} className="border-r border-border p-1 text-center last:border-r-0">
                       <button
                         type="button"

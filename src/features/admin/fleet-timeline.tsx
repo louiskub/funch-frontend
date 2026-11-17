@@ -33,16 +33,18 @@ const timelineSchema = z.object({
 type Timeline = z.infer<typeof timelineSchema>;
 type Branch = { id: string; name: string; timezone: string };
 
-function currentMonth(timeZone: string) {
+function currentDate(timeZone: string) {
   const parts = new Intl.DateTimeFormat("en", {
     timeZone,
     year: "numeric",
     month: "2-digit",
+    day: "2-digit",
   }).formatToParts(new Date());
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
-  if (!year || !month) throw new Error("Could not determine the branch month.");
-  return `${year}-${month}`;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) throw new Error("Could not determine the branch date.");
+  return `${year}-${month}-${day}`;
 }
 
 function shiftMonth(month: string, offset: number) {
@@ -65,8 +67,10 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
     model: string;
     date: string;
   } | null>(null);
-  const current = currentMonth(branch.timezone);
+  const today = currentDate(branch.timezone);
+  const current = today.slice(0, 7);
   const selectedMonth = month ?? current;
+  const visibleDays = timeline?.matrix[0]?.days.filter((day) => day.date >= today) ?? [];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -132,7 +136,7 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
             <thead>
               <tr className="bg-surface-soft text-muted-foreground">
                 <th scope="col" className="sticky left-0 z-10 min-w-48 border-b border-r border-border bg-surface-soft px-3 py-3 text-left font-bold">{t("vehicleModel")}</th>
-                {timeline.matrix[0]?.days.map((day) => <th key={day.date} scope="col" className="min-w-12 border-b border-border px-2 py-3 text-center font-bold tabular-nums">{day.day}</th>)}
+                {visibleDays.map((day) => <th key={day.date} scope="col" className="min-w-12 border-b border-border px-2 py-3 text-center font-bold tabular-nums">{day.day}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -142,7 +146,7 @@ export function FleetTimeline({ branch }: { branch: Branch }) {
                     <span className="block font-bold text-foreground">{model.brand} {model.model}</span>
                     <span className="mt-0.5 block font-normal text-muted-foreground">{t("capacity", { count: model.totalCapacity })}</span>
                   </th>
-                  {model.days.map((day) => (
+                  {model.days.filter((day) => day.date >= today).map((day) => (
                     <td key={day.date} className="border-r border-border p-1 text-center last:border-r-0">
                       <button
                         type="button"

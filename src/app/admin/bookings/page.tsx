@@ -146,7 +146,7 @@ function BookingsWorkspace() {
     },
     {
       value: "RETURN_REVIEW" as BookingFilter,
-      label: "Return Review & Settle",
+      label: tAdmin("returnReviewAndSettle"),
       count: returnReviewCount,
       icon: ShieldCheckIcon,
       color: "bg-status-approved-bg text-status-approved-text border-status-approved-border",
@@ -520,7 +520,7 @@ function BookingsWorkspace() {
                         <div className="space-y-1">
                           {stage === "RETURN_REVIEW" ? (
                             <Badge variant="pending" className="text-[10px] font-bold">
-                              Return Review
+                              {tAdmin("returnReview")}
                             </Badge>
                           ) : (
                             <StatusBadge status={booking.status} className="text-[10px]" />
@@ -560,7 +560,9 @@ function BookingsWorkspace() {
                               className="h-7 text-xs font-bold"
                               onClick={() => setReturnBooking(booking)}
                             >
-                              Process Return
+                              {stage === "RETURN_REVIEW"
+                                ? tAdmin("reviewReturnSettle")
+                                : tAdmin("recordReturn")}
                             </Button>
                           )}
 
@@ -633,6 +635,9 @@ function BookingsWorkspace() {
         <ReturnSettlementModal
           booking={returnBooking}
           onClose={() => setReturnBooking(null)}
+          onReturnRecorded={() => {
+            void queryClient.invalidateQueries({ queryKey: queueKey });
+          }}
           onSuccess={() => {
             setReturnBooking(null);
             void queryClient.invalidateQueries({ queryKey: queueKey });
@@ -673,6 +678,7 @@ function BookingDetailsDrawer({
   onOpenReturn: () => void;
   onOpenCancel: () => void;
 }) {
+  const tAdmin = useTranslations("admin.workspacePages");
   const detailKey = ["admin", "booking-detail", booking.id];
   const detail = useQuery({
     queryKey: detailKey,
@@ -684,6 +690,25 @@ function BookingDetailsDrawer({
 
   const queryClient = useQueryClient();
   const [markingReady, setMarkingReady] = useState(false);
+  const [readinessNow, setReadinessNow] = useState<number | null>(null);
+  const actualReturnAt = detail.data?.actualReturnAt ?? booking.actualReturnAt;
+  const vehicleReadyAt =
+    detail.data?.readyAt ??
+    booking.readyAt ??
+    (actualReturnAt
+      ? new Date(Date.parse(actualReturnAt) + 60 * 60 * 1000).toISOString()
+      : null);
+  const vehicleIsReady =
+    readinessNow !== null &&
+    vehicleReadyAt !== null &&
+    Date.parse(vehicleReadyAt) <= readinessNow;
+
+  useEffect(() => {
+    const now = Date.now();
+    const delay = vehicleReadyAt ? Math.max(0, Date.parse(vehicleReadyAt) - now) : 0;
+    const timer = window.setTimeout(() => setReadinessNow(Date.now()), delay);
+    return () => window.clearTimeout(timer);
+  }, [vehicleReadyAt]);
 
   async function handleMarkReady() {
     setMarkingReady(true);
@@ -813,30 +838,32 @@ function BookingDetailsDrawer({
                 </span>
               </div>
             </div>
-            {booking.actualReturnAt && (
+            {actualReturnAt && (
               <div className="rounded bg-status-approved-bg p-2 border border-status-approved-border text-status-approved-text tabular-nums">
                 <span className="text-[10px] font-bold block">Actual Return</span>
                 <span className="font-bold text-xs mt-0.5 block">
-                  {branchTime(booking.actualReturnAt, booking.timezone)}
+                  {branchTime(actualReturnAt, booking.timezone)}
                 </span>
               </div>
             )}
-            {booking.actualReturnAt &&
-              (data?.readyAt || booking.readyAt ? (
+            {actualReturnAt && vehicleReadyAt &&
+              (vehicleIsReady ? (
                 <div className="rounded bg-accent p-2 border border-status-in-use-border text-status-in-use-text tabular-nums">
-                  <span className="text-[10px] font-bold block">Vehicle Readiness</span>
+                  <span className="text-[10px] font-bold block">{tAdmin("vehicleReadiness")}</span>
                   <span className="font-bold text-xs mt-0.5 block">
-                    ● Ready for Next Rental ({branchTime(String(data?.readyAt || booking.readyAt), booking.timezone)})
+                    {tAdmin("vehicleReadyForNextRental")}
                   </span>
                 </div>
               ) : (
                 <div className="rounded bg-status-pending-bg p-2.5 border border-status-pending-border text-status-pending-text flex items-center justify-between gap-2">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-status-pending-text block">
-                      Turnaround / Cooldown
+                      {tAdmin("vehicleCooldown")}
                     </span>
                     <span className="text-[11px] text-status-pending-text block mt-0.5">
-                      Standard 1-hr cooldown in effect
+                      {tAdmin("vehicleCooldownUntil", {
+                        time: branchTime(vehicleReadyAt, booking.timezone),
+                      })}
                     </span>
                   </div>
                   <Button
@@ -846,7 +873,7 @@ function BookingDetailsDrawer({
                     onClick={handleMarkReady}
                     disabled={markingReady}
                   >
-                    {markingReady ? "Updating…" : "Mark Ready Now"}
+                    {markingReady ? tAdmin("updating") : tAdmin("markReadyNow")}
                   </Button>
                 </div>
               ))}
@@ -975,18 +1002,9 @@ function BookingDetailsDrawer({
                 onOpenReturn();
               }}
             >
-              Process Return & Settle
-            </Button>
-          )}
-
-          {booking.status === "COMPLETED" && !(data?.readyAt || booking.readyAt) && (
-            <Button
-              variant="success"
-              className="w-full font-bold text-xs"
-              onClick={handleMarkReady}
-              disabled={markingReady}
-            >
-              {markingReady ? "Updating…" : "Mark Vehicle Ready for Next Rental"}
+              {actualReturnAt
+                ? tAdmin("reviewReturnSettle")
+                : tAdmin("recordReturn")}
             </Button>
           )}
 
@@ -1396,13 +1414,18 @@ function PickupCarModal({
 function ReturnSettlementModal({
   booking,
   onClose,
+  onReturnRecorded,
   onSuccess,
 }: {
   booking: BookingRow;
   onClose: () => void;
+  onReturnRecorded: () => void;
   onSuccess: () => void;
 }) {
-  const [step, setStep] = useState<"return" | "charges" | "settle">("return");
+  const tAdmin = useTranslations("admin.workspacePages");
+  const [step, setStep] = useState<"return" | "charges" | "settle">(
+    booking.actualReturnAt ? "charges" : "return",
+  );
   const [busy, setBusy] = useState(false);
 
   // New charge state with decimal sanitizer
@@ -1422,6 +1445,7 @@ function ReturnSettlementModal({
 
   const previewQuery = useQuery({
     queryKey: ["admin", "return-preview", booking.id],
+    enabled: !booking.actualReturnAt,
     queryFn: async ({ signal }) =>
       returnPreviewSchema.parse(
         await apiClient<unknown>(`/admin/bookings/${booking.id}/return-preview`, { signal }),
@@ -1429,6 +1453,7 @@ function ReturnSettlementModal({
   });
 
   const data = detail.data;
+  const actualReturnAt = data?.actualReturnAt ?? booking.actualReturnAt;
   const preview = previewQuery.data;
   const money = (val: string) => formatCurrency(val, booking.currencyCode);
   const pendingCharges = data?.charges.filter((c) => c.status === "PENDING") || [];
@@ -1441,8 +1466,9 @@ function ReturnSettlementModal({
         method: "POST",
         body: JSON.stringify({ charges: [] }),
       });
-      toast.success("Actual return time recorded.");
       await detail.refetch();
+      onReturnRecorded();
+      toast.success(tAdmin("returnRecordedToast"));
       setStep("charges");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not record return.");
@@ -1538,9 +1564,9 @@ function ReturnSettlementModal({
         {/* Step Indicator */}
         <div className="flex items-center justify-between gap-1.5 p-1 bg-surface-alt rounded-[10px]">
           {[
-            { id: "return" as const, num: 1, label: "Return & Surcharge" },
-            { id: "charges" as const, num: 2, label: `Damages & Fuel (${data?.charges.length || 0})` },
-            { id: "settle" as const, num: 3, label: "Final Settlement" },
+            { id: "return" as const, num: 1, label: tAdmin("recordReturnStep") },
+            { id: "charges" as const, num: 2, label: tAdmin("reviewVehicleAndCharges") },
+            { id: "settle" as const, num: 3, label: tAdmin("finalSettlement") },
           ].map((s) => {
             const active = step === s.id;
             return (
@@ -1548,10 +1574,11 @@ function ReturnSettlementModal({
                 key={s.id}
                 type="button"
                 onClick={() => setStep(s.id)}
+                disabled={!actualReturnAt && s.id !== "return"}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-[8px] text-xs transition-all duration-150 ${
                   active
                     ? "bg-card text-primary shadow-xs font-bold"
-                    : "text-muted-foreground font-semibold hover:text-foreground hover:bg-card/50"
+                    : "text-muted-foreground font-semibold hover:text-foreground hover:bg-card/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
                 }`}
               >
                 <span
@@ -1568,6 +1595,12 @@ function ReturnSettlementModal({
         </div>
 
         {/* STEP 1: Return Inspection & Late Surcharge Preview */}
+        {actualReturnAt && (
+          <div className="rounded-[10px] border border-status-pending-border bg-status-pending-bg px-3 py-2 text-xs font-medium text-status-pending-text">
+            {tAdmin("returnReviewPrompt")}
+          </div>
+        )}
+
         {step === "return" && (
           <div className="space-y-4 text-xs">
             <div className="rounded-[10px] border border-border bg-surface-subtle p-3.5 space-y-2">
@@ -1583,46 +1616,48 @@ function ReturnSettlementModal({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Actual Return Recorded:</span>
                 <span className="font-semibold text-foreground tabular-nums">
-                  {booking.actualReturnAt
-                    ? branchTime(booking.actualReturnAt, booking.timezone)
-                    : "Not recorded yet (Current time will be used)"}
+                  {actualReturnAt
+                    ? branchTime(actualReturnAt, booking.timezone)
+                    : tAdmin("returnNotRecordedUseNow")}
                 </span>
               </div>
             </div>
 
             {/* Overdue Surcharge Preview */}
-            <div className="rounded-[10px] border border-border p-3.5 space-y-2">
-              <h4 className="text-xs font-bold text-foreground">
-                Calculated surcharges (overdue fees)
-              </h4>
-              {previewQuery.isPending ? (
-                <p className="text-muted-foreground">Calculating surcharges…</p>
-              ) : preview?.lines.length ? (
-                <div className="space-y-1.5 divide-y divide-border">
-                  {preview.lines.map((line, idx) => (
-                    <div key={idx} className="flex justify-between pt-1 font-medium">
-                      <span>{line.kind === "EXTRA_RENTAL" ? "Extra Vehicle Rental" : "Extra Add-on Rental"}</span>
-                      <span className="font-mono text-destructive tabular-nums">+{money(line.amount.amount)}</span>
+            {!actualReturnAt && (
+              <div className="rounded-[10px] border border-border p-3.5 space-y-2">
+                <h4 className="text-xs font-bold text-foreground">
+                  Calculated surcharges (overdue fees)
+                </h4>
+                {previewQuery.isPending ? (
+                  <p className="text-muted-foreground">Calculating surcharges…</p>
+                ) : preview?.lines.length ? (
+                  <div className="space-y-1.5 divide-y divide-border">
+                    {preview.lines.map((line, idx) => (
+                      <div key={idx} className="flex justify-between pt-1 font-medium">
+                        <span>{line.kind === "EXTRA_RENTAL" ? "Extra Vehicle Rental" : "Extra Add-on Rental"}</span>
+                        <span className="font-mono text-destructive tabular-nums">+{money(line.amount.amount)}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between pt-2 font-bold text-foreground">
+                      <span>Projected Total:</span>
+                      <span className="font-mono text-primary tabular-nums">{money(preview.projectedFinalAmount)}</span>
                     </div>
-                  ))}
-                  <div className="flex justify-between pt-2 font-bold text-foreground">
-                    <span>Projected Total:</span>
-                    <span className="font-mono text-primary tabular-nums">{money(preview.projectedFinalAmount)}</span>
                   </div>
-                </div>
-              ) : (
-                <p className="text-status-approved-text font-medium">
-                  ✓ Returned within agreed schedule. No extra rental surcharges applied.
-                </p>
-              )}
-            </div>
+                ) : (
+                  <p className="text-status-approved-text font-medium">
+                    ✓ Returned within agreed schedule. No extra rental surcharges applied.
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="flex justify-between items-center pt-2 border-t border-border">
               <span className="text-muted-foreground">
-                {booking.actualReturnAt ? "Return already recorded." : "Record return time now."}
+                {actualReturnAt ? tAdmin("returnAlreadyRecorded") : tAdmin("recordReturnNow")}
               </span>
               <div className="flex gap-2">
-                {!booking.actualReturnAt && (
+                {!actualReturnAt && (
                   <Button
                     size="sm"
                     variant="warning"
@@ -1630,10 +1665,10 @@ function ReturnSettlementModal({
                     disabled={busy}
                     className="font-bold"
                   >
-                    {busy ? "Recording…" : "Record Return Time"}
+                    {busy ? tAdmin("recordingReturn") : tAdmin("recordReturn")}
                   </Button>
                 )}
-                <Button size="sm" onClick={() => setStep("charges")} className="font-bold transition-all active:scale-[0.98]">
+                <Button size="sm" onClick={() => setStep("charges")} disabled={!actualReturnAt} className="font-bold transition-all active:scale-[0.98]">
                   Next: Additional Charges →
                 </Button>
               </div>

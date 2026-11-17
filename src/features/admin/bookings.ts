@@ -62,6 +62,7 @@ export type BookingRow = z.infer<typeof bookingQueueSchema>[number];
 
 export const bookingDetailSchema = z.object({
   id: z.string(),
+  actualReturnAt: instant.nullable(),
   carId: z.string().nullable(),
   licensePlate: z.string().nullable().optional(),
   carVin: z.string().nullable().optional(),
